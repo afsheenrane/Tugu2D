@@ -2,7 +2,7 @@ package phys2d;
 
 /**
  * Last edit 210515
- * Success!
+ * Eclipse commit test.
  */
 
 import javax.swing.JFrame;
