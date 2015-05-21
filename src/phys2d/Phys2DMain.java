@@ -1,7 +1,8 @@
 package phys2d;
 
 /**
- * Last edit 060914 @ 0500
+ * Last edit 210515
+ * Success!
  */
 
 import javax.swing.JFrame;
