@@ -6,16 +6,14 @@ import java.awt.RenderingHints;
 import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
-import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
+import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA;
 import phys2d.collisionLogic.collisionManagers.DiscreteManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager;
-import phys2d.collisionLogic.tools.LinePolyTools;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Circle;
 import phys2d.entities.shapes.Shape;
-import phys2d.entities.shapes.polygons.Polygon;
 import phys2d.entities.shapes.polygons.Square;
 import phys2d.entities.shapes.polygons.WorldBound;
 
@@ -70,12 +68,8 @@ public class Phys2DPane extends AnimatedPane {
 
         // System.out.println(CollisionCheckerGJKEPA.getDisplacementBetweenShapes(entities.get(1),
         // entities.get(0)).getNegated());
-        System.out.println(LinePolyTools.polyDifference(
-                (Polygon) entities.get(0), (Polygon) entities.get(1)));
-        boolean result = CollisionCheckerGJKEPA2.isColliding(entities.get(0),
-                entities.get(1));
-        System.out.println(result);
-        // tester();
+
+        tester();
 
         System.exit(0);
     }
@@ -165,9 +159,10 @@ public class Phys2DPane extends AnimatedPane {
         for (int j = 0; j < tests; j++) {
             long t = System.nanoTime();
             for (int i = 0; i < 5000; i++) {
-                // CollisionCheckerGJKEPA.isCollidingGJK(entities.get(0),
+                CollisionCheckerGJKEPA.isCollidingGJK(entities.get(0),
+                        entities.get(1));
+                // CollisionCheckerGJKEPA2.isColliding(entities.get(0),
                 // entities.get(1));
-                // CollisionCheckerGJKEPA2
             }
 
             dt += (System.nanoTime() - t) / 1e6;

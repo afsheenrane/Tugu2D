@@ -22,29 +22,28 @@ public final class CollisionCheckerGJKEPA2 {
      */
     public static boolean isColliding(Shape s1, Shape s2) {
 
-        Vec2D dir = Vec2D.sub(s2.getCOM(), s1.getCOM());
         Vec2D newPt;
-
-        ArrayList<Vec2D> simplex = new ArrayList<>(3);
+        GJKStruct g = new GJKStruct();
 
         int count = 0;
 
-        simplex.add(support(s1, s2, dir));
+        g.dir = Vec2D.sub(s2.getCOM(), s1.getCOM());
+        g.simplex.add(support(s1, s2, g.dir));
 
-        dir.negate();
+        g.dir.negate();
 
         while (count < 20) {
-            newPt = support(s1, s2, dir);
+            newPt = support(s1, s2, g.dir);
 
             // If the new point is not past the origin, then the origin cannot
             // be encapsulated.
-            if (newPt.dotProduct(dir) < 0) {
+            if (newPt.dotProduct(g.dir) < 0) {
                 return false;
             }
 
-            simplex.add(newPt);
+            g.simplex.add(newPt);
 
-            if (computeSimplex(simplex, dir)) {
+            if (computeSimplex(g)) {
                 return true;
             }
 
@@ -65,15 +64,15 @@ public final class CollisionCheckerGJKEPA2 {
      * @param dir the search direction.
      * @return true if the origin is inside the simplex, false otherwise.
      */
-    private static boolean computeSimplex(ArrayList<Vec2D> simplex, Vec2D dir) {
+    private static boolean computeSimplex(GJKStruct g) {
 
-        switch (simplex.size()) {
+        switch (g.simplex.size()) {
             case 2:
-                return computeLineSimplex(simplex, dir);
+                return computeLineSimplex(g);
             case 3:
-                return computeTriangleSimplex(simplex, dir);
+                return computeTriangleSimplex(g);
             default:
-                System.err.println("Simplex size error: " + simplex.size());
+                System.err.println("Simplex size error: " + g.simplex.size());
                 System.exit(0);
         }
 
@@ -93,30 +92,29 @@ public final class CollisionCheckerGJKEPA2 {
      * @return false because it is not possible to enclose the origin with only
      *         two points in R2.
      */
-    private static boolean computeLineSimplex(ArrayList<Vec2D> simplex,
-            Vec2D dir) {
+    private static boolean computeLineSimplex(GJKStruct g) {
 
         // B-------------A
         // B=0,A=1
 
         Vec2D AB, AO;
 
-        AB = Vec2D.sub(simplex.get(0), simplex.get(1));
-        AO = simplex.get(1).getNegated();
+        AB = Vec2D.sub(g.simplex.get(0), g.simplex.get(1));
+        AO = g.simplex.get(1).getNegated();
 
         // If the line segment body is closest:
         if (AB.dotProduct(AO) > 0) {
 
             if (AB.perpDotProduct(AO) > 0)
-                dir = AB.getNormal(); // TODO mutation is not maintained here.
+                g.dir = AB.getNormal();
             else
-                dir = AB.getNormal().getNegated();
+                g.dir = AB.getNormal().getNegated();
 
         }
         // Otherwise, point A is closest.
         else {
-            simplex.remove(0); // Remove B
-            dir = AO;
+            g.simplex.remove(0); // Remove B
+            g.dir = AO;
         }
 
         return false;
@@ -133,8 +131,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @return true if the origin is contained inside the triangle. False
      *         otherwise.
      */
-    private static boolean computeTriangleSimplex(ArrayList<Vec2D> simplex,
-            Vec2D dir) {
+    private static boolean computeTriangleSimplex(GJKStruct g) {
 
         //@formatter:off 
         
@@ -160,8 +157,8 @@ public final class CollisionCheckerGJKEPA2 {
         // The normal pointing outwards from the triangle.
         Vec2D ABnorm, ACnorm;
 
-        AB = Vec2D.sub(simplex.get(1), simplex.get(2));
-        AO = simplex.get(2).getNegated();
+        AB = Vec2D.sub(g.simplex.get(1), g.simplex.get(2));
+        AO = g.simplex.get(2).getNegated();
 
         ABnorm = AB.getNormal().getNegated(); // Because we need the right norm.
 
@@ -170,21 +167,21 @@ public final class CollisionCheckerGJKEPA2 {
 
             // Somewhere past A's voronoi region, inside AB's voro region
             if (AB.dotProduct(AO) > 0) {
-                simplex.remove(2); // Remove C
-                dir = ABnorm;
+                g.simplex.remove(2); // Remove C
+                g.dir = ABnorm;
                 return false;
             }
             // Inside A's voro region.
             else {
-                simplex.remove(0); // Remove C.
-                simplex.remove(1); // Remove B.
-                dir = AO;
+                g.simplex.remove(0); // Remove C.
+                g.simplex.remove(1); // Remove B.
+                g.dir = AO;
                 return false;
             }
 
         }
 
-        AC = Vec2D.sub(simplex.get(0), simplex.get(2));
+        AC = Vec2D.sub(g.simplex.get(0), g.simplex.get(2));
         ACnorm = AC.getNormal();
 
         // Somewhere past AC
@@ -192,15 +189,15 @@ public final class CollisionCheckerGJKEPA2 {
 
             // Somewhere past A's voro region, inside AC's voro region.
             if (AC.dotProduct(AO) > 0) {
-                simplex.remove(1); // Remove B
-                dir = ACnorm;
+                g.simplex.remove(1); // Remove B
+                g.dir = ACnorm;
                 return false;
             }
             // Inside A's voronoi region.
             else {
-                simplex.remove(0); // Remove C.
-                simplex.remove(1); // Remove B.
-                dir = AO;
+                g.simplex.remove(0); // Remove C.
+                g.simplex.remove(1); // Remove B.
+                g.dir = AO;
                 return false;
             }
         }
@@ -219,6 +216,18 @@ public final class CollisionCheckerGJKEPA2 {
      */
     private static Vec2D support(Shape s1, Shape s2, Vec2D dir) {
         return (Vec2D.sub(s1.getMax(dir), s2.getMin(dir)));
+    }
+
+}
+
+class GJKStruct {
+
+    ArrayList<Vec2D> simplex;
+    Vec2D dir;
+
+    GJKStruct() {
+        this.simplex = new ArrayList<Vec2D>(3);
+        this.dir = new Vec2D();
     }
 
 }
