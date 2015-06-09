@@ -6,7 +6,7 @@ import java.awt.RenderingHints;
 import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
-import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA;
+import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
 import phys2d.collisionLogic.collisionManagers.DiscreteManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager;
 import phys2d.collisionLogic.tools.MiscTools;
@@ -18,10 +18,7 @@ import phys2d.entities.shapes.polygons.Square;
 import phys2d.entities.shapes.polygons.WorldBound;
 
 /**
- * @author Afsheen
- *         TODO
- *         -impulse resolution
- *         -swept detection
+ * @author Afsheen TODO -impulse resolution -swept detection
  */
 
 @SuppressWarnings("serial")
@@ -48,12 +45,8 @@ public class Phys2DPane extends AnimatedPane {
 
         Shape s;
         /*
-         * int i = 1;
-         * for(Material m : Material.values()){
-         * s = new Square(new Vec2D(75 * i++, 600), 25, 0);
-         * s.setMaterial(m);
-         * entities.add(s);
-         * }
+         * int i = 1; for(Material m : Material.values()){ s = new Square(new
+         * Vec2D(75 * i++, 600), 25, 0); s.setMaterial(m); entities.add(s); }
          */
 
         s = new Square(new Vec2D(480, 458), 100, 0);
@@ -159,10 +152,10 @@ public class Phys2DPane extends AnimatedPane {
         for (int j = 0; j < tests; j++) {
             long t = System.nanoTime();
             for (int i = 0; i < 5000; i++) {
-                CollisionCheckerGJKEPA.isCollidingGJK(entities.get(0),
-                        entities.get(1));
-                // CollisionCheckerGJKEPA2.isColliding(entities.get(0),
+                // CollisionCheckerGJKEPA.isCollidingGJK(entities.get(0),
                 // entities.get(1));
+                CollisionCheckerGJKEPA2.isColliding(entities.get(0),
+                        entities.get(1));
             }
 
             dt += (System.nanoTime() - t) / 1e6;

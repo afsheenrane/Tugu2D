@@ -6,7 +6,8 @@ import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
 
 /**
- * A better written version of GJK and EPA with a focus on speed.
+ * A better written version of GJK and EPA with a focus on speed. Tests show it
+ * to be around 3 times faster than v1.
  * 
  * @author afsheen
  *
@@ -23,27 +24,27 @@ public final class CollisionCheckerGJKEPA2 {
     public static boolean isColliding(Shape s1, Shape s2) {
 
         Vec2D newPt;
-        GJKStruct g = new GJKStruct();
+        GJKStruct gjkInfo = new GJKStruct();
 
         int count = 0;
 
-        g.dir = Vec2D.sub(s2.getCOM(), s1.getCOM());
-        g.simplex.add(support(s1, s2, g.dir));
+        gjkInfo.dir = Vec2D.sub(s2.getCOM(), s1.getCOM());
+        gjkInfo.simplex.add(support(s1, s2, gjkInfo.dir));
 
-        g.dir.negate();
+        gjkInfo.dir.negate();
 
         while (count < 20) {
-            newPt = support(s1, s2, g.dir);
+            newPt = support(s1, s2, gjkInfo.dir);
 
             // If the new point is not past the origin, then the origin cannot
             // be encapsulated.
-            if (newPt.dotProduct(g.dir) < 0) {
+            if (newPt.dotProduct(gjkInfo.dir) < 0) {
                 return false;
             }
 
-            g.simplex.add(newPt);
+            gjkInfo.simplex.add(newPt);
 
-            if (computeSimplex(g)) {
+            if (computeSimplex(gjkInfo)) {
                 return true;
             }
 
@@ -64,15 +65,16 @@ public final class CollisionCheckerGJKEPA2 {
      * @param dir the search direction.
      * @return true if the origin is inside the simplex, false otherwise.
      */
-    private static boolean computeSimplex(GJKStruct g) {
+    private static boolean computeSimplex(GJKStruct gjkInfo) {
 
-        switch (g.simplex.size()) {
+        switch (gjkInfo.simplex.size()) {
             case 2:
-                return computeLineSimplex(g);
+                return computeLineSimplex(gjkInfo);
             case 3:
-                return computeTriangleSimplex(g);
+                return computeTriangleSimplex(gjkInfo);
             default:
-                System.err.println("Simplex size error: " + g.simplex.size());
+                System.err.println("Simplex size error: "
+                        + gjkInfo.simplex.size());
                 System.exit(0);
         }
 
@@ -94,7 +96,7 @@ public final class CollisionCheckerGJKEPA2 {
      */
     private static boolean computeLineSimplex(GJKStruct g) {
 
-        // B-------------A
+        // Line: B-------------A
         // B=0,A=1
 
         Vec2D AB, AO;
@@ -133,9 +135,8 @@ public final class CollisionCheckerGJKEPA2 {
      */
     private static boolean computeTriangleSimplex(GJKStruct g) {
 
-        //@formatter:off 
-        
-        /* 
+        // @formatter:off
+        /*
          * Triangle:
          * ....A....
          * .../.\...
@@ -143,13 +144,12 @@ public final class CollisionCheckerGJKEPA2 {
          * .B_____C.
          * 
          * simplex mapping: A=2, B=1, C=0
-         */ 
-        
-        //@formatter:on
+         */
+        // @formatter:on
 
         /*
-         * A is the newest point added. So we dont have to check edge BC
-         * because the origin is not there. We also don't have to check B or C.
+         * A is the newest point added. So we dont have to check edge BC because
+         * the origin is not there. We also don't have to check B or C.
          */
 
         Vec2D AB, AC, AO;
@@ -201,7 +201,9 @@ public final class CollisionCheckerGJKEPA2 {
                 return false;
             }
         }
-        // Because
+
+        // Because the point was not found outside either of the edges of the
+        // triangle. Therefore, it must be inside the triangle.
         return true;
     }
 
@@ -220,11 +222,29 @@ public final class CollisionCheckerGJKEPA2 {
 
 }
 
+/**
+ * This class holds all the vital information used by th GJK algorithm while it
+ * computes whether a collision has taken place.
+ * 
+ * @author Afsheen
+ *
+ */
 class GJKStruct {
 
+    /**
+     * The simplex for the gjk algorithm.
+     */
     ArrayList<Vec2D> simplex;
+
+    /**
+     * The current search direction.
+     */
     Vec2D dir;
 
+    /**
+     * Initialize a new GJKStruct with an empty simplex of size 3 and a search
+     * direction = [0,0].
+     */
     GJKStruct() {
         this.simplex = new ArrayList<Vec2D>(3);
         this.dir = new Vec2D();
