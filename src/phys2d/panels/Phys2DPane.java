@@ -6,6 +6,7 @@ import java.awt.RenderingHints;
 import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
+import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
 import phys2d.collisionLogic.collisionManagers.DiscreteManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager;
@@ -152,16 +153,17 @@ public class Phys2DPane extends AnimatedPane {
         for (int j = 0; j < tests; j++) {
             long t = System.nanoTime();
             for (int i = 0; i < 5000; i++) {
-                // CollisionCheckerGJKEPA.isCollidingGJK(entities.get(0),
-                // entities.get(1));
-                CollisionCheckerGJKEPA2.isColliding(entities.get(0),
+                CollisionCheckerGJKEPA.isColliding(entities.get(0),
                         entities.get(1));
+                // CollisionCheckerGJKEPA2.isColliding(entities.get(0),
+                // entities.get(1));
             }
 
             dt += (System.nanoTime() - t) / 1e6;
         }
         System.out.println("DEF: " + dt / tests);
-
+        System.out.println(CollisionCheckerGJKEPA2.isColliding(entities.get(0),
+                entities.get(1)) + "");
         System.exit(0);
     }
 
