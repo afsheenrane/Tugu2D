@@ -15,16 +15,17 @@ import phys2d.entities.shapes.Shape;
 public final class CollisionCheckerGJKEPA2 {
 
     /**
-     * Using GJK, return whether the shapes s1 and s2 are colliding.
+     * Using GJK, return the result of the algorithm on the two shapes.
      * 
      * @param s1 the first shape.
      * @param s2 the second shape.
-     * @return true if s1 and s2 intersect, false otherwise.
+     * @return a structure containing the final state of the simplex, the last
+     *         search direction, and whether the shapes are colliding or not.
      */
-    public static boolean isColliding(Shape s1, Shape s2) {
+    public static SimplexDirStruct computeSimplex(Shape s1, Shape s2) {
 
         Vec2D newPt;
-        GJKStruct gjkInfo = new GJKStruct();
+        SimplexDirStruct gjkInfo = new SimplexDirStruct();
 
         int count = 0;
 
@@ -39,13 +40,14 @@ public final class CollisionCheckerGJKEPA2 {
             // If the new point is not past the origin, then the origin cannot
             // be encapsulated.
             if (newPt.dotProduct(gjkInfo.dir) < 0) {
-                return false;
+                gjkInfo.isColliding = false;
+                return gjkInfo;
             }
 
             gjkInfo.simplex.add(newPt);
-
-            if (computeSimplex(gjkInfo)) {
-                return true;
+            computeSimplex(gjkInfo);
+            if (gjkInfo.isColliding) {
+                return gjkInfo;
             }
 
             count++;
@@ -53,7 +55,8 @@ public final class CollisionCheckerGJKEPA2 {
         }
 
         System.err.println("GJK TOL failure.");
-        return false;
+        gjkInfo.isColliding = false;
+        return gjkInfo;
 
     }
 
@@ -61,24 +64,23 @@ public final class CollisionCheckerGJKEPA2 {
      * Modifies the simplex according to it's current characteristics and change
      * the search direction if needed.
      * 
-     * @param simplex the simplex computed so far.
-     * @param dir the search direction.
-     * @return true if the origin is inside the simplex, false otherwise.
+     * @param gjkInfo the current state of the algorithm.
      */
-    private static boolean computeSimplex(GJKStruct gjkInfo) {
+    private static void computeSimplex(SimplexDirStruct gjkInfo) {
 
         switch (gjkInfo.simplex.size()) {
             case 2:
-                return computeLineSimplex(gjkInfo);
+                computeLineSimplex(gjkInfo);
+                break;
             case 3:
-                return computeTriangleSimplex(gjkInfo);
+                computeTriangleSimplex(gjkInfo);
+                break;
             default:
                 System.err.println("Simplex size error: "
                         + gjkInfo.simplex.size());
                 System.exit(0);
+                break;
         }
-
-        return false;
     }
 
     /**
@@ -89,37 +91,35 @@ public final class CollisionCheckerGJKEPA2 {
      * direction of the origin. Therefore, we only need to check if the new
      * point is closest to the origin, or whether the line body is closest.
      * 
-     * @param simplex the simplex computed thus far.
-     * @param dir the current search direction.
-     * @return false because it is not possible to enclose the origin with only
-     *         two points in R2.
+     * @param gjkInfo the current state of the algorithm.
      */
-    private static boolean computeLineSimplex(GJKStruct g) {
+    private static void computeLineSimplex(SimplexDirStruct gjkInfo) {
 
         // Line: B-------------A
         // B=0,A=1
 
         Vec2D AB, AO;
 
-        AB = Vec2D.sub(g.simplex.get(0), g.simplex.get(1));
-        AO = g.simplex.get(1).getNegated();
+        AB = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(1));
+        AO = gjkInfo.simplex.get(1).getNegated();
 
         // If the line segment body is closest:
         if (AB.dotProduct(AO) > 0) {
 
             if (AB.perpDotProduct(AO) > 0)
-                g.dir = AB.getNormal();
+                gjkInfo.dir = AB.getNormal();
             else
-                g.dir = AB.getNormal().getNegated();
+                gjkInfo.dir = AB.getNormal().getNegated();
 
         }
         // Otherwise, point A is closest.
         else {
-            g.simplex.remove(0); // Remove B
-            g.dir = AO;
+            gjkInfo.simplex.remove(0); // Remove B
+            gjkInfo.dir = AO;
         }
 
-        return false;
+        gjkInfo.isColliding = false;
+        ;
     }
 
     /**
@@ -128,12 +128,9 @@ public final class CollisionCheckerGJKEPA2 {
      * Like the line case, B, C, or BC cannot the closest features to the
      * origin. So they are automatically discarded and checks are not done.
      * 
-     * @param simplex the simplex computed thus far.
-     * @param dir the current search direction.
-     * @return true if the origin is contained inside the triangle. False
-     *         otherwise.
+     * @param gjkInfo the current state of the algorithm execution.
      */
-    private static boolean computeTriangleSimplex(GJKStruct g) {
+    private static void computeTriangleSimplex(SimplexDirStruct gjkInfo) {
 
         // @formatter:off
         /*
@@ -157,8 +154,8 @@ public final class CollisionCheckerGJKEPA2 {
         // The normal pointing outwards from the triangle.
         Vec2D ABnorm, ACnorm;
 
-        AB = Vec2D.sub(g.simplex.get(1), g.simplex.get(2));
-        AO = g.simplex.get(2).getNegated();
+        AB = Vec2D.sub(gjkInfo.simplex.get(1), gjkInfo.simplex.get(2));
+        AO = gjkInfo.simplex.get(2).getNegated();
 
         ABnorm = AB.getNormal().getNegated(); // Because we need the right norm.
 
@@ -167,21 +164,23 @@ public final class CollisionCheckerGJKEPA2 {
 
             // Somewhere past A's voronoi region, inside AB's voro region
             if (AB.dotProduct(AO) > 0) {
-                g.simplex.remove(2); // Remove C
-                g.dir = ABnorm;
-                return false;
+                gjkInfo.simplex.remove(2); // Remove C
+                gjkInfo.dir = ABnorm;
+                gjkInfo.isColliding = false;
+                return;
             }
             // Inside A's voro region.
             else {
-                g.simplex.remove(0); // Remove C.
-                g.simplex.remove(1); // Remove B.
-                g.dir = AO;
-                return false;
+                gjkInfo.simplex.remove(0); // Remove C.
+                gjkInfo.simplex.remove(1); // Remove B.
+                gjkInfo.dir = AO;
+                gjkInfo.isColliding = false;
+                return;
             }
 
         }
 
-        AC = Vec2D.sub(g.simplex.get(0), g.simplex.get(2));
+        AC = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(2));
         ACnorm = AC.getNormal();
 
         // Somewhere past AC
@@ -189,22 +188,24 @@ public final class CollisionCheckerGJKEPA2 {
 
             // Somewhere past A's voro region, inside AC's voro region.
             if (AC.dotProduct(AO) > 0) {
-                g.simplex.remove(1); // Remove B
-                g.dir = ACnorm;
-                return false;
+                gjkInfo.simplex.remove(1); // Remove B
+                gjkInfo.dir = ACnorm;
+                gjkInfo.isColliding = false;
+                return;
             }
             // Inside A's voronoi region.
             else {
-                g.simplex.remove(0); // Remove C.
-                g.simplex.remove(1); // Remove B.
-                g.dir = AO;
-                return false;
+                gjkInfo.simplex.remove(0); // Remove C.
+                gjkInfo.simplex.remove(1); // Remove B.
+                gjkInfo.dir = AO;
+                gjkInfo.isColliding = false;
+                return;
             }
         }
 
         // Because the point was not found outside either of the edges of the
         // triangle. Therefore, it must be inside the triangle.
-        return true;
+        gjkInfo.isColliding = true;
     }
 
     /**
@@ -220,34 +221,49 @@ public final class CollisionCheckerGJKEPA2 {
         return (Vec2D.sub(s1.getMax(dir), s2.getMin(dir)));
     }
 
-}
+    /**
+     * Returns the resolution vector if the two shapes are colliding, by using
+     * the EPA algorithm.
+     * 
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     * @return the resolution vector if the shapes are colliding. The zero
+     *         vector otherwise.
+     */
+    public Vec2D getCollisionResolution(Shape s1, Shape s2) {
+        SimplexDirStruct gjkInfo = computeSimplex(s1, s2);
 
-/**
- * This class holds all the vital information used by th GJK algorithm while it
- * computes whether a collision has taken place.
- * 
- * @author Afsheen
- *
- */
-class GJKStruct {
+        if (!gjkInfo.isColliding) {
+            return Vec2D.ORIGIN;
+        }
+        else {
+            return computeCollisionResolutionEPA(s1, s2, gjkInfo.simplex);
+        }
+
+    }
 
     /**
-     * The simplex for the gjk algorithm.
+     * 
+     * @param s1
+     * @param s2
+     * @param simplex
+     * @return
      */
-    ArrayList<Vec2D> simplex;
+    private Vec2D computeCollisionResolutionEPA(Shape s1, Shape s2,
+            ArrayList<Vec2D> simplex) {
+
+        return null;
+    }
 
     /**
-     * The current search direction.
+     * Using GJK, return whether the shapes s1 and s2 are colliding.
+     * 
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     * @return true if s1 and s2 intersect, false otherwise.
      */
-    Vec2D dir;
-
-    /**
-     * Initialize a new GJKStruct with an empty simplex of size 3 and a search
-     * direction = [0,0].
-     */
-    GJKStruct() {
-        this.simplex = new ArrayList<Vec2D>(3);
-        this.dir = new Vec2D();
+    public static boolean isColliding(Shape s1, Shape s2) {
+        return computeSimplex(s1, s2).isColliding;
     }
 
 }
