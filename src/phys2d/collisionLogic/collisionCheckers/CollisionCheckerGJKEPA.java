@@ -192,15 +192,13 @@ public final class CollisionCheckerGJKEPA {
                 System.out.println("EPA Checker failure");
                 System.exit(0);
             }
+
             // First find the closest edge to the origin
             Vec2D[] closestEdge = new Vec2D[] {
                     simplex.get(simplex.size() - 1), simplex.get(0) };
             Vec2D closestDisp = LinePolyTools.ptToLineDisp(Vec2D.ORIGIN,
-                    closestEdge); // Compare this with ln202 (after "computing")
-                                  // and see if that is redundant op
-            // was using ptToLineSegDisp but since the origin is inside the
-            // simplex, the edge cases
-            // for a line segment shouldnt be nescessary
+                    closestEdge);
+
             double closestDist = closestDisp.getSquaredLength();
             int insertionIndex = 0;
 
@@ -228,8 +226,7 @@ public final class CollisionCheckerGJKEPA {
             Vec2D edgeNorm = closestDisp.getNormalized();
             Vec2D point = support(s1, s2, edgeNorm);
 
-            double newPtDistFromOrigin = point.dotProduct(edgeNorm); // scalar
-                                                                     // projection
+            double newPtDistFromOrigin = point.dotProduct(edgeNorm);
 
             // If our new expansion point is already on the edge (or very close
             // to) then return that edge normal

@@ -45,7 +45,7 @@ public final class CollisionCheckerGJKEPA2 {
             }
 
             gjkInfo.simplex.add(newPt);
-            computeSimplex(gjkInfo);
+            evolveSimplex(gjkInfo);
             if (gjkInfo.isColliding) {
                 return gjkInfo;
             }
@@ -66,7 +66,7 @@ public final class CollisionCheckerGJKEPA2 {
      * 
      * @param gjkInfo the current state of the algorithm.
      */
-    private static void computeSimplex(SimplexDirStruct gjkInfo) {
+    private static void evolveSimplex(SimplexDirStruct gjkInfo) {
 
         switch (gjkInfo.simplex.size()) {
             case 2:
@@ -243,16 +243,47 @@ public final class CollisionCheckerGJKEPA2 {
     }
 
     /**
+     * Using the EPA algorithm, compute the collision normal and penetration
+     * depth.
      * 
      * @param s1
      * @param s2
      * @param simplex
      * @return
      */
-    private Vec2D computeCollisionResolutionEPA(Shape s1, Shape s2,
+    private static Vec2D computeCollisionResolutionEPA(Shape s1, Shape s2,
             ArrayList<Vec2D> simplex) {
 
-        return null;
+        final double TOL = 0.1;
+        int count = 0;
+
+        while (count < 20) {
+            Vec2D[] closestEdge = new Vec2D[] { simplex.get(2), simplex.get(0) };
+
+            double closestDisp = computeRelativeDisp(Vec2D.ORIGIN, closestEdge);
+
+        }
+
+        System.err.println("EPA checker failure!");
+
+        return Vec2D.ORIGIN;
+    }
+
+    /**
+     * Compute the relative displacement of p from the line.
+     * 
+     * @param p the point to check.
+     * @param line the line to check p's displacement from.
+     * @return a number directly proportional to the point's displacement from
+     *         the line. <b> This is not an actual displacement.</b>
+     */
+    private static double computeRelativeDisp(Vec2D p, Vec2D[] line) {
+        Vec2D lineNorm = Vec2D.sub(line[1], line[0]).getNormal();
+        Vec2D relVec = Vec2D.sub(p, line[0]);
+
+        double disp = relVec.dotProduct(lineNorm);
+
+        return disp;
     }
 
     /**
