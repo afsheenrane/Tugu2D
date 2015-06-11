@@ -2,8 +2,10 @@ package phys2d.collisionLogic.collisionCheckers;
 
 import java.util.ArrayList;
 
+import phys2d.collisionLogic.tools.LinePolyTools;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
+import phys2d.entities.shapes.polygons.Polygon;
 
 /**
  * A better written version of GJK and EPA with a focus on speed. Tests show it
@@ -230,7 +232,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @return the resolution vector if the shapes are colliding. The zero
      *         vector otherwise.
      */
-    public Vec2D getCollisionResolution(Shape s1, Shape s2) {
+    public static Vec2D getCollisionResolution(Shape s1, Shape s2) {
         SimplexDirStruct gjkInfo = computeSimplex(s1, s2);
 
         if (!gjkInfo.isColliding) {
@@ -254,17 +256,54 @@ public final class CollisionCheckerGJKEPA2 {
     private static Vec2D computeCollisionResolutionEPA(Shape s1, Shape s2,
             ArrayList<Vec2D> simplex) {
 
+        simplex = Polygon.arrangePoints(simplex);
+
         final double TOL = 0.1;
         int count = 0;
 
         while (count < 20) {
-            Vec2D[] closestEdge = new Vec2D[] { simplex.get(2), simplex.get(0) };
+            Vec2D[] closestEdge = new Vec2D[] {
+                    simplex.get(simplex.size() - 1), simplex.get(0) };
 
-            double closestDisp = computeRelativeDisp(Vec2D.ORIGIN, closestEdge);
+            double closestDist = computeRelativeDist(Vec2D.ORIGIN, closestEdge);
+            int insertionIndex = 0;
 
+            Vec2D[] edge;
+            double dist;
+            // 2 => simplex.size - 1
+            for (int i = 0; i < 2; i++) {
+                edge = new Vec2D[] { simplex.get(i), simplex.get(i + 1) };
+                dist = computeRelativeDist(Vec2D.ORIGIN, edge);
+
+                if (dist < closestDist) {
+                    closestEdge = edge;
+                    closestDist = dist;
+                    insertionIndex = i + 1;
+                }
+            }
+
+            Vec2D edgeNorm = Vec2D.sub(closestEdge[1], closestEdge[0])
+                    .getNormal();
+            Vec2D newPt = support(s1, s2, edgeNorm);
+
+            double newPtDistFromOrigin = Math.abs(newPt.dotProduct(edgeNorm));
+
+            if (newPtDistFromOrigin - closestDist <= TOL) {
+                // TODO: return an actual normalized vector which is scaled
+                // correctly.
+                // edgeNorm.normalize();
+                return LinePolyTools.ptToLineDisp(Vec2D.ORIGIN, closestEdge);
+                // edgeNorm.scaleBy(LinePolyTools.ptToLineDisp(Vec2D.ORIGIN,
+                // closestEdge));
+
+            }
+            else {
+                simplex.add(insertionIndex, newPt); // TODO fix insertion index.
+            }
+            count++;
         }
 
-        System.err.println("EPA checker failure!");
+        System.err.println("EPA v2 checker failure!");
 
         return Vec2D.ORIGIN;
     }
@@ -277,13 +316,13 @@ public final class CollisionCheckerGJKEPA2 {
      * @return a number directly proportional to the point's displacement from
      *         the line. <b> This is not an actual displacement.</b>
      */
-    private static double computeRelativeDisp(Vec2D p, Vec2D[] line) {
+    private static double computeRelativeDist(Vec2D p, Vec2D[] line) {
         Vec2D lineNorm = Vec2D.sub(line[1], line[0]).getNormal();
         Vec2D relVec = Vec2D.sub(p, line[0]);
 
-        double disp = relVec.dotProduct(lineNorm);
+        double dist = relVec.dotProduct(lineNorm);
 
-        return disp;
+        return Math.abs(dist);
     }
 
     /**

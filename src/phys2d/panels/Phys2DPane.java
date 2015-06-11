@@ -60,10 +60,13 @@ public class Phys2DPane extends AnimatedPane {
         // s.setVelocity(new Vec2D(300, 200));
         entities.add(s);
 
-        // System.out.println(CollisionCheckerGJKEPA.getDisplacementBetweenShapes(entities.get(1),
-        // entities.get(0)).getNegated());
+        // System.out.println(CollisionCheckerGJKEPA.getDisplacementBetweenShapes(
+        // entities.get(1), entities.get(0)).getNegated());
 
-        tester();
+        System.out.println(CollisionCheckerGJKEPA2.getCollisionResolution(
+                entities.get(0), entities.get(1)));
+
+        // tester();
 
         System.exit(0);
     }
