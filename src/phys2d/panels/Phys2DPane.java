@@ -19,7 +19,9 @@ import phys2d.entities.shapes.polygons.Square;
 import phys2d.entities.shapes.polygons.WorldBound;
 
 /**
- * @author Afsheen TODO -impulse resolution -swept detection
+ * @author Afsheen
+ *         TODO -impulse resolution -swept detection
+ *         Contact points.
  */
 
 @SuppressWarnings("serial")
@@ -158,12 +160,13 @@ public class Phys2DPane extends AnimatedPane {
     private void tester() {
         double dt = 0;
         int tests = 3000;
+        int frames = 5000;
         for (int j = 0; j < tests; j++) {
             long t = System.nanoTime();
-            for (int i = 0; i < 5000; i++) {
+            for (int i = 0; i < frames; i++) {
                 // CollisionCheckerMPR.isColliding(entities.get(0),
                 // entities.get(1));
-                CollisionCheckerGJKEPA2.isColliding(entities.get(0),
+                CollisionCheckerGJKEPA2.getCollisionResolution(entities.get(0),
                         entities.get(1));
             }
 

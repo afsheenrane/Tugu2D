@@ -39,4 +39,32 @@ final class SimplexDirStruct {
         this.isColliding = false;
     }
 
+    /**
+     * @return the final simplex after a collision detection algorithm has been
+     *         run.
+     */
+    public ArrayList<Vec2D> getSimplex() {
+        return simplex;
+    }
+
+    /**
+     * @return the collision normal or displacement normal between the two
+     *         shapes on which a collision detection algorithm is run. <br>
+     *         <b>Note: </b> <i>Only use this getter outside of the actual
+     *         collision detection computation. This is because, dir is only a
+     *         collision normal AFTER a collision detection algorithm has been
+     *         executed. Otherwise, directly access dir during computation.</i>
+     */
+    public Vec2D getDir() {
+        return dir;
+    }
+
+    /**
+     * @return whether the shapes to which this struct belonged
+     *         to were colliding or not.
+     */
+    public boolean isColliding() {
+        return isColliding;
+    }
+
 }
