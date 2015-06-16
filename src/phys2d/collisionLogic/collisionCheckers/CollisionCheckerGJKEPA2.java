@@ -1,7 +1,5 @@
 package phys2d.collisionLogic.collisionCheckers;
 
-import java.util.ArrayList;
-
 import phys2d.collisionLogic.tools.LinePolyTools;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
@@ -24,7 +22,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @return a structure containing the final state of the simplex, the last
      *         search direction, and whether the shapes are colliding or not.
      */
-    public static SimplexDirStruct computeSimplex(Shape s1, Shape s2) {
+    private static SimplexDirStruct computeSimplex(Shape s1, Shape s2) {
 
         Vec2D newPt;
         SimplexDirStruct gjkInfo = new SimplexDirStruct();
@@ -121,7 +119,7 @@ public final class CollisionCheckerGJKEPA2 {
         }
 
         gjkInfo.isColliding = false;
-        ;
+
     }
 
     /**
@@ -232,38 +230,53 @@ public final class CollisionCheckerGJKEPA2 {
      * @return the resolution vector if the shapes are colliding. The zero
      *         vector otherwise.
      */
-    public static Vec2D getCollisionResolution(Shape s1, Shape s2) {
+    public static SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
         SimplexDirStruct gjkInfo = computeSimplex(s1, s2);
 
         if (!gjkInfo.isColliding) {
-            return Vec2D.ORIGIN;
+            // TODO return the minimum distance between the two shapes.
+            return computeMinimumDisplacement(s1, s2, gjkInfo);
         }
         else {
-            return computeCollisionResolutionEPA(s1, s2, gjkInfo.simplex);
+            computeCollisionResolutionEPA(s1, s2, gjkInfo);
         }
+        return gjkInfo;
+    }
 
+    /**
+     * If a collision is not detected, returns the minimum displacement between
+     * the two shapes.
+     * 
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     * @param gjkInfo the final simplex and search direction after GJK has run.
+     */
+    private static void computeMinimumDisplacement(Shape s1, Shape s2,
+            SimplexDirStruct gjkInfo) {
+        // TODO finish this.
     }
 
     /**
      * Using the EPA algorithm, compute the collision normal and penetration
      * depth.
      * 
-     * @param s1
-     * @param s2
-     * @param simplex
-     * @return
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     * @param simplex the result simplex from running GJK on the shapes.
+     * @return the collision normal between the two shapes.
      */
-    private static Vec2D computeCollisionResolutionEPA(Shape s1, Shape s2,
-            ArrayList<Vec2D> simplex) {
+    private static void computeCollisionResolutionEPA(Shape s1, Shape s2,
+            SimplexDirStruct gjkInfo) {
 
-        simplex = Polygon.arrangePoints(simplex);
+        gjkInfo.simplex = Polygon.arrangePoints(gjkInfo.simplex);
 
         final double TOL = 0.1;
         int count = 0;
 
         while (count < 20) {
             Vec2D[] closestEdge = new Vec2D[] {
-                    simplex.get(simplex.size() - 1), simplex.get(0) };
+                    gjkInfo.simplex.get(gjkInfo.simplex.size() - 1),
+                    gjkInfo.simplex.get(0) };
 
             double closestDist = computeRelativeDist(Vec2D.ORIGIN, closestEdge);
             int insertionIndex = 0;
@@ -272,7 +285,8 @@ public final class CollisionCheckerGJKEPA2 {
             double dist;
             // 2 => simplex.size - 1
             for (int i = 0; i < 2; i++) {
-                edge = new Vec2D[] { simplex.get(i), simplex.get(i + 1) };
+                edge = new Vec2D[] { gjkInfo.simplex.get(i),
+                        gjkInfo.simplex.get(i + 1) };
                 dist = computeRelativeDist(Vec2D.ORIGIN, edge);
 
                 if (dist < closestDist) {
@@ -289,23 +303,20 @@ public final class CollisionCheckerGJKEPA2 {
             double newPtDistFromOrigin = Math.abs(newPt.dotProduct(edgeNorm));
 
             if (newPtDistFromOrigin - closestDist <= TOL) {
-                // TODO: return an actual normalized vector which is scaled
-                // correctly.
-                // edgeNorm.normalize();
-                return LinePolyTools.ptToLineDisp(Vec2D.ORIGIN, closestEdge);
-                // edgeNorm.scaleBy(LinePolyTools.ptToLineDisp(Vec2D.ORIGIN,
-                // closestEdge));
-
+                gjkInfo.dir = LinePolyTools.ptToLineDisp(Vec2D.ORIGIN,
+                        closestEdge);
+                return gjkInfo;
             }
             else {
-                simplex.add(insertionIndex, newPt); // TODO fix insertion index.
+                gjkInfo.simplex.add(insertionIndex, newPt);
             }
             count++;
         }
 
         System.err.println("EPA v2 checker failure!");
 
-        return Vec2D.ORIGIN;
+        gjkInfo.dir = Vec2D.ORIGIN;
+        return gjkInfo;
     }
 
     /**
