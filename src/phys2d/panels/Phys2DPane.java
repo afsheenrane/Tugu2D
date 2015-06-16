@@ -6,8 +6,8 @@ import java.awt.RenderingHints;
 import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
-import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
+import phys2d.collisionLogic.collisionCheckers.CollisionCheckerMPR;
 import phys2d.collisionLogic.collisionManagers.DiscreteManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager;
 import phys2d.collisionLogic.tools.MiscTools;
@@ -60,13 +60,18 @@ public class Phys2DPane extends AnimatedPane {
         // s.setVelocity(new Vec2D(300, 200));
         entities.add(s);
 
-        // System.out.println(CollisionCheckerGJKEPA.getDisplacementBetweenShapes(
-        // entities.get(1), entities.get(0)).getNegated());
+        // System.out.println(LinePolyTools.polyDifference(
+        // (Polygon) entities.get(0), (Polygon) entities.get(1)));
 
-        System.out.println(CollisionCheckerGJKEPA2.getCollisionResolution(
-                entities.get(0), entities.get(1)));
+        System.out.println("GJK2: "
+                + CollisionCheckerGJKEPA2.isColliding(entities.get(0),
+                        entities.get(1)));
 
-        // tester();
+        System.out.println("MPR: "
+                + CollisionCheckerMPR.isColliding(entities.get(0),
+                        entities.get(1)));
+
+        tester();
 
         System.exit(0);
     }
@@ -156,17 +161,15 @@ public class Phys2DPane extends AnimatedPane {
         for (int j = 0; j < tests; j++) {
             long t = System.nanoTime();
             for (int i = 0; i < 5000; i++) {
-                CollisionCheckerGJKEPA.isColliding(entities.get(0),
-                        entities.get(1));
-                // CollisionCheckerGJKEPA2.isColliding(entities.get(0),
+                // CollisionCheckerMPR.isColliding(entities.get(0),
                 // entities.get(1));
+                CollisionCheckerGJKEPA2.isColliding(entities.get(0),
+                        entities.get(1));
             }
 
             dt += (System.nanoTime() - t) / 1e6;
         }
         System.out.println("DEF: " + dt / tests);
-        System.out.println(CollisionCheckerGJKEPA2.isColliding(entities.get(0),
-                entities.get(1)) + "");
         System.exit(0);
     }
 
