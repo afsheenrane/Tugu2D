@@ -326,13 +326,8 @@ public final class CollisionCheckerGJKEPA {
                 return closestPt; // the closest feature of the line
             }
 
-            if (simplex[0].getSquaredLength() < simplex[1].getSquaredLength()) // Remove
-                                                                               // the
-                                                                               // further
-                                                                               // point
-                                                                               // from
-                                                                               // the
-                                                                               // origin
+            // Remove the further point from the origin
+            if (simplex[0].getSquaredLength() < simplex[1].getSquaredLength())
                 simplex[1] = supp;
             else
                 simplex[0] = supp;
