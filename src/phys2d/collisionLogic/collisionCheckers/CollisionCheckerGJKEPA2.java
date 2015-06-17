@@ -36,6 +36,7 @@ public final class CollisionCheckerGJKEPA2 {
 
         while (count < 20) {
             newPt = support(s1, s2, gjkInfo.dir);
+            gjkInfo.simplex.add(newPt);
 
             // If the new point is not past the origin, then the origin cannot
             // be encapsulated.
@@ -44,7 +45,6 @@ public final class CollisionCheckerGJKEPA2 {
                 return gjkInfo;
             }
 
-            gjkInfo.simplex.add(newPt);
             evolveSimplex(gjkInfo);
             if (gjkInfo.isColliding) {
                 return gjkInfo;
@@ -78,6 +78,7 @@ public final class CollisionCheckerGJKEPA2 {
             default:
                 System.err.println("Simplex size error: "
                         + gjkInfo.simplex.size());
+
                 System.exit(0);
                 break;
         }
@@ -254,6 +255,62 @@ public final class CollisionCheckerGJKEPA2 {
     private static void computeMinimumDisplacement(Shape s1, Shape s2,
             SimplexDirStruct gjkInfo) {
         // TODO finish this.
+
+        final double TOL = 0.1;
+
+        /*
+         * First, if there's a triangle simplex, cull it down to a lower
+         * dimensional simplex. There's no way for the simplex to contain the
+         * origin. Because, you know, we wouldn't be here if it did.
+         */
+        if (gjkInfo.simplex.size() == 3)
+            computeTriangleSimplex(gjkInfo);
+
+        // Next, start the march towards the origin till the tol is reached.
+
+        // If the simplex was originally a triangle, and then was evolved into a
+        // point above, then we need to "re-evolve" it into a line.
+        if (gjkInfo.simplex.size() == 1) {
+            // The last search direction is unchecked and is still pointing at
+            // the origin.
+            gjkInfo.simplex.add(support(s1, s2, gjkInfo.dir));
+        }
+
+        // Now we have a line simplex and are ready to march.
+
+        // Find closest point on line to the origin. Using same protocol as
+        // previous simplex where latest point is A.
+        Vec2D AB = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(1));
+        Vec2D AO = gjkInfo.simplex.get(1).getNegated();
+        Vec2D closestPt = AO.vecProjection(AB);
+
+        if (closestPt.equals(Vec2D.ORIGIN)) {
+            gjkInfo.dir = Vec2D.ORIGIN;
+            return;
+        }
+
+        Vec2D newPt;
+
+        // Find the direction of the origin from the closest point.
+        closestPt.negate();
+        gjkInfo.dir = closestPt;
+
+        newPt = support(s1, s2, gjkInfo.dir);
+
+        // Check if the new support is actually making progress towards the
+        // origin.
+        if (Vec2D.sub(newPt, gjkInfo.simplex.get(1)).dotProduct(gjkInfo.dir) <= TOL) {
+            gjkInfo.dir = closestPt;
+            return;
+        }
+
+        // If progress was made, replace a bad point in the simplex with the new
+        // support.
+        if (gjkInfo.simplex.get(0).getSquaredLength() > gjkInfo.simplex.get(1)
+                .getSquaredLength())
+            gjkInfo.simplex.set(0, newPt);
+        else
+            gjkInfo.simplex.set(1, newPt);
     }
 
     /**
@@ -305,7 +362,7 @@ public final class CollisionCheckerGJKEPA2 {
             if (newPtDistFromOrigin - closestDist <= TOL) {
                 gjkInfo.dir = LinePolyTools.ptToLineDisp(Vec2D.ORIGIN,
                         closestEdge);
-                return gjkInfo;
+                return;
             }
             else {
                 gjkInfo.simplex.add(insertionIndex, newPt);
@@ -316,7 +373,7 @@ public final class CollisionCheckerGJKEPA2 {
         System.err.println("EPA v2 checker failure!");
 
         gjkInfo.dir = Vec2D.ORIGIN;
-        return gjkInfo;
+        return;
     }
 
     /**
