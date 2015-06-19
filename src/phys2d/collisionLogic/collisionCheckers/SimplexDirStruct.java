@@ -11,7 +11,7 @@ import phys2d.entities.Vec2D;
  * @author Afsheen
  *
  */
-final class SimplexDirStruct {
+public final class SimplexDirStruct {
 
     /**
      * The simplex for the gjk algorithm.
@@ -60,11 +60,22 @@ final class SimplexDirStruct {
     }
 
     /**
-     * @return whether the shapes to which this struct belonged
-     *         to were colliding or not.
+     * @return whether the shapes to which this struct belonged to were
+     *         colliding or not.
      */
     public boolean isColliding() {
         return isColliding;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "SimplexDirStruct [simplex= " + simplex + ", dir= " + dir
+                + ", isColliding= " + isColliding + "]";
     }
 
 }

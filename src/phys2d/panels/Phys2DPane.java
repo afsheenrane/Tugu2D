@@ -7,21 +7,21 @@ import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
-import phys2d.collisionLogic.collisionCheckers.CollisionCheckerMPR;
+import phys2d.collisionLogic.collisionCheckers.SimplexDirStruct;
 import phys2d.collisionLogic.collisionManagers.DiscreteManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager;
+import phys2d.collisionLogic.tools.LinePolyTools;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Circle;
 import phys2d.entities.shapes.Shape;
+import phys2d.entities.shapes.polygons.Polygon;
 import phys2d.entities.shapes.polygons.Square;
 import phys2d.entities.shapes.polygons.WorldBound;
 
 /**
- * @author Afsheen
- *         TODO -impulse resolution -swept detection
- *         Contact points.
+ * @author Afsheen TODO -impulse resolution -swept detection Contact points.
  */
 
 @SuppressWarnings("serial")
@@ -52,28 +52,33 @@ public class Phys2DPane extends AnimatedPane {
          * Vec2D(75 * i++, 600), 25, 0); s.setMaterial(m); entities.add(s); }
          */
 
-        s = new Square(new Vec2D(480, 458), 100, 0);
+        s = new Square(new Vec2D(500, 400), 100, 0);
         // s.setVelocity(new Vec2D(300, -10));
         // s.setMaterial(Material.REFLECTIUM);
         entities.add(s);
 
-        s = new Square(new Vec2D(560, 540), 100, 0);
+        s = new Square(new Vec2D(650, 400), 100, 0);
         // s.setMaterial(Material.REFLECTIUM);
         // s.setVelocity(new Vec2D(300, 200));
         entities.add(s);
 
-        // System.out.println(LinePolyTools.polyDifference(
-        // (Polygon) entities.get(0), (Polygon) entities.get(1)));
+        System.out.println(LinePolyTools.polyDifference(
+                (Polygon) entities.get(0), (Polygon) entities.get(1)));
+        /*
+         * System.out.println("GJK2: " +
+         * CollisionCheckerGJKEPA2.isColliding(entities.get(0),
+         * entities.get(1)));
+         * 
+         * System.out.println("MPR: " +
+         * CollisionCheckerMPR.isColliding(entities.get(0), entities.get(1)));
+         */
 
-        System.out.println("GJK2: "
-                + CollisionCheckerGJKEPA2.isColliding(entities.get(0),
-                        entities.get(1)));
+        SimplexDirStruct str = CollisionCheckerGJKEPA2.getCollisionResolution(
+                entities.get(0), entities.get(1));
 
-        System.out.println("MPR: "
-                + CollisionCheckerMPR.isColliding(entities.get(0),
-                        entities.get(1)));
-
-        tester();
+        System.out.println("is colliding: " + str.isColliding());
+        System.out.println("disp: " + str.getDir());
+        // tester();
 
         System.exit(0);
     }
