@@ -13,8 +13,70 @@ import phys2d.entities.shapes.Shape;
  */
 public final class CollisionCheckerMPR {
 
+    /**
+     * Uses the MPR algorithm to detect whether a collision has occurred between
+     * shapes s1 and s2.
+     * 
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     * @return true if the shapes are colliding, false otherwise.
+     */
     public static boolean isColliding(Shape s1, Shape s2) {
+        SimplexDirStruct mprInfo = new SimplexDirStruct();
+        computeSimplex(s1, s2, mprInfo);
 
+        return mprInfo.isColliding;
+    }
+
+    /**
+     * If the shapes are colliding, return the minimum displacement to unstick
+     * them, otherwise, return the minimum displacement between the two shapes.
+     * 
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     */
+    public static SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
+        SimplexDirStruct mprInfo = new SimplexDirStruct();
+        computeSimplex(s1, s2, mprInfo);
+
+        if (mprInfo.isColliding)
+            computeCollisionResolution(s1, s2, mprInfo);
+
+        else
+            computeMinimumDisplacement(s1, s2, mprInfo);
+
+        return mprInfo;
+    }
+
+    private static void computeCollisionResolution(Shape s1, Shape s2,
+            SimplexDirStruct mprInfo) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /**
+     * 
+     * @param s1
+     * @param s2
+     * @param mprInfo
+     */
+    private static void computeMinimumDisplacement(Shape s1, Shape s2,
+            SimplexDirStruct mprInfo) {
+        // Honestly, im pretty sure GJK's march works fine.
+        mprInfo.simplex.remove(0); // Remove the COM point.
+        CollisionCheckerGJKEPA2.computeMinimumDisplacement(s1, s2, mprInfo);
+    }
+
+    /**
+     * Evolve the simplex using MPR into it's final state.
+     * 
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     * @param mprInfo the structure where information about the MPR run is
+     *        stored.
+     */
+    private static void computeSimplex(Shape s1, Shape s2,
+            SimplexDirStruct mprInfo) {
         //@formatter:off
         /*
          * A---p>--B
@@ -25,7 +87,6 @@ public final class CollisionCheckerMPR {
          */
         //@formatter:on
 
-        SimplexDirStruct mprInfo = new SimplexDirStruct();
         Vec2D RA, portal, RAnorm, RO;
 
         mprInfo.simplex.add(Vec2D.sub(s1.getCOM(), s2.getCOM())); // R: V0
@@ -38,7 +99,7 @@ public final class CollisionCheckerMPR {
         RA = Vec2D.sub(mprInfo.simplex.get(1), mprInfo.simplex.get(0)); // RA
         RAnorm = RA.getNormal();
 
-        // Find which side origin is on. TODO, maybe use perpdot instead?
+        // Find which side origin is on.
         if (RAnorm.dotProduct(mprInfo.dir) > 0) {
             mprInfo.dir = RAnorm;
         }
@@ -75,7 +136,8 @@ public final class CollisionCheckerMPR {
 
                 // See if the new point is past the origin.
                 if (newPt.dotProduct(mprInfo.dir) < 0) { // If not past origin
-                    return false;
+                    mprInfo.isColliding = false;
+                    return;
                 }
                 else {
                     //@formatter:off
@@ -105,12 +167,13 @@ public final class CollisionCheckerMPR {
                 }
 
             }
-            else
+            else {
                 // Else, it is inside the portal.
-                return true;
+                mprInfo.isColliding = true;
+                return;
+            }
 
         }
-
     }
 
     /**
