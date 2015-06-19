@@ -250,7 +250,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @param s2 the second shape.
      * @param gjkInfo the final simplex and search direction after GJK has run.
      */
-    private static void computeMinimumDisplacement(Shape s1, Shape s2,
+    protected static void computeMinimumDisplacement(Shape s1, Shape s2,
             SimplexDirStruct gjkInfo) {
 
         final double TOL = 0.1;

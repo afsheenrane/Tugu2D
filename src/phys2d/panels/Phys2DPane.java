@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
+import phys2d.collisionLogic.collisionCheckers.CollisionCheckerMPR;
 import phys2d.collisionLogic.collisionCheckers.SimplexDirStruct;
 import phys2d.collisionLogic.collisionManagers.DiscreteManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager;
@@ -73,7 +74,7 @@ public class Phys2DPane extends AnimatedPane {
          * CollisionCheckerMPR.isColliding(entities.get(0), entities.get(1)));
          */
 
-        SimplexDirStruct str = CollisionCheckerGJKEPA2.getCollisionResolution(
+        SimplexDirStruct str = CollisionCheckerMPR.getCollisionResolution(
                 entities.get(0), entities.get(1));
 
         System.out.println("is colliding: " + str.isColliding());
