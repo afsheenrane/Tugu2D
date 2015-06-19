@@ -252,7 +252,6 @@ public final class CollisionCheckerGJKEPA2 {
      */
     private static void computeMinimumDisplacement(Shape s1, Shape s2,
             SimplexDirStruct gjkInfo) {
-        // TODO finish this.
 
         final double TOL = 0.1;
 
@@ -324,6 +323,7 @@ public final class CollisionCheckerGJKEPA2 {
     private static void computeCollisionResolutionEPA(Shape s1, Shape s2,
             SimplexDirStruct gjkInfo) {
 
+        // TODO try and make it so that we dont need this function call.
         gjkInfo.simplex = Polygon.arrangePoints(gjkInfo.simplex);
 
         final double TOL = 0.1;
