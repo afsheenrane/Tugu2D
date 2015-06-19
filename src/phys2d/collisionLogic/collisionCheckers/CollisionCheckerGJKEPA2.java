@@ -32,11 +32,10 @@ public final class CollisionCheckerGJKEPA2 {
         gjkInfo.dir = Vec2D.sub(s2.getCOM(), s1.getCOM());
         gjkInfo.simplex.add(support(s1, s2, gjkInfo.dir));
 
-        gjkInfo.dir.negate();
+        gjkInfo.dir = gjkInfo.simplex.get(0).getNegated();
 
         while (count < 20) {
             newPt = support(s1, s2, gjkInfo.dir);
-            gjkInfo.simplex.add(newPt);
 
             // If the new point is not past the origin, then the origin cannot
             // be encapsulated.
@@ -45,6 +44,7 @@ public final class CollisionCheckerGJKEPA2 {
                 return gjkInfo;
             }
 
+            gjkInfo.simplex.add(newPt);
             evolveSimplex(gjkInfo);
             if (gjkInfo.isColliding) {
                 return gjkInfo;
@@ -234,13 +234,11 @@ public final class CollisionCheckerGJKEPA2 {
     public static SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
         SimplexDirStruct gjkInfo = computeSimplex(s1, s2);
 
-        if (!gjkInfo.isColliding) {
-            // TODO return the minimum distance between the two shapes.
-            return computeMinimumDisplacement(s1, s2, gjkInfo);
-        }
-        else {
+        if (gjkInfo.isColliding)
             computeCollisionResolutionEPA(s1, s2, gjkInfo);
-        }
+        else
+            computeMinimumDisplacement(s1, s2, gjkInfo);
+
         return gjkInfo;
     }
 
@@ -283,6 +281,7 @@ public final class CollisionCheckerGJKEPA2 {
         Vec2D AB = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(1));
         Vec2D AO = gjkInfo.simplex.get(1).getNegated();
         Vec2D closestPt = AO.vecProjection(AB);
+        closestPt.add(gjkInfo.simplex.get(1));
 
         if (closestPt.equals(Vec2D.ORIGIN)) {
             gjkInfo.dir = Vec2D.ORIGIN;
