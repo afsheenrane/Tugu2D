@@ -224,7 +224,13 @@ public final class CollisionCheckerGJKEPA2 {
 
     /**
      * Returns the resolution vector if the two shapes are colliding, by using
-     * the EPA algorithm.
+     * the EPA algorithm. <br>
+     * <b>Colliding: </b>The returned vector is the displacement that needs to
+     * be applied to s2 to completely unstick the shapes. <br>
+     * <b>Not colliding: </b> The returned vector represents the amount that s2
+     * needs to be displaced, to be in contact with s1. <br>
+     * That is, if (s2.vel - s1.vel).proj(disp) >= disp.mag --> collision
+     * imminent.
      * 
      * @param s1 the first shape.
      * @param s2 the second shape.
@@ -244,7 +250,10 @@ public final class CollisionCheckerGJKEPA2 {
 
     /**
      * If a collision is not detected, returns the minimum displacement between
-     * the two shapes.
+     * the two shapes. <br>
+     * The displacement vector takes s2 as the reference shape. <br>
+     * For example, if [-50,0] is returned, it means that s1 is 50 units to the
+     * left of s2.
      * 
      * @param s1 the first shape.
      * @param s2 the second shape.
@@ -255,25 +264,29 @@ public final class CollisionCheckerGJKEPA2 {
 
         final double TOL = 0.1;
 
+        if (gjkInfo.simplex.size() == 1) {
+            gjkInfo.dir = gjkInfo.simplex.get(0);
+            return;
+        }
+
         /*
-         * First, if there's a triangle simplex, cull it down to a lower
+         * If there's a triangle simplex, cull it down to a lower
          * dimensional simplex. There's no way for the simplex to contain the
          * origin. Because, you know, we wouldn't be here if it did.
          */
-        if (gjkInfo.simplex.size() == 3)
+        else if (gjkInfo.simplex.size() == 3) {
             computeTriangleSimplex(gjkInfo);
 
-        // Next, start the march towards the origin till the tol is reached.
-
-        // If the simplex was originally a triangle, and then was evolved into a
-        // point above, then we need to "re-evolve" it into a line.
-        if (gjkInfo.simplex.size() == 1) {
-            // The last search direction is unchecked and is still pointing at
-            // the origin.
-            gjkInfo.simplex.add(support(s1, s2, gjkInfo.dir));
+            // If the simplex was originally a triangle, and then was evolved
+            // into a point above, then we need to "re-evolve" it into a line.
+            if (gjkInfo.simplex.size() == 1) {
+                // The last search direction is unchecked and is still pointing
+                // at the origin.
+                gjkInfo.simplex.add(support(s1, s2, gjkInfo.dir));
+            }
+            // Now we have a line simplex and are ready to march.
         }
-
-        // Now we have a line simplex and are ready to march.
+        // Next, start the march towards the origin till the tol is reached.
 
         // Find closest point on line to the origin. Using same protocol as
         // previous simplex where latest point is A.
@@ -313,7 +326,11 @@ public final class CollisionCheckerGJKEPA2 {
 
     /**
      * Using the EPA algorithm, compute the collision normal and penetration
-     * depth.
+     * depth. <br>
+     * Returns the vector by which s2 needs to be translated to be completely
+     * removed from s1. <br>
+     * For example, if [10,0] is returned, s2 needs to be moved 10 units to the
+     * right to unstick the shapes.
      * 
      * @param s1 the first shape.
      * @param s2 the second shape.
