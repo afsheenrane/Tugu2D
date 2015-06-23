@@ -224,7 +224,8 @@ public final class CollisionCheckerGJKEPA2 {
 
     /**
      * Returns the resolution vector if the two shapes are colliding, by using
-     * the EPA algorithm. <br>
+     * the EPA algorithm. Otherwise, returns the minimum displacement between
+     * the two shapes using GJK.<br>
      * <b>Colliding: </b>The returned vector is the displacement that needs to
      * be applied to s2 to completely unstick the shapes. <br>
      * <b>Not colliding: </b> The returned vector represents the amount that s2
