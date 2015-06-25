@@ -64,11 +64,12 @@ public final class CollisionCheckerMPR {
      * @param s1 the first shape.
      * @param s2 the second shape.
      * @param mprInfo the state of the simplex and the last search direction
-     *            after the MPR algorithm searched for the origin.
+     *        after the MPR algorithm searched for the origin.
      */
     private static void computeMinimumDisplacement(Shape s1, Shape s2,
             SimplexDirStruct mprInfo) {
-        // Honestly, im pretty sure GJK's march works fine.
+        // Honestly, im pretty sure GJK's march works fine. Especially since MPR
+        // makes and arguably better simplex.
         mprInfo.simplex.remove(0); // Remove the COM point.
         CollisionCheckerGJKEPA2.computeMinimumDisplacement(s1, s2, mprInfo);
     }
@@ -79,7 +80,7 @@ public final class CollisionCheckerMPR {
      * @param s1 the first shape.
      * @param s2 the second shape.
      * @param mprInfo the structure where information about the MPR run is
-     *            stored.
+     *        stored.
      */
     private static void computeSimplex(Shape s1, Shape s2,
             SimplexDirStruct mprInfo) {
