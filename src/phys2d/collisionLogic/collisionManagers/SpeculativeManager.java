@@ -273,7 +273,6 @@ public final class SpeculativeManager extends CollisionManager {
 
     }
 
-    @Override
     protected void manageCollisions(Shape[] entities) {
         checkAndResolveCollisions(entities);
 
@@ -287,6 +286,12 @@ public final class SpeculativeManager extends CollisionManager {
         manageCollisions(entities.toArray(new Shape[] {}));
 
         moveEntities(entities);
+    }
+
+    @Override
+    protected void manageCollisions(ArrayList<Shape> entities) {
+        // TODO Auto-generated method stub
+
     }
 
 }

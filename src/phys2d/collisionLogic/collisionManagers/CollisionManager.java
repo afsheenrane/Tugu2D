@@ -24,7 +24,12 @@ public abstract class CollisionManager {
         this.dt = dt;
     }
 
-    protected abstract void manageCollisions(Shape[] entities);
+    /**
+     * Computes all collisions and they resolution forces.
+     * 
+     * @param entities
+     */
+    protected abstract void manageCollisions(ArrayList<Shape> entities);
 
     public abstract void runManager(ArrayList<Shape> entities);
 
@@ -83,5 +88,4 @@ public abstract class CollisionManager {
             addForceOfGravity(s);
         }
     }
-
 }
