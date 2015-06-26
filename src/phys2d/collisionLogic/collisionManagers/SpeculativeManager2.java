@@ -9,9 +9,11 @@ import java.util.HashSet;
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.spacePartitioning.BSPTree;
 import phys2d.collisionLogic.spacePartitioning.SweptBSPTree;
+import phys2d.collisionLogic.tools.CollisionPairs;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
 import phys2d.entities.shapes.polygons.Rectangle;
+import phys2d.entities.shapes.polygons.WorldBound;
 
 /**
  * This class manages all collisions and collision resolutions that take place
@@ -44,6 +46,23 @@ public class SpeculativeManager2 extends CollisionManager {
 
         for (Shape s : entities) {
             collisionTree.insert(s);
+        }
+
+        ArrayList<Shape[]> collisionGroups = collisionTree
+                .getPossibleCollisions();
+
+        for (Shape[] group : collisionGroups) {
+
+            for (int i = 0; i < group.length; i++) {
+                for (int j = i + 1; j < group.length; j++) {
+                    if (!(group[i] instanceof WorldBound && group[j] instanceof WorldBound)
+                            && collidedPairs.add(new CollisionPairs(group[i],
+                                    group[j]))) {
+
+                    }
+                }
+            }
+
         }
 
     }
