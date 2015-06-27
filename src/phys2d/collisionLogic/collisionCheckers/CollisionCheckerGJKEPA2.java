@@ -39,7 +39,7 @@ public final class CollisionCheckerGJKEPA2 {
 
             // If the new point is not past the origin, then the origin cannot
             // be encapsulated.
-            if (newPt.dotProduct(gjkInfo.dir) < 0) {
+            if (newPt.dotProduct(gjkInfo.dir) <= 0) {
                 gjkInfo.isColliding = false;
                 return gjkInfo;
             }
