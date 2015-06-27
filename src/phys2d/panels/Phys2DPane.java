@@ -7,17 +7,12 @@ import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
-import phys2d.collisionLogic.collisionCheckers.CollisionCheckerMPR;
-import phys2d.collisionLogic.collisionCheckers.SimplexDirStruct;
-import phys2d.collisionLogic.collisionManagers.DiscreteManager;
-import phys2d.collisionLogic.collisionManagers.SpeculativeManager;
-import phys2d.collisionLogic.tools.LinePolyTools;
+import phys2d.collisionLogic.collisionManagers.SpeculativeManager2;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Circle;
 import phys2d.entities.shapes.Shape;
-import phys2d.entities.shapes.polygons.Polygon;
 import phys2d.entities.shapes.polygons.Square;
 import phys2d.entities.shapes.polygons.WorldBound;
 
@@ -30,9 +25,7 @@ public class Phys2DPane extends AnimatedPane {
 
     private final ArrayList<Shape> entities = new ArrayList<Shape>();
 
-    private final SpeculativeManager sm = new SpeculativeManager(dt);
-
-    private final DiscreteManager dm = new DiscreteManager(dt);
+    private final SpeculativeManager2 sm = new SpeculativeManager2(dt);
 
     public Phys2DPane(int updateRate, int maxFps, int maxFramesSkippable) {
         super(updateRate, maxFps, maxFramesSkippable);
@@ -53,40 +46,25 @@ public class Phys2DPane extends AnimatedPane {
          * Vec2D(75 * i++, 600), 25, 0); s.setMaterial(m); entities.add(s); }
          */
 
-        s = new Square(new Vec2D(500, 400), 100, 0);
+        s = new Square(new Vec2D(550, 400), 100, 0);
         // s.setVelocity(new Vec2D(300, -10));
         // s.setMaterial(Material.REFLECTIUM);
         entities.add(s);
 
-        s = new Square(new Vec2D(650, 400), 100, 0);
+        s = new Square(new Vec2D(640, 400), 100, 0);
         // s.setMaterial(Material.REFLECTIUM);
         // s.setVelocity(new Vec2D(300, 200));
         entities.add(s);
 
-        System.out.println(LinePolyTools.polyDifference(
-                (Polygon) entities.get(0), (Polygon) entities.get(1)));
-        /*
-         * System.out.println("GJK2: " +
-         * CollisionCheckerGJKEPA2.isColliding(entities.get(0),
-         * entities.get(1)));
-         * 
-         * System.out.println("MPR: " +
-         * CollisionCheckerMPR.isColliding(entities.get(0), entities.get(1)));
-         */
-
-        SimplexDirStruct str = CollisionCheckerMPR.getCollisionResolution(
-                entities.get(0), entities.get(1));
-
-        System.out.println("is colliding: " + str.isColliding());
-        System.out.println("disp: " + str.getDir());
         // tester();
 
-        System.exit(0);
+        // System.exit(0);
     }
 
     @Override
     public void update() {
-
+        // System.out.println(LinePolyTools.polyDifference(
+        // (Polygon) entities.get(0), (Polygon) entities.get(1)));
         sm.runManager(entities);
 
     }
@@ -96,17 +74,9 @@ public class Phys2DPane extends AnimatedPane {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g2d.setColor(Color.red);
         for (Shape entity : entities) {
-            if (entity instanceof WorldBound)
-                g2d.setColor(Color.green);
-            else
-                g2d.setColor(Color.red);
             entity.draw(g2d, alpha);
-
         }
-
-        g2d.setColor(Color.orange);
 
     }
 
