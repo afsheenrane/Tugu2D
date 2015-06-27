@@ -9,8 +9,6 @@ public class Vec2D {
     private double x;
     private double y;
 
-    private boolean modified = true;
-
     /**
      * Initialize a vector to [0,0]
      */
@@ -48,7 +46,7 @@ public class Vec2D {
     }
 
     /**
-     * Normalize the current vector
+     * Normalize the current vector.
      */
     public void normalize() {
         double len = getLength();
@@ -98,7 +96,6 @@ public class Vec2D {
      */
     public void setX(double x) {
         this.x = x;
-        modified = true;
     }
 
     /**
@@ -113,7 +110,6 @@ public class Vec2D {
      */
     public void setY(double y) {
         this.y = y;
-        modified = true;
     }
 
     /**
@@ -178,6 +174,15 @@ public class Vec2D {
         y -= v.getY();
     }
 
+    /**
+     * Returns the 2D cross product of this vector and v1. Also known as the
+     * perpendicular dot product. <br>
+     * The sign of the answer gives insight into the relative configuration of
+     * the two vectors.
+     * 
+     * @param v1 the vector to perpdot against.
+     * @return the perpendicular dot product of this vector and the vector v1.
+     */
     public double perpDotProduct(Vec2D v1) {
         return (x * v1.y) - (y * v1.x);
     }
@@ -205,6 +210,12 @@ public class Vec2D {
         return (v1.x * v2.y) - (v1.y * v2.x);
     }
 
+    /**
+     * Find the angle between this vector and ref.
+     * 
+     * @param ref the reference vector.
+     * @return the angle between this vector and ref.
+     */
     public double getRelativeAngle(Vec2D ref) {
 
         double angle = this.dotProduct(ref);
@@ -214,6 +225,13 @@ public class Vec2D {
         return angle;
     }
 
+    /**
+     * Uses insertion sort to sort a collection of vectors based on their x
+     * values.
+     * 
+     * @param a the array of vectors to sort.
+     * @return an array of vectors sorted by their x values.
+     */
     public static Vec2D[] sortByX(Vec2D[] a) {
 
         Vec2D t;
@@ -253,28 +271,55 @@ public class Vec2D {
         y *= k;
     }
 
+    /**
+     * Return a scaled copy of the vector v.
+     * 
+     * @param v the vector to scale.
+     * @param k the scale magnitude.
+     * @return v * k.
+     */
     public static Vec2D getScaled(Vec2D v, double k) {
         return new Vec2D(v.x * k, v.y * k);
     }
 
+    /**
+     * Negates this vector.
+     */
     public void negate() {
         x = (x != 0.0 || x != -0.0) ? (x * -1.0) : 0.0;
         y = (y != 0.0 || y != -0.0) ? (y * -1.0) : 0.0;
     }
 
+    /**
+     * @return a negated copy of this vector.
+     */
     public Vec2D getNegated() {
         return Vec2D.getNegated(this);
     }
 
+    /**
+     * @param v the vector to negate.
+     * @return a negated copy of the vector v.
+     */
     public static Vec2D getNegated(Vec2D v) {
         return new Vec2D((v.x != 0.0 || v.x != -0.0) ? v.x * -1.0 : 0.0,
                 (v.y != 0.0 || v.y != -0.0) ? v.y * -1.0 : 0.0);
     }
 
+    /**
+     * Draws a point where the vector should be.
+     * 
+     * @param g2d
+     */
     public void drawPoint(Graphics2D g2d) {
         g2d.fillOval((int) x - 1, (int) y - 1, 3, 3);
     }
 
+    /**
+     * Draw the full vector.
+     * 
+     * @param g2d
+     */
     public void drawVector(Graphics2D g2d) {
         g2d.drawLine(0, 0, (int) x, (int) y);
         g2d.drawString(String.format("[%.2f, %.2f]", x, y), (int) x - 20,
@@ -282,14 +327,27 @@ public class Vec2D {
         g2d.fillOval((int) x - 1, (int) y - 1, 2, 2);
     }
 
+    /**
+     * Draws a vector which has been translated from the origin by trans.
+     * 
+     * @param g2d
+     * @param trans the displacement vector from the origin.
+     */
     public void drawTranslatedVec(Graphics2D g2d, Vec2D trans) {
         g2d.drawLine((int) trans.x, (int) trans.y, (int) x, (int) y);
     }
 
+    /**
+     * @return a copy of this vector.
+     */
     public Vec2D getCopy() {
         return new Vec2D(x, y);
     }
 
+    /**
+     * @return a string representation of this vector which can be used to
+     *         reconstruct it.
+     */
     public String repr() {
         return String.format("new Vec2D(%.5f,%.5f)", x, y);
     }
