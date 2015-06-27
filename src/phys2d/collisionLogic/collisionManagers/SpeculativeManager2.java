@@ -20,7 +20,9 @@ import phys2d.entities.shapes.polygons.WorldBound;
 /**
  * This class manages all collisions and collision resolutions that take place
  * within the simulation. It uses the 2nd version of the GJK-EPA collision
- * checker and (hopefully) implements speculative contacts.
+ * checker and (hopefully) implements speculative contacts. <br>
+ * This new class was written because the old manager just got way too messy.
+ * The code should now look a lot cleaner and this should run a lot faster.
  * 
  * @author afsheen
  */
@@ -53,8 +55,13 @@ public class SpeculativeManager2 extends CollisionManager {
         ArrayList<Shape[]> collisionGroups = collisionTree
                 .getPossibleCollisions();
 
-        for (Shape[] group : collisionGroups) {
+        for (Shape[] group : collisionGroups) { // For each group
 
+            /*
+             * Perform a "brute force" check. This is now OK because the groups
+             * are very small. Also, make sure collision resolution is only run
+             * once per shape pair.
+             */
             for (int i = 0; i < group.length; i++) {
                 for (int j = i + 1; j < group.length; j++) {
                     if (!(group[i] instanceof WorldBound && group[j] instanceof WorldBound)
@@ -64,9 +71,7 @@ public class SpeculativeManager2 extends CollisionManager {
                     }
                 }
             }
-
         }
-
     }
 
     /**
@@ -79,19 +84,32 @@ public class SpeculativeManager2 extends CollisionManager {
                 .getCollisionResolution(s1, s2);
 
         if (gjkInfo.isColliding()) {
-            // TODO unstick shapes and compute forces
             unstickShapes(s1, s2, gjkInfo);
             computeForces(s1, s2, gjkInfo);
             return;
         }
         else { // No discrete collision
-               // TODO check if collision imminent
-
-            // If imminent, execute speculative contacts algo
-
+            if (isCollisionImminent(s1, s2, gjkInfo)) {
+                // If imminent, execute speculative contacts algo
+            }
             // otherwise, no one cares
         }
+    }
 
+    /**
+     * Checks to see if there will be a collision between these two shapes in
+     * the next frame.
+     * 
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     * @param gjkInfo the result of the GJKEPA run on the two shapes.
+     * @return true if there is a collision imminent next frame. False
+     *         otherwise.
+     */
+    private boolean isCollisionImminent(Shape s1, Shape s2,
+            SimplexDirStruct gjkInfo) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     /**
@@ -135,6 +153,14 @@ public class SpeculativeManager2 extends CollisionManager {
 
     }
 
+    /**
+     * Applies the corresponding forces to the two shapes because of their
+     * collision.
+     * 
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     * @param gjkInfo the result of running GJKEPA2 on the two shapes.
+     */
     private void computeForces(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
 
         Vec2D unitDisp = gjkInfo.getDir().getNormalized();
@@ -150,8 +176,11 @@ public class SpeculativeManager2 extends CollisionManager {
         double restitution = Math.min(s1.getMaterial().getRestitution(), s2
                 .getMaterial().getRestitution());
 
+        // This formula was made almost a year ago. I'm pretty sure it works.
         Vec2D force = Vec2D.getScaled(unitDisp, -(1 + restitution) * relNormSp
                 * (1.0 / dt));
+
+        force.scaleBy(1.0 / (s1.getInvMass() + s2.getInvMass()));
 
         s1.addForce(force);
         s2.addForce(force.getNegated());
