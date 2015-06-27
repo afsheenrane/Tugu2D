@@ -10,11 +10,11 @@ import phys2d.entities.shapes.Shape;
  * @author Afsheen
  *
  */
-public class CollisionPairs {
+public class CollisionPair {
 
-    private Shape s1, s2;
+    private final Shape s1, s2;
 
-    public CollisionPairs(Shape s1, Shape s2) {
+    public CollisionPair(Shape s1, Shape s2) {
         this.s1 = s1;
         this.s2 = s2;
     }
@@ -35,22 +35,31 @@ public class CollisionPairs {
             return true;
         if (obj == null)
             return false;
+
         if (getClass() != obj.getClass())
             return false;
-        CollisionPairs other = (CollisionPairs) obj;
-        if (s1 == null) {
-            if (other.s1 != null)
-                return false;
-        }
-        else if (!s1.equals(other.s1))
-            return false;
-        if (s2 == null) {
-            if (other.s2 != null)
-                return false;
-        }
-        else if (!s2.equals(other.s2))
-            return false;
-        return true;
+
+        CollisionPair other = (CollisionPair) obj;
+
+        if (this.hashCode() == other.hashCode())
+            return true;
+
+        /*
+         * if (s1 == null) {
+         * if (other.s1 != null)
+         * return false;
+         * }
+         * else if (!s1.equals(other.s1))
+         * return false;
+         * 
+         * if (s2 == null) {
+         * if (other.s2 != null)
+         * return false;
+         * }
+         * else if (!s2.equals(other.s2))
+         * return false;
+         */
+        return false;
     }
 
 }
