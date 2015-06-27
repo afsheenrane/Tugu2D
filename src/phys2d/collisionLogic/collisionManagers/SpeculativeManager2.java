@@ -81,7 +81,8 @@ public class SpeculativeManager2 extends CollisionManager {
         if (gjkInfo.isColliding()) {
             // TODO unstick shapes and compute forces
             unstickShapes(s1, s2, gjkInfo);
-            // computeForces(s1, s2, gjkInfo);
+            computeForces(s1, s2, gjkInfo);
+            return;
         }
         else { // No discrete collision
                // TODO check if collision imminent
@@ -93,10 +94,22 @@ public class SpeculativeManager2 extends CollisionManager {
 
     }
 
+    /**
+     * If a collision is detected, translate the shapes out of each other. <br>
+     * The translation is distributed between each shape depending on mass. This
+     * should be very small anyways because deep collisions will be prevented by
+     * the swept checker.
+     * 
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     * @param gjkInfo the result of the GJKEPA run on the two shapes.
+     */
     private void unstickShapes(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
+
         double totalMass = s1.getMass() + s2.getMass();
         double s1ratio, s2ratio;
 
+        // Logically distribute the translations.
         if (s1 instanceof WorldBound) {
             s1ratio = 0;
             s2ratio = 1;
@@ -118,7 +131,30 @@ public class SpeculativeManager2 extends CollisionManager {
         s1.translate(s1tran);
         s2.translate(s2tran);
 
-        System.out.println("Shapes unstuck! " + gjkInfo.getDir());
+        // System.out.println("Shapes unstuck! " + gjkInfo.getDir());
+
+    }
+
+    private void computeForces(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
+
+        Vec2D unitDisp = gjkInfo.getDir().getNormalized();
+        Vec2D relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
+
+        relVel.scaleBy(dt);
+
+        // This is the exact speed along collision axis (projection) because
+        // unitDisp is normalized.
+        double relNormSp = relVel.dotProduct(unitDisp);
+
+        // This restitution approximation will give pretty believable results.
+        double restitution = Math.min(s1.getMaterial().getRestitution(), s2
+                .getMaterial().getRestitution());
+
+        Vec2D force = Vec2D.getScaled(unitDisp, -(1 + restitution) * relNormSp
+                * (1.0 / dt));
+
+        s1.addForce(force);
+        s2.addForce(force.getNegated());
 
     }
 
