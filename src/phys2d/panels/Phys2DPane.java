@@ -36,7 +36,7 @@ public class Phys2DPane extends AnimatedPane {
     public void init() {
         // Add in the world boundaries
 
-        // addWorldBounds();
+        addWorldBounds();
         // populateWithSmallSquares(entities);
         // populateWithSmallCircles(entities);
 
@@ -46,13 +46,13 @@ public class Phys2DPane extends AnimatedPane {
          * Vec2D(75 * i++, 600), 25, 0); s.setMaterial(m); entities.add(s); }
          */
 
-        s = new Square(new Vec2D(550, 400), 100, 0);
-        // s.setVelocity(new Vec2D(300, -10));
-        // s.setMaterial(Material.REFLECTIUM);
+        s = new Square(new Vec2D(100, 400), 100, 0);
+        s.setVelocity(new Vec2D(100, 0));
+        s.setMaterial(Material.REFLECTIUM);
         entities.add(s);
 
-        s = new Square(new Vec2D(640, 400), 100, 0);
-        // s.setMaterial(Material.REFLECTIUM);
+        s = new Square(new Vec2D(700, 400), 100, 0);
+        s.setMaterial(Material.REFLECTIUM);
         // s.setVelocity(new Vec2D(300, 200));
         entities.add(s);
 
@@ -66,7 +66,9 @@ public class Phys2DPane extends AnimatedPane {
         // System.out.println(LinePolyTools.polyDifference(
         // (Polygon) entities.get(0), (Polygon) entities.get(1)));
         sm.runManager(entities);
-
+        // System.out.println(entities.get(4).getVelocity());
+        // System.out.println(entities.get(5).getVelocity());
+        // System.out.println();
     }
 
     @Override

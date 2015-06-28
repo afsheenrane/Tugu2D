@@ -85,17 +85,17 @@ public class SpeculativeManager2 extends CollisionManager {
                 .getCollisionResolution(s1, s2);
 
         if (gjkInfo.isColliding()) { // Discrete collision
-            System.out.println("disc");
+            // System.out.println("disc");
             unstickShapes(s1, s2, gjkInfo);
             computeForces(s1, s2, gjkInfo);
             s1.move(dt);
             s2.move(dt);
         }
         else { // No discrete collision
-            System.out.println("non disc");
+               // System.out.println("non disc");
             double collisionTime = impendingCollisionChecker(s1, s2, gjkInfo);
             if (collisionTime >= 0) { // Impending collision.
-
+                System.out.println("full swept");
                 // First compute the forces so that the shapes can continue
                 // expected movement in the next frame.
                 gjkInfo.getDir().negate(); // Expected by the force computer.
@@ -127,6 +127,9 @@ public class SpeculativeManager2 extends CollisionManager {
             }
             else {
                 // otherwise, no one cares. Just move them.
+                // TODO Things are getting moved multiple times per frame
+                // because different collisionGroups can contain the same shape.
+                // Fix this and we win.
                 s1.move(dt);
                 s2.move(dt);
             }
@@ -223,7 +226,7 @@ public class SpeculativeManager2 extends CollisionManager {
         s1.translate(s1tran);
         s2.translate(s2tran);
 
-        System.out.println("Shapes unstuck! " + gjkInfo.getDir());
+        // System.out.println("Shapes unstuck! " + gjkInfo.getDir());
 
     }
 
