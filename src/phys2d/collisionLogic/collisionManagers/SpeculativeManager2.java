@@ -20,7 +20,8 @@ import phys2d.entities.shapes.polygons.WorldBound;
 /**
  * This class manages all collisions and collision resolutions that take place
  * within the simulation. It uses the 2nd version of the GJK-EPA collision
- * checker and (hopefully) implements speculative contacts. <br>
+ * checker and (hopefully) implements some primitive form of swept collision
+ * detection. <br>
  * This new class was written because the old manager just got way too messy.
  * The code should now look a lot cleaner and this should run a lot faster.
  * 
@@ -83,33 +84,106 @@ public class SpeculativeManager2 extends CollisionManager {
         SimplexDirStruct gjkInfo = CollisionCheckerGJKEPA2
                 .getCollisionResolution(s1, s2);
 
-        if (gjkInfo.isColliding()) {
+        if (gjkInfo.isColliding()) { // Discrete collision
+            System.out.println("disc");
             unstickShapes(s1, s2, gjkInfo);
             computeForces(s1, s2, gjkInfo);
-            return;
+            s1.move(dt);
+            s2.move(dt);
         }
         else { // No discrete collision
-            if (isCollisionImminent(s1, s2, gjkInfo)) {
-                // If imminent, execute speculative contacts algo
+            System.out.println("non disc");
+            double collisionTime = impendingCollisionChecker(s1, s2, gjkInfo);
+            if (collisionTime >= 0) { // Impending collision.
+
+                // First compute the forces so that the shapes can continue
+                // expected movement in the next frame.
+                gjkInfo.getDir().negate(); // Expected by the force computer.
+                computeForces(s1, s2, gjkInfo);
+                gjkInfo.getDir().negate();
+
+                // First, move the shapes till they are just in contact.
+                Vec2D s1Disp, s2Disp;
+
+                s1Disp = s1.getVelocity().getScaled(dt);
+                s1Disp.scaleBy(collisionTime);
+
+                s2Disp = s2.getVelocity().getScaled(dt);
+                s2Disp.scaleBy(collisionTime);
+
+                s1.translate(s1Disp);
+                s2.translate(s2Disp);
+                // Now the shapes should be in contact.
+
+                // Percent of frame left to simulate.
+                collisionTime = 1.0 - collisionTime;
+
+                // Now move the shapes by the forces times the time left in the
+                // frame.
+
+                s1.incrementMove(dt, collisionTime);
+                s2.incrementMove(dt, collisionTime);
+
             }
-            // otherwise, no one cares
+            else {
+                // otherwise, no one cares. Just move them.
+                s1.move(dt);
+                s2.move(dt);
+            }
         }
     }
 
     /**
      * Checks to see if there will be a collision between these two shapes in
-     * the next frame.
+     * the next frame. If there is, return the exact time during the next frame
+     * that the collision should happen.
      * 
      * @param s1 the first shape.
      * @param s2 the second shape.
      * @param gjkInfo the result of the GJKEPA run on the two shapes.
-     * @return true if there is a collision imminent next frame. False
-     *         otherwise.
+     * @return a double between 0.0-1.0 representing when a collision will take
+     *         place next frame. If there is no collision next frame, return -1.
      */
-    private boolean isCollisionImminent(Shape s1, Shape s2,
+    private double impendingCollisionChecker(Shape s1, Shape s2,
             SimplexDirStruct gjkInfo) {
-        // TODO Auto-generated method stub
-        return false;
+
+        Vec2D unitDisp = gjkInfo.getDir().getNormalized();
+        Vec2D relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
+
+        relVel.scaleBy(dt);
+
+        // If the shapes are touching, move them back 1 frame to see their
+        // previous positions to deduce a collision normal.
+        if (unitDisp.equals(Vec2D.ORIGIN)) {
+            for (Vec2D v : gjkInfo.getSimplex()) {
+                v.sub(relVel);
+            }
+            computeMinimumDisplacement(gjkInfo);
+            unitDisp = gjkInfo.getDir().getNormalized();
+        }
+
+        // The speed along the collision normal
+        double relNormSpeed = relVel.dotProduct(unitDisp);
+        double seperatingDist = gjkInfo.getDir().getLength();
+
+        if (relNormSpeed >= seperatingDist) {
+            return seperatingDist / relNormSpeed;
+        }
+
+        return -1;
+    }
+
+    private void computeMinimumDisplacement(SimplexDirStruct gjkInfo) {
+        if (gjkInfo.getSimplex().size() == 1)
+            gjkInfo.setDir(gjkInfo.getSimplex().get(0));
+
+        else {
+            Vec2D AB = Vec2D.sub(gjkInfo.getSimplex().get(0), gjkInfo
+                    .getSimplex().get(1));
+            Vec2D AO = gjkInfo.getSimplex().get(1).getNegated();
+            gjkInfo.setDir(AO.vecProjection(AB));
+        }
+
     }
 
     /**
@@ -149,7 +223,7 @@ public class SpeculativeManager2 extends CollisionManager {
         s1.translate(s1tran);
         s2.translate(s2tran);
 
-        // System.out.println("Shapes unstuck! " + gjkInfo.getDir());
+        System.out.println("Shapes unstuck! " + gjkInfo.getDir());
 
     }
 
@@ -189,11 +263,11 @@ public class SpeculativeManager2 extends CollisionManager {
 
     @Override
     public void runManager(ArrayList<Shape> entities) {
-        // addWorldForces(entities);
+        // addWorldForces(entities); //TODO one day...
 
         manageCollisions(entities);
 
-        moveEntities(entities);
+        // moveEntities(entities);
 
     }
 
