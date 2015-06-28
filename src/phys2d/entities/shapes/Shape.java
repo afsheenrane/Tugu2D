@@ -110,6 +110,8 @@ public abstract class Shape extends PhysEntity {
 
     public abstract void move(double dt);
 
+    public abstract void incrementMove(double dt, double modifier);
+
     public abstract String repr();
 
     /**
@@ -142,6 +144,15 @@ public abstract class Shape extends PhysEntity {
      * @param delta physics delta time
      */
     public abstract void draw(Graphics2D g2d, double delta);
+
+    /**
+     * Set the netForce of this shape to netForce.
+     * 
+     * @param netForce the netForce to set.
+     */
+    public void setNetForce(Vec2D netForce) {
+        this.netForce = netForce;
+    }
 
     /**
      * @return the netForce
