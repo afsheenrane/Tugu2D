@@ -40,6 +40,26 @@ public final class SimplexDirStruct {
     }
 
     /**
+     * Be very careful when editing this parameters outside the collision
+     * checkers.
+     * 
+     * @param simplex the simplex to set
+     */
+    public void setSimplex(ArrayList<Vec2D> simplex) {
+        this.simplex = simplex;
+    }
+
+    /**
+     * Be very careful when editing this parameters outside the collision
+     * checkers.
+     * 
+     * @param dir the dir to set
+     */
+    public void setDir(Vec2D dir) {
+        this.dir = dir;
+    }
+
+    /**
      * @return the final simplex after a collision detection algorithm has been
      *         run.
      */
