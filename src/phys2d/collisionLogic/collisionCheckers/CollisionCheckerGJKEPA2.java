@@ -240,7 +240,7 @@ public final class CollisionCheckerGJKEPA2 {
      */
     public static SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
         SimplexDirStruct gjkInfo = computeSimplex(s1, s2);
-
+        int x = 0;
         if (gjkInfo.isColliding)
             computeCollisionResolutionEPA(s1, s2, gjkInfo);
         else
@@ -289,40 +289,44 @@ public final class CollisionCheckerGJKEPA2 {
         }
         // Next, start the march towards the origin till the tol is reached.
 
-        // Find closest point on line to the origin. Using same protocol as
-        // previous simplex where latest point is A.
-        Vec2D AB = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(1));
-        Vec2D AO = gjkInfo.simplex.get(1).getNegated();
-        Vec2D closestPt = AO.vecProjection(AB);
-        closestPt.add(gjkInfo.simplex.get(1));
+        while (true) {
+            // Find closest point on line to the origin. Using same protocol as
+            // previous simplex where latest point is A.
+            Vec2D AB = Vec2D
+                    .sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(1));
+            Vec2D AO = gjkInfo.simplex.get(1).getNegated();
+            Vec2D closestPt = AO.vecProjection(AB);
+            closestPt.add(gjkInfo.simplex.get(1));
 
-        if (closestPt.equals(Vec2D.ORIGIN)) {
-            gjkInfo.dir = Vec2D.ORIGIN;
-            return;
-        }
+            if (closestPt.equals(Vec2D.ORIGIN)) {
+                gjkInfo.dir = Vec2D.ORIGIN;
+                return;
+            }
 
-        Vec2D newPt;
-
-        // Find the direction of the origin from the closest point.
-        closestPt.negate();
-        gjkInfo.dir = closestPt;
-
-        newPt = support(s1, s2, gjkInfo.dir);
-
-        // Check if the new support is actually making progress towards the
-        // origin.
-        if (Vec2D.sub(newPt, gjkInfo.simplex.get(1)).dotProduct(gjkInfo.dir) <= TOL) {
+            // Find the direction of the origin from the closest point.
+            closestPt.negate();
             gjkInfo.dir = closestPt;
-            return;
-        }
 
-        // If progress was made, replace a bad point in the simplex with the new
-        // support.
-        if (gjkInfo.simplex.get(0).getSquaredLength() > gjkInfo.simplex.get(1)
-                .getSquaredLength())
-            gjkInfo.simplex.set(0, newPt);
-        else
-            gjkInfo.simplex.set(1, newPt);
+            Vec2D newPt;
+            newPt = support(s1, s2, gjkInfo.dir);
+
+            // Check if the new support is actually making progress towards the
+            // origin.
+            if (Vec2D.sub(newPt, gjkInfo.simplex.get(1))
+                    .dotProduct(gjkInfo.dir) <= TOL) { // If no progress
+                gjkInfo.dir = closestPt;
+                return;
+            }
+
+            // If progress was made, replace a bad point in the simplex with the
+            // new
+            // support.
+            if (gjkInfo.simplex.get(0).getSquaredLength() > gjkInfo.simplex
+                    .get(1).getSquaredLength())
+                gjkInfo.simplex.set(0, newPt);
+            else
+                gjkInfo.simplex.set(1, newPt);
+        }
     }
 
     /**

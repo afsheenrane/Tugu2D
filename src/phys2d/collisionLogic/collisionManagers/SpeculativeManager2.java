@@ -30,6 +30,7 @@ import phys2d.entities.shapes.polygons.WorldBound;
 public class SpeculativeManager2 extends CollisionManager {
 
     private final SweptBSPTree collisionTree;
+    private final HashSet<Shape> movedShapes;
 
     /**
      * Create a new manager which uses GJKv2 and speculative contacts.
@@ -41,6 +42,8 @@ public class SpeculativeManager2 extends CollisionManager {
         collisionTree = new SweptBSPTree(new Rectangle(new Vec2D(500, 500),
                 Phys2DMain.XRES + 50, Phys2DMain.YRES + 50),
                 BSPTree.HORIZONTAL_SPLIT, 1, dt);
+
+        movedShapes = new HashSet<Shape>();
     }
 
     @Override
@@ -48,6 +51,8 @@ public class SpeculativeManager2 extends CollisionManager {
         collisionTree.refresh();
         HashSet<CollisionPair> collidedPairs = new HashSet<CollisionPair>(
                 entities.size());
+
+        movedShapes.clear();
 
         for (Shape s : entities) {
             collisionTree.insert(s);
@@ -85,11 +90,9 @@ public class SpeculativeManager2 extends CollisionManager {
                 .getCollisionResolution(s1, s2);
 
         if (gjkInfo.isColliding()) { // Discrete collision
-            // System.out.println("disc");
+            System.out.println("disc");
             unstickShapes(s1, s2, gjkInfo);
             computeForces(s1, s2, gjkInfo);
-            s1.move(dt);
-            s2.move(dt);
         }
         else { // No discrete collision
                // System.out.println("non disc");
@@ -124,15 +127,10 @@ public class SpeculativeManager2 extends CollisionManager {
                 s1.incrementMove(dt, collisionTime);
                 s2.incrementMove(dt, collisionTime);
 
+                movedShapes.add(s1);
+                movedShapes.add(s2);
             }
-            else {
-                // otherwise, no one cares. Just move them.
-                // TODO Things are getting moved multiple times per frame
-                // because different collisionGroups can contain the same shape.
-                // Fix this and we win.
-                s1.move(dt);
-                s2.move(dt);
-            }
+            // otherwise, no one cares
         }
     }
 
@@ -266,12 +264,21 @@ public class SpeculativeManager2 extends CollisionManager {
 
     @Override
     public void runManager(ArrayList<Shape> entities) {
-        // addWorldForces(entities); //TODO one day...
+        // addWorldForces(entities); // TODO one day...
 
         manageCollisions(entities);
 
-        // moveEntities(entities);
+        moveEntities(entities);
 
+    }
+
+    @Override
+    protected void moveEntities(ArrayList<Shape> entities) {
+        for (Shape s : entities) {
+            if (movedShapes.add(s)) {
+                s.move(dt);
+            }
+        }
     }
 
 }
