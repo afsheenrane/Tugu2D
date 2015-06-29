@@ -38,6 +38,8 @@ public class Circle extends Shape {
      */
     public Circle(Vec2D[] pos, double radius, Material material) {
         super(pos, pos[0], 0, 10);
+        this.prevPos = new ArrayList<Vec2D>(2);
+        prevPos.add(pos[0]);
         this.material = material;
         double temp = Math.PI * (radius * radius);
         temp /= 10000.0; // unit conversion cm^2 -> m^2

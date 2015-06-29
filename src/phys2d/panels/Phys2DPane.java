@@ -36,7 +36,7 @@ public class Phys2DPane extends AnimatedPane {
     public void init() {
         // Add in the world boundaries
 
-        addWorldBounds();
+        // addWorldBounds();
         // populateWithSmallSquares(entities);
         // populateWithSmallCircles(entities);
 
@@ -49,11 +49,20 @@ public class Phys2DPane extends AnimatedPane {
         s = new Square(new Vec2D(100, 400), 100, 0);
         s.setVelocity(new Vec2D(100, 0));
         s.setMaterial(Material.REFLECTIUM);
-        entities.add(s);
+        // entities.add(s);
 
         s = new Square(new Vec2D(700, 400), 100, 0);
         s.setMaterial(Material.REFLECTIUM);
         // s.setVelocity(new Vec2D(300, 200));
+        // entities.add(s);
+
+        s = new Circle(new Vec2D(100, 400), 50);
+        s.setMaterial(Material.REFLECTIUM);
+        s.setVelocity(new Vec2D(300, 0));
+        entities.add(s);
+
+        s = new Circle(new Vec2D(700, 400), 50);
+        s.setMaterial(Material.REFLECTIUM);
         entities.add(s);
 
         // tester();
@@ -98,8 +107,8 @@ public class Phys2DPane extends AnimatedPane {
 
     private void populateWithSmallSquares(ArrayList<Shape> entities) {
         Shape s;
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 2; j++) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
 
                 Vec2D pos = MiscTools.genRandVecs(1, new Vec2D(20, 20),
                         new Vec2D(970, 970))[0];
@@ -108,7 +117,7 @@ public class Phys2DPane extends AnimatedPane {
                                // 2f), 5),new Vec2D(Math.PI * 2f,10))[0].getX();
 
                 s = new Square(pos, size, ang);
-                // s.setMaterial(Material.REFLECTIUM);
+                s.setMaterial(Material.REFLECTIUM);
                 s.setVelocity(MiscTools.genRandVecs(1, new Vec2D(-150, -150),
                         new Vec2D(150, 150))[0]);
                 // s.setMass(5);
@@ -129,7 +138,7 @@ public class Phys2DPane extends AnimatedPane {
                                 900 - radius))[0], radius);
                 s.setVelocity(MiscTools.genRandVecs(1, new Vec2D(-200, -200),
                         new Vec2D(200, 200))[0]);
-                s.setMaterial(Material.BUTTER);
+                s.setMaterial(Material.REFLECTIUM);
                 entities.add(s);
             }
         }
