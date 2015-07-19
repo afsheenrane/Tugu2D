@@ -31,6 +31,7 @@ public class SpeculativeManager2 extends CollisionManager {
 
     private final SweptBSPTree collisionTree;
     private final HashSet<Shape> movedShapes;
+    private final HashSet<Shape> forcedShapes;
 
     /**
      * Create a new manager which uses GJKv2 and speculative contacts.
@@ -44,6 +45,7 @@ public class SpeculativeManager2 extends CollisionManager {
                 BSPTree.HORIZONTAL_SPLIT, 1, dt);
 
         movedShapes = new HashSet<Shape>();
+        forcedShapes = new HashSet<Shape>();
     }
 
     @Override
@@ -53,6 +55,7 @@ public class SpeculativeManager2 extends CollisionManager {
                 entities.size());
 
         movedShapes.clear();
+        forcedShapes.clear();
 
         for (Shape s : entities) {
             collisionTree.insert(s);
@@ -92,7 +95,16 @@ public class SpeculativeManager2 extends CollisionManager {
 
         if (gjkInfo.isColliding()) { // Discrete collision
             System.out.println("disc");
-            gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1, s2);
+
+            gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1, s2); // TODO
+                                                                              // REMOVE
+
+            addWorldForcesTo(s1, 1.0);
+            addWorldForcesTo(s2, 1.0);
+
+            forcedShapes.add(s1);
+            forcedShapes.add(s2);
+
             unstickShapes(s1, s2, gjkInfo);
             computeForces(s1, s2, gjkInfo);
         }
@@ -101,6 +113,13 @@ public class SpeculativeManager2 extends CollisionManager {
             double collisionTime = impendingCollisionChecker(s1, s2, gjkInfo);
             if (collisionTime >= 0) { // Impending coll.
                 System.out.println("full swept");
+
+                addWorldForcesTo(s1, collisionTime);
+                addWorldForcesTo(s2, collisionTime);
+
+                gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1,
+                        s2); // TODO remove
+
                 // First compute the forces so that the shapes can continue
                 // expected movement in the next frame.
                 gjkInfo.getDir().negate(); // Expected by the force computer.
@@ -123,6 +142,12 @@ public class SpeculativeManager2 extends CollisionManager {
                 // Percent of frame left to simulate.
                 collisionTime = 1.0 - collisionTime;
 
+                addWorldForcesTo(s1, 1.0);
+                addWorldForcesTo(s2, 1.0);
+
+                forcedShapes.add(s1);
+                forcedShapes.add(s2);
+
                 // Now move the shapes by the forces times the time left in the
                 // frame.
 
@@ -132,7 +157,13 @@ public class SpeculativeManager2 extends CollisionManager {
                 movedShapes.add(s1);
                 movedShapes.add(s2);
             }
-            // otherwise, no one cares
+            else { // otherwise, just add all world forces
+                addWorldForcesTo(s1, 1.0);
+                addWorldForcesTo(s2, 1.0);
+                forcedShapes.add(s1);
+                forcedShapes.add(s2);
+            }
+
         }
     }
 
@@ -271,6 +302,8 @@ public class SpeculativeManager2 extends CollisionManager {
 
         manageCollisions(entities);
 
+        addWorldForces(entities);
+
         moveEntities(entities);
 
     }
@@ -282,6 +315,21 @@ public class SpeculativeManager2 extends CollisionManager {
                 s.move(dt);
             }
         }
+    }
+
+    @Override
+    protected void addWorldForces(ArrayList<Shape> entities) {
+        for (Shape s : entities) {
+            if (forcedShapes.add(s)) {
+                addWorldForcesTo(s, 1.0);
+            }
+        }
+    }
+
+    @Override
+    protected void addWorldForcesTo(Shape entity, double increment) {
+        if (!forcedShapes.contains(entity))
+            addForceOfGravity(entity, increment);
     }
 
 }

@@ -72,14 +72,20 @@ public abstract class CollisionManager {
     }
 
     protected void addForceOfGravity(Shape s) {
+        addForceOfGravity(s, 1.0);
+    }
+
+    protected void addForceOfGravity(Shape s, double increment) {
         final double g = 10.0;
         Vec2D weightForce = new Vec2D(0, g);
         weightForce.scaleBy(s.getMass());
+        weightForce.scaleBy(increment);
         s.addForce(weightForce);
     }
 
     /**
-     * Add all the external forces acting on the entities. Currently on gravity.
+     * Add all the external forces acting on the entities. Currently only
+     * gravity.
      * 
      * @param entities the entities inside the world.
      */
@@ -87,5 +93,16 @@ public abstract class CollisionManager {
         for (Shape s : entities) {
             addForceOfGravity(s);
         }
+    }
+
+    /**
+     * Add in a certain percent of the world forces. Used by the swept checker
+     * to advance the entity by subframes.
+     * 
+     * @param entity the entity to add all world forces to.
+     * @param increment the percent of world forces to add.
+     */
+    protected void addWorldForcesTo(Shape entity, double increment) {
+        addForceOfGravity(entity, increment);
     }
 }
