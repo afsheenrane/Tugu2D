@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
+import phys2d.collisionLogic.collisionCheckers.SimplexDirStruct;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager2;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
@@ -36,7 +37,7 @@ public class Phys2DPane extends AnimatedPane {
     public void init() {
         // Add in the world boundaries
 
-        // addWorldBounds();
+        addWorldBounds();
         // populateWithSmallSquares(entities);
         // populateWithSmallCircles(entities);
 
@@ -46,34 +47,39 @@ public class Phys2DPane extends AnimatedPane {
          * Vec2D(75 * i++, 600), 25, 0); s.setMaterial(m); entities.add(s); }
          */
 
-        s = new Square(new Vec2D(100, 400), 100, 0);
-        s.setVelocity(new Vec2D(100, 0));
+        s = new Square(new Vec2D(300, 402), 100, 0);
+        s.setVelocity(new Vec2D(300, 0));
         s.setMaterial(Material.REFLECTIUM);
-        // entities.add(s);
+        entities.add(s);
 
         s = new Square(new Vec2D(700, 400), 100, 0);
         s.setMaterial(Material.REFLECTIUM);
         // s.setVelocity(new Vec2D(300, 200));
-        // entities.add(s);
-
-        s = new Circle(new Vec2D(100, 400), 50);
-        s.setMaterial(Material.REFLECTIUM);
-        s.setVelocity(new Vec2D(300, 0));
         entities.add(s);
+
+        s = new Circle(new Vec2D(399, 400), 50);
+        s.setMaterial(Material.REFLECTIUM);
+        s.setVelocity(new Vec2D(300, 100));
+        // entities.add(s);
 
         s = new Circle(new Vec2D(700, 400), 50);
         s.setMaterial(Material.REFLECTIUM);
-        entities.add(s);
+        // entities.add(s);
 
         // tester();
+
+        // System.out.println(LinePolyTools.polyDifference(
+        // (Polygon) entities.get(0), (Polygon) entities.get(1)));
+        SimplexDirStruct g = CollisionCheckerGJKEPA2.getCollisionResolution(
+                entities.get(0), entities.get(1));
+
+        System.out.println(g);
 
         // System.exit(0);
     }
 
     @Override
     public void update() {
-        // System.out.println(LinePolyTools.polyDifference(
-        // (Polygon) entities.get(0), (Polygon) entities.get(1)));
         sm.runManager(entities);
         // System.out.println(entities.get(4).getVelocity());
         // System.out.println(entities.get(5).getVelocity());

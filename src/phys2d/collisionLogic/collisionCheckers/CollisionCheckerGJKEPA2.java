@@ -29,7 +29,9 @@ public final class CollisionCheckerGJKEPA2 {
 
         int count = 0;
 
-        gjkInfo.dir = Vec2D.sub(s2.getCOM(), s1.getCOM());
+        gjkInfo.dir = Vec2D.sub(s1.getCOM(), s2.getCOM()); // COM of s1 - s2.
+        gjkInfo.dir.negate(); // And point that towards the origin.
+
         gjkInfo.simplex.add(support(s1, s2, gjkInfo.dir));
 
         gjkInfo.dir = gjkInfo.simplex.get(0).getNegated();
@@ -76,8 +78,8 @@ public final class CollisionCheckerGJKEPA2 {
                 computeTriangleSimplex(gjkInfo);
                 break;
             default:
-                System.err.println("Simplex size error: "
-                        + gjkInfo.simplex.size());
+                System.err.println(
+                        "Simplex size error: " + gjkInfo.simplex.size());
 
                 System.exit(0);
                 break;
@@ -160,8 +162,9 @@ public final class CollisionCheckerGJKEPA2 {
 
         ABnorm = AB.getNormal().getNegated(); // Because we need the right norm.
 
+        double t = ABnorm.dotProduct(AO);
         // Somewhere past AB
-        if (ABnorm.dotProduct(AO) > 0) {
+        if (t > 0) {
 
             // Somewhere past A's voronoi region, inside AB's voro region
             if (AB.dotProduct(AO) > 0) {
@@ -180,10 +183,16 @@ public final class CollisionCheckerGJKEPA2 {
             }
 
         }
+        else if (tolEquals(t, 0)) {
+            gjkInfo.simplex.remove(2); // Remove C
+            gjkInfo.setDir(Vec2D.ORIGIN);
+            gjkInfo.isColliding = false;
+            return;
+        }
 
         AC = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(2));
         ACnorm = AC.getNormal();
-
+        t = ACnorm.dotProduct(AO);
         // Somewhere past AC
         if (ACnorm.dotProduct(AO) > 0) {
 
@@ -202,6 +211,12 @@ public final class CollisionCheckerGJKEPA2 {
                 gjkInfo.isColliding = false;
                 return;
             }
+        }
+        else if (tolEquals(t, 0)) {
+            gjkInfo.simplex.remove(1); // Remove B
+            gjkInfo.setDir(Vec2D.ORIGIN);
+            gjkInfo.isColliding = false;
+            return;
         }
 
         // Because the point was not found outside either of the edges of the
@@ -228,10 +243,8 @@ public final class CollisionCheckerGJKEPA2 {
      * the two shapes using GJK.<br>
      * <b>Colliding: </b>The returned vector is the displacement that needs to
      * be applied to s2 to completely unstick the shapes. <br>
-     * <b>Not colliding: </b> The returned vector represents the amount that s2
-     * needs to be displaced, to be in contact with s1. <br>
-     * That is, if (s2.vel - s1.vel).proj(disp) >= disp.mag --> collision
-     * imminent.
+     * <b>Not colliding: </b> The returned vector represents the amount that s1
+     * needs to be displaced, to be in contact with s2. <br>
      * 
      * @param s1 the first shape.
      * @param s2 the second shape.
@@ -266,7 +279,7 @@ public final class CollisionCheckerGJKEPA2 {
         final double TOL = 0.1;
 
         if (gjkInfo.simplex.size() == 1) {
-            gjkInfo.dir = gjkInfo.simplex.get(0);
+            gjkInfo.dir = gjkInfo.simplex.get(0).getNegated();
             return;
         }
 
@@ -292,8 +305,8 @@ public final class CollisionCheckerGJKEPA2 {
         while (true) {
             // Find closest point on line to the origin. Using same protocol as
             // previous simplex where latest point is A.
-            Vec2D AB = Vec2D
-                    .sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(1));
+            Vec2D AB = Vec2D.sub(gjkInfo.simplex.get(0),
+                    gjkInfo.simplex.get(1));
             Vec2D AO = gjkInfo.simplex.get(1).getNegated();
             Vec2D closestPt = AO.vecProjection(AB);
             closestPt.add(gjkInfo.simplex.get(1));
@@ -423,6 +436,19 @@ public final class CollisionCheckerGJKEPA2 {
      */
     public static boolean isColliding(Shape s1, Shape s2) {
         return computeSimplex(s1, s2).isColliding;
+    }
+
+    /**
+     * Checks whether two doubles are equal to each other given a specific
+     * tolerance. (0.001) in this case.
+     * 
+     * @param t1 the first double.
+     * @param t2 the second double.
+     * @return whether t1 almost equals t2.
+     */
+    private static boolean tolEquals(double t1, double t2) {
+        final double TOL = 0.001;
+        return Math.abs(t1 - t2) < TOL;
     }
 
 }

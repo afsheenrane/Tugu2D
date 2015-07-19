@@ -70,9 +70,10 @@ public class SpeculativeManager2 extends CollisionManager {
              */
             for (int i = 0; i < group.length; i++) {
                 for (int j = i + 1; j < group.length; j++) {
-                    if (!(group[i] instanceof WorldBound && group[j] instanceof WorldBound)
-                            && collidedPairs.add(new CollisionPair(group[i],
-                                    group[j]))) {
+                    if (!(group[i] instanceof WorldBound
+                            && group[j] instanceof WorldBound)
+                            && collidedPairs.add(
+                                    new CollisionPair(group[i], group[j]))) {
                         resolveCollision(group[i], group[j]);
                     }
                 }
@@ -91,13 +92,14 @@ public class SpeculativeManager2 extends CollisionManager {
 
         if (gjkInfo.isColliding()) { // Discrete collision
             System.out.println("disc");
+            gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1, s2);
             unstickShapes(s1, s2, gjkInfo);
             computeForces(s1, s2, gjkInfo);
         }
         else { // No discrete collision
                // System.out.println("non disc");
             double collisionTime = impendingCollisionChecker(s1, s2, gjkInfo);
-            if (collisionTime >= 0) { // Impending collision.
+            if (collisionTime >= 0) { // Impending coll.
                 System.out.println("full swept");
                 // First compute the forces so that the shapes can continue
                 // expected movement in the next frame.
@@ -179,9 +181,10 @@ public class SpeculativeManager2 extends CollisionManager {
             gjkInfo.setDir(gjkInfo.getSimplex().get(0));
 
         else {
-            Vec2D AB = Vec2D.sub(gjkInfo.getSimplex().get(0), gjkInfo
-                    .getSimplex().get(1));
+            Vec2D AB = Vec2D.sub(gjkInfo.getSimplex().get(0),
+                    gjkInfo.getSimplex().get(1));
             Vec2D AO = gjkInfo.getSimplex().get(1).getNegated();
+
             gjkInfo.setDir(AO.vecProjection(AB));
         }
 
@@ -248,12 +251,12 @@ public class SpeculativeManager2 extends CollisionManager {
         double relNormSp = relVel.dotProduct(unitDisp);
 
         // This restitution approximation will give pretty believable results.
-        double restitution = Math.min(s1.getMaterial().getRestitution(), s2
-                .getMaterial().getRestitution());
+        double restitution = Math.min(s1.getMaterial().getRestitution(),
+                s2.getMaterial().getRestitution());
 
         // This formula was made almost a year ago. I'm pretty sure it works.
-        Vec2D force = Vec2D.getScaled(unitDisp, -(1 + restitution) * relNormSp
-                * (1.0 / dt));
+        Vec2D force = Vec2D.getScaled(unitDisp,
+                -(1 + restitution) * relNormSp * (1.0 / dt));
 
         force.scaleBy(1.0 / (s1.getInvMass() + s2.getInvMass()));
 
