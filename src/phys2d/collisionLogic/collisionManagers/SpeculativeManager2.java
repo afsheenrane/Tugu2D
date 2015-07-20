@@ -95,6 +95,9 @@ public class SpeculativeManager2 extends CollisionManager {
 
         if (gjkInfo.isColliding()) { // Discrete collision
             System.out.println("disc");
+
+            gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1, s2);
+
             addWorldForcesTo(s1, 1.0);
             addWorldForcesTo(s2, 1.0);
 
@@ -228,8 +231,8 @@ public class SpeculativeManager2 extends CollisionManager {
             s2ratio = 1;
         }
         else if (s2 instanceof WorldBound) {
-            s1ratio = 0;
-            s2ratio = 1;
+            s1ratio = 1;
+            s2ratio = 0;
         }
         else {
             s1ratio = s1.getMass() / totalMass;
