@@ -81,6 +81,7 @@ public class Phys2DPane extends AnimatedPane {
     @Override
     public void update() {
         sm.runManager(entities);
+        System.out.println(entities.get(4).getCOM());
         // System.out.println(entities.get(4).getVelocity());
         // System.out.println(entities.get(5).getVelocity());
         // System.out.println();
@@ -101,15 +102,15 @@ public class Phys2DPane extends AnimatedPane {
      * Add in the world bounds of the space
      */
     private void addWorldBounds() {
-        /*
-         * entities.add(new WorldBound(new Vec2D(0, Phys2DMain.YRES / 2), 20,
-         * Phys2DMain.YRES + 40)); // left
-         * entities.add(new WorldBound(new Vec2D(Phys2DMain.XRES / 2, 0),
-         * Phys2DMain.XRES - 20, 20)); // top
-         * entities.add(new WorldBound(
-         * new Vec2D(Phys2DMain.XRES - 5, Phys2DMain.YRES / 2), 20,
-         * Phys2DMain.YRES + 40)); // right
-         */
+
+        entities.add(new WorldBound(new Vec2D(0, Phys2DMain.YRES / 2), 20,
+                Phys2DMain.YRES + 40)); // left
+        entities.add(new WorldBound(new Vec2D(Phys2DMain.XRES / 2, 0),
+                Phys2DMain.XRES - 20, 20)); // top
+        entities.add(new WorldBound(
+                new Vec2D(Phys2DMain.XRES - 5, Phys2DMain.YRES / 2), 20,
+                Phys2DMain.YRES + 40)); // right
+
         entities.add(new WorldBound(
                 new Vec2D(Phys2DMain.XRES / 2, Phys2DMain.YRES - 35),
                 Phys2DMain.XRES - 20, 20)); // bottom

@@ -95,10 +95,6 @@ public class SpeculativeManager2 extends CollisionManager {
 
         if (gjkInfo.isColliding()) { // Discrete collision
             System.out.println("disc");
-
-            gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1, s2); // TODO
-                                                                              // REMOVE
-
             addWorldForcesTo(s1, 1.0);
             addWorldForcesTo(s2, 1.0);
 
@@ -117,16 +113,6 @@ public class SpeculativeManager2 extends CollisionManager {
                 // Apply pre-collision world forces
                 addWorldForcesTo(s1, collisionTime);
                 addWorldForcesTo(s2, collisionTime);
-
-                gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1,
-                        s2); // TODO remove
-
-                // First compute the forces so that the shapes can continue
-                // expected movement in the next frame.
-
-                // gjkInfo.getDir().negate(); // Expected by the force computer.
-                // computeForces(s1, s2, gjkInfo);
-                // gjkInfo.getDir().negate();
 
                 // First, move the shapes till they are just in contact.
                 s1.incrementMove(dt, collisionTime);

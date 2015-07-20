@@ -252,8 +252,8 @@ public final class CollisionCheckerGJKEPA2 {
      *         vector otherwise.
      */
     public static SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
-        System.out.println(
-                LinePolyTools.polyDifference((Polygon) s1, (Polygon) s2));
+        // System.out.println(
+        // LinePolyTools.polyDifference((Polygon) s1, (Polygon) s2));
 
         SimplexDirStruct gjkInfo = computeSimplex(s1, s2);
         if (gjkInfo.isColliding)
