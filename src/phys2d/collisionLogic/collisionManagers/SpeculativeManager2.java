@@ -114,6 +114,7 @@ public class SpeculativeManager2 extends CollisionManager {
             if (collisionTime >= 0) { // Impending coll.
                 System.out.println("full swept");
 
+                // Apply pre-collision world forces
                 addWorldForcesTo(s1, collisionTime);
                 addWorldForcesTo(s2, collisionTime);
 
@@ -122,34 +123,33 @@ public class SpeculativeManager2 extends CollisionManager {
 
                 // First compute the forces so that the shapes can continue
                 // expected movement in the next frame.
-                gjkInfo.getDir().negate(); // Expected by the force computer.
-                computeForces(s1, s2, gjkInfo);
-                gjkInfo.getDir().negate();
+
+                // gjkInfo.getDir().negate(); // Expected by the force computer.
+                // computeForces(s1, s2, gjkInfo);
+                // gjkInfo.getDir().negate();
 
                 // First, move the shapes till they are just in contact.
-                Vec2D s1Disp, s2Disp;
+                s1.incrementMove(dt, collisionTime);
+                s2.incrementMove(dt, collisionTime);
 
-                s1Disp = s1.getVelocity().getScaled(dt);
-                s1Disp.scaleBy(collisionTime);
-
-                s2Disp = s2.getVelocity().getScaled(dt);
-                s2Disp.scaleBy(collisionTime);
-
-                s1.translate(s1Disp);
-                s2.translate(s2Disp);
                 // Now the shapes should be in contact.
 
                 // Percent of frame left to simulate.
                 collisionTime = 1.0 - collisionTime;
 
-                addWorldForcesTo(s1, 1.0);
-                addWorldForcesTo(s2, 1.0);
+                // Add post-collision world forces.
+                addWorldForcesTo(s1, collisionTime);
+                addWorldForcesTo(s2, collisionTime);
+
+                // Add collision forces
+                gjkInfo.getDir().negate(); // Expected by the force computer.
+                computeForces(s1, s2, gjkInfo);
+                gjkInfo.getDir().negate();
 
                 forcedShapes.add(s1);
                 forcedShapes.add(s2);
 
-                // Now move the shapes by the forces times the time left in the
-                // frame.
+                // Now move the shapes by the time left in the frame.
 
                 s1.incrementMove(dt, collisionTime);
                 s2.incrementMove(dt, collisionTime);
