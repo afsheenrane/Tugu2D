@@ -252,8 +252,6 @@ public final class CollisionCheckerGJKEPA2 {
      *         vector otherwise.
      */
     public static SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
-        System.out.println(LinePolyTools.polyDifference(s1, s2)); // TODO
-        // remove
 
         SimplexDirStruct gjkInfo = computeSimplex(s1, s2);
         if (gjkInfo.isColliding)
@@ -303,20 +301,30 @@ public final class CollisionCheckerGJKEPA2 {
             // Now we have a line simplex and are ready to march.
         }
         // Next, start the march towards the origin till the tol is reached.
-
+        // getCollisionResolution(s1, s2);
         while (true) {
-            // Find closest point on line //TODO segment to the origin. Using
-            // same protocol as
-            // previous simplex where latest point is A.
-            Vec2D closestPt = LinePolyTools
-                    .getClosestPtToOrigin(gjkInfo.simplex);
-            /*
-             * Vec2D AB = Vec2D.sub(gjkInfo.simplex.get(0),
-             * gjkInfo.simplex.get(1));
-             * Vec2D AO = gjkInfo.simplex.get(1).getNegated();
-             * Vec2D closestPt = AO.vecProjection(AB);
-             * closestPt.add(gjkInfo.simplex.get(1));
-             */
+
+            // Find closest point on line segment to the origin. Using
+            // same protocol as previous simplex where latest point is A.
+
+            Vec2D AB = Vec2D.sub(gjkInfo.simplex.get(0),
+                    gjkInfo.simplex.get(1));
+            Vec2D AO = gjkInfo.simplex.get(1).getNegated();
+            Vec2D closestPt = AO.vecProjection(AB);
+
+            closestPt.add(gjkInfo.simplex.get(1));
+
+            // Now check if closestPt was outside of line seg.
+            Vec2D ACl = Vec2D.sub(closestPt, gjkInfo.simplex.get(1));
+            double ABdotACl = AB.dotProduct(ACl);
+
+            if (ABdotACl <= 0) {
+                closestPt = gjkInfo.simplex.get(1).getCopy();
+            }
+            else if (ABdotACl >= AB.getSquaredLength()) {
+                closestPt = gjkInfo.simplex.get(0).getCopy();
+            }
+
             if (closestPt.equals(Vec2D.ORIGIN)) {
                 gjkInfo.dir = Vec2D.ORIGIN;
                 return;
