@@ -97,6 +97,7 @@ public class SpeculativeManager2 extends CollisionManager {
             System.out.println("disc");
 
             gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1, s2);
+            // TODO remove
 
             addWorldForcesTo(s1, 1.0);
             addWorldForcesTo(s2, 1.0);
@@ -112,6 +113,10 @@ public class SpeculativeManager2 extends CollisionManager {
             double collisionTime = impendingCollisionChecker(s1, s2, gjkInfo);
             if (collisionTime >= 0) { // Impending coll.
                 System.out.println("full swept");
+
+                // TODO remove below
+                gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1,
+                        s2);
 
                 // Apply pre-collision world forces
                 addWorldForcesTo(s1, collisionTime);

@@ -252,8 +252,7 @@ public final class CollisionCheckerGJKEPA2 {
      *         vector otherwise.
      */
     public static SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
-        // System.out.println(
-        // LinePolyTools.polyDifference((Polygon) s1, (Polygon) s2)); //TODO
+        System.out.println(LinePolyTools.polyDifference(s1, s2)); // TODO
         // remove
 
         SimplexDirStruct gjkInfo = computeSimplex(s1, s2);
@@ -306,14 +305,18 @@ public final class CollisionCheckerGJKEPA2 {
         // Next, start the march towards the origin till the tol is reached.
 
         while (true) {
-            // Find closest point on line to the origin. Using same protocol as
+            // Find closest point on line //TODO segment to the origin. Using
+            // same protocol as
             // previous simplex where latest point is A.
-            Vec2D AB = Vec2D.sub(gjkInfo.simplex.get(0),
-                    gjkInfo.simplex.get(1));
-            Vec2D AO = gjkInfo.simplex.get(1).getNegated();
-            Vec2D closestPt = AO.vecProjection(AB);
-            closestPt.add(gjkInfo.simplex.get(1));
-
+            Vec2D closestPt = LinePolyTools
+                    .getClosestPtToOrigin(gjkInfo.simplex);
+            /*
+             * Vec2D AB = Vec2D.sub(gjkInfo.simplex.get(0),
+             * gjkInfo.simplex.get(1));
+             * Vec2D AO = gjkInfo.simplex.get(1).getNegated();
+             * Vec2D closestPt = AO.vecProjection(AB);
+             * closestPt.add(gjkInfo.simplex.get(1));
+             */
             if (closestPt.equals(Vec2D.ORIGIN)) {
                 gjkInfo.dir = Vec2D.ORIGIN;
                 return;
@@ -335,8 +338,7 @@ public final class CollisionCheckerGJKEPA2 {
             }
 
             // If progress was made, replace a bad point in the simplex with the
-            // new
-            // support.
+            // new support.
             if (gjkInfo.simplex.get(0).getSquaredLength() > gjkInfo.simplex
                     .get(1).getSquaredLength())
                 gjkInfo.simplex.set(0, newPt);
