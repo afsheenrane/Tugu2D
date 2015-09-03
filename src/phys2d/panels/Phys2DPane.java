@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
-import phys2d.collisionLogic.collisionCheckers.SimplexDirStruct;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager2;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
@@ -49,32 +48,27 @@ public class Phys2DPane extends AnimatedPane {
 
         s = new Square(new Vec2D(300, 700), 100, 0);
         // s.setVelocity(new Vec2D(300, 0));
-        // s.setMaterial(Material.REFLECTIUM);
-        entities.add(s);
+        // s.setMaterial(Material.DIRT);
+        // entities.add(s);
 
-        s = new Square(new Vec2D(700, 400), 100, 0);
-        s.setMaterial(Material.REFLECTIUM);
+        s = new Square(new Vec2D(300, 150), 100, 0);
+        // s.setMaterial(Material.STEEL);
         // s.setVelocity(new Vec2D(300, 200));
         // entities.add(s);
 
-        s = new Circle(new Vec2D(399, 400), 50);
+        s = new Circle(new Vec2D(300, 700), 50);
         s.setMaterial(Material.REFLECTIUM);
-        s.setVelocity(new Vec2D(300, 100));
+        // s.setVelocity(new Vec2D(300, 100));
         // entities.add(s);
 
-        s = new Circle(new Vec2D(700, 400), 50);
+        s = new Circle(new Vec2D(700, 500), 50);
         s.setMaterial(Material.REFLECTIUM);
-        // entities.add(s);
+        entities.add(s);
 
         // tester();
 
-        // System.out.println(LinePolyTools.polyDifference(
-        // (Polygon) entities.get(0), (Polygon) entities.get(1)));
-        SimplexDirStruct g = CollisionCheckerGJKEPA2
-                .getCollisionResolution(entities.get(0), entities.get(1));
-
-        System.out.println(g);
-
+        // System.out.println(
+        // LinePolyTools.polyDifference(entities.get(0), entities.get(1)));
         // System.exit(0);
     }
 
@@ -130,7 +124,7 @@ public class Phys2DPane extends AnimatedPane {
                                // 2f), 5),new Vec2D(Math.PI * 2f,10))[0].getX();
 
                 s = new Square(pos, size, ang);
-                s.setMaterial(Material.REFLECTIUM);
+                // s.setMaterial(Material.REFLECTIUM);
                 s.setVelocity(MiscTools.genRandVecs(1, new Vec2D(-150, -150),
                         new Vec2D(150, 150))[0]);
                 // s.setMass(5);
