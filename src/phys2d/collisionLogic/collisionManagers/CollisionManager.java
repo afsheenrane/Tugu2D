@@ -76,10 +76,11 @@ public abstract class CollisionManager {
     }
 
     protected void addForceOfGravity(Shape s, double increment) {
-        final double g = 10.0;
+        final double g = 100.0; // m/s^2
         Vec2D weightForce = new Vec2D(0, g);
         weightForce.scaleBy(s.getMass());
         weightForce.scaleBy(increment);
+        weightForce.scaleBy(dt);
         s.addForce(weightForce);
     }
 

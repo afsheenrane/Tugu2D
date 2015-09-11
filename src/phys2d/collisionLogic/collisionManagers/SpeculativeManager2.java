@@ -96,9 +96,6 @@ public class SpeculativeManager2 extends CollisionManager {
         if (gjkInfo.isColliding()) { // Discrete collision
             System.out.println("disc");
 
-            gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1, s2);
-            // TODO remove
-
             addWorldForcesTo(s1, 1.0);
             addWorldForcesTo(s2, 1.0);
 
@@ -114,10 +111,6 @@ public class SpeculativeManager2 extends CollisionManager {
             if (collisionTime >= 0) { // Impending coll.
                 System.out.println("full swept");
 
-                // TODO remove below
-                gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1,
-                        s2);
-
                 // Apply pre-collision world forces
                 addWorldForcesTo(s1, collisionTime);
                 addWorldForcesTo(s2, collisionTime);
@@ -131,20 +124,19 @@ public class SpeculativeManager2 extends CollisionManager {
                 // Percent of frame left to simulate.
                 collisionTime = 1.0 - collisionTime;
 
-                // Add post-collision world forces.
-                addWorldForcesTo(s1, collisionTime);
-                addWorldForcesTo(s2, collisionTime);
-
                 // Add collision forces
                 gjkInfo.getDir().negate(); // Expected by the force computer.
                 computeForces(s1, s2, gjkInfo);
                 gjkInfo.getDir().negate();
 
+                // Add post-collision world forces.
+                addWorldForcesTo(s1, collisionTime);
+                addWorldForcesTo(s2, collisionTime);
+
                 forcedShapes.add(s1);
                 forcedShapes.add(s2);
 
                 // Now move the shapes by the time left in the frame.
-
                 s1.incrementMove(dt, collisionTime);
                 s2.incrementMove(dt, collisionTime);
 

@@ -15,26 +15,26 @@ public class Circle extends Shape {
     /**
      * Default the mass to 10
      * 
-     * @param pos
-     *            the center of the circle
-     * @param radius
-     *            the radius of the circle
+     * @param pos the center of the circle
+     * @param radius the radius of the circle
      */
     public Circle(Vec2D[] pos, double radius) {
         this(pos, radius, Material.RUBBER);
     }
 
+    /**
+     * 
+     * @param pos the center of the circle
+     * @param radius the radius of the circle
+     */
     public Circle(Vec2D pos, double radius) {
         this(new Vec2D[] { pos }, radius, Material.RUBBER);
     }
 
     /**
-     * @param pos
-     *            the position of the center of the circle
-     * @param radius
-     *            the radius of the circle
-     * @param mass
-     *            the mass of the circle
+     * @param pos the position of the center of the circle
+     * @param radius the radius of the circle
+     * @param mass the mass of the circle
      */
     public Circle(Vec2D[] pos, double radius, Material material) {
         super(pos, pos[0], 0, 10);
@@ -51,8 +51,7 @@ public class Circle extends Shape {
     /**
      * Move the circle with the velocity vel
      * 
-     * @param vel
-     *            (px/s) the velocity to move the circle with
+     * @param vel (px/s) the velocity to move the circle with
      */
     @Override
     public void move(double dt) {
@@ -185,7 +184,8 @@ public class Circle extends Shape {
                 (int) Math.round(((points[0].getX() - 1) * alpha)
                         + ((prevPos.get(0).getX() - 1) * (1.0 - alpha))),
                 (int) Math.round(((points[0].getY() - 1) * alpha)
-                        + ((prevPos.get(0).getY() - 1) * (1.0 - alpha))), 3, 3);
+                        + ((prevPos.get(0).getY() - 1) * (1.0 - alpha))),
+                3, 3);
 
         g2d.setColor(t);
     }
