@@ -37,14 +37,23 @@ public class Phys2DPane extends AnimatedPane {
         // Add in the world boundaries
 
         addWorldBounds();
-        // populateWithSmallSquares(entities);
+        populateWithSmallSquares(entities);
         // populateWithSmallCircles(entities);
 
         Shape s;
 
-        s = new Square(new Vec2D(550, 500), 40, 0);
+        s = new Square(new Vec2D(550, 915), 80, 0);
+        s.setMaterial(Material.REF30);
+        // entities.add(s);
+
+        s = new Square(new Vec2D(705, 915), 80, 0);
         s.setMaterial(Material.REF50);
-        entities.add(s);
+        // entities.add(s);
+
+        s = new Square(new Vec2D(300, 915), 80, 0);
+        s.setMaterial(Material.REF10);
+        s.setVelocity(new Vec2D(200, 0));
+        // entities.add(s);
 
         // tester();
 
@@ -62,8 +71,8 @@ public class Phys2DPane extends AnimatedPane {
             // System.out.println();
         }
         sm.runManager(entities);
-        System.out.println(++upCt + ": " + entities.get(1).getCOM() + " "
-                + entities.get(1).getVelocity());
+        // System.out.println(++upCt + ": " + entities.get(1).getCOM() + " "
+        // + entities.get(1).getVelocity());
         // System.out.println(entities.get(4).getVelocity());
         // System.out.println(entities.get(5).getVelocity());
         // System.out.println();
@@ -84,9 +93,6 @@ public class Phys2DPane extends AnimatedPane {
      * Add in the world bounds of the space
      */
     private void addWorldBounds() {
-
-        // entities.add(new WorldBound(new Vec2D(0, Phys2DMain.YRES / 2), 20,
-        // Phys2DMain.YRES + 40)); // left
 
         // Left
         entities.add(new WorldBound(new Vec2D(Phys2DMain.XRES * -1.5, -20),

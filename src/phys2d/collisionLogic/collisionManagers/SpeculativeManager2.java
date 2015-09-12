@@ -30,11 +30,20 @@ import phys2d.entities.shapes.polygons.WorldBound;
 public class SpeculativeManager2 extends CollisionManager {
 
     private final SweptBSPTree collisionTree;
+
+    /**
+     * Keeps track of all objects which have been moved for the current
+     * timestep.
+     */
     private final HashSet<Shape> movedShapes;
+
+    /**
+     * Keeps track of all objects which have had world forces applied to them.
+     */
     private final HashSet<Shape> forcedShapes;
 
     /**
-     * Create a new manager which uses GJKv2 and speculative contacts.
+     * Create a new manager which uses GJKv2 and swept detection.
      * 
      * @param dt the timestep of this simulation.
      */
@@ -94,6 +103,12 @@ public class SpeculativeManager2 extends CollisionManager {
                 .getCollisionResolution(s1, s2);
 
         if (gjkInfo.isColliding()) { // Discrete collision
+            /*
+             * Apply world forces
+             * unstick
+             * add collision forces
+             * move
+             */
             System.out.println("disc");
 
             addWorldForcesTo(s1, 1.0);
@@ -104,9 +119,21 @@ public class SpeculativeManager2 extends CollisionManager {
 
             unstickShapes(s1, s2, gjkInfo);
             computeForces(s1, s2, gjkInfo);
+
+            s1.move(dt);
+            s2.move(dt);
+
+            movedShapes.add(s1);
+            movedShapes.add(s2);
         }
-        else { // No discrete collision
-               // System.out.println("non disc");
+        else {
+            /*
+             * apply pre collision world forces
+             * move till in contact
+             * add collision forces
+             * add post collision world forces
+             * move for remainder of frame
+             */
             double collisionTime = impendingCollisionChecker(s1, s2, gjkInfo);
             if (collisionTime >= 0) { // Impending coll.
                 System.out.println("full swept");
