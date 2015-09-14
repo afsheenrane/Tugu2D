@@ -24,6 +24,8 @@ public final class CollisionCheckerGJKEPA2 {
      */
     private static SimplexDirStruct computeSimplex(Shape s1, Shape s2) {
 
+        System.out.println(LinePolyTools.polyDifference(s1, s2));
+
         Vec2D newPt;
         SimplexDirStruct gjkInfo = new SimplexDirStruct();
 
