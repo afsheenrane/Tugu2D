@@ -8,10 +8,10 @@ public enum Material {
     /**
      * COR: 0.828 <br>
      * DENSITY: 1.1 <br>
-     * &mu;<sub>S</sub>: 0.9 <br>
+     * &mu;<sub>S</sub>: 0.95 <br>
      * &mu;<sub>k</sub>: 0.8
      */
-    RUBBER(0.828, 1.1, 0.9, 0.8, Color.LIGHT_GRAY),
+    RUBBER(0.828, 1.1, 0.95, 0.8, Color.LIGHT_GRAY),
 
     /**
      * COR: 1 <br>
@@ -24,66 +24,66 @@ public enum Material {
     /**
      * COR: 0.597 <br>
      * DENSITY: 7.82 <br>
-     * &mu;<sub>S</sub>: 0.4 <br>
+     * &mu;<sub>S</sub>: 0.55 <br>
      * &mu;<sub>k</sub>: 0.3
      */
-    STEEL(0.597, 7.82, 0.4, 0.3, Color.GRAY),
+    STEEL(0.597, 7.82, 0.55, 0.3, Color.GRAY),
 
     /**
      * COR: 0.05 <br>
      * DENSITY: 0.87 <br>
-     * &mu;<sub>S</sub>: 0.2 <br>
-     * &mu;<sub>k</sub>: 0.1
+     * &mu;<sub>S</sub>: 0.3 <br>
+     * &mu;<sub>k</sub>: 0.15
      */
-    BUTTER(0.05, 0.87, 0.2, 0.15, Color.YELLOW),
+    BUTTER(0.05, 0.87, 0.3, 0.15, Color.YELLOW),
 
     /**
      * COR: 0.25 <br>
      * DENSITY: 2.1 <br>
-     * &mu;<sub>S</sub>: 0.75 <br>
+     * &mu;<sub>S</sub>: 0.85 <br>
      * &mu;<sub>k</sub>: 0.65
      */
-    DIRT(0.25, 2.1, 0.75, 0.65, new Color(95, 50, 0)),
+    DIRT(0.25, 2.1, 0.85, 0.65, new Color(95, 50, 0)),
 
     /**
      * COR: 0.18 <br>
      * DENSITY: 2.1 <br>
-     * &mu;<sub>S</sub>: 0.5 <br>
+     * &mu;<sub>S</sub>: 0.55 <br>
      * &mu;<sub>k</sub>: 0.45
      */
-    GRASS(0.18, 2.1, 0.5, 0.45, new Color(0, 128, 0)),
+    GRASS(0.18, 2.1, 0.55, 0.45, new Color(0, 128, 0)),
 
     /**
      * COR: 0.13 <br>
      * DENSITY: 1.1 <br>
-     * &mu;<sub>S</sub>: 0.7 <br>
+     * &mu;<sub>S</sub>: 0.75 <br>
      * &mu;<sub>k</sub>: 0.6
      */
-    FLESH(0.13, 1.1, 0.7, 0.6, new Color(245, 188, 189)),
+    FLESH(0.13, 1.1, 0.75, 0.6, new Color(245, 188, 189)),
 
     /**
      * COR: 0.6 <br>
      * DENSITY: 0.8 <br>
-     * &mu;<sub>S</sub>: 0.4 <br>
-     * &mu;<sub>k</sub>: 0.35
+     * &mu;<sub>S</sub>: 0.45 <br>
+     * &mu;<sub>k</sub>: 0.3
      */
-    WOOD(0.6, 0.8, 0.4, 0.35, new Color(165, 85, 0, 255)),
+    WOOD(0.6, 0.8, 0.45, 0.3, new Color(165, 85, 0, 255)),
 
     /**
      * COR: 0.66 <br>
      * DENSITY: 2.5 <br>
-     * &mu;<sub>S</sub>: 0.3 <br>
+     * &mu;<sub>S</sub>: 0.4 <br>
      * &mu;<sub>k</sub>: 0.2
      */
-    GLASS(0.66, 2.5, 0.3, 0.2, new Color(225, 225, 225, 20)),
+    GLASS(0.66, 2.5, 0.4, 0.2, new Color(225, 225, 225, 20)),
 
     /**
      * COR: 0 <br>
      * DENSITY: 100 <br>
-     * &mu;<sub>S</sub>: 1 <br>
-     * &mu;<sub>k</sub>: 1000
+     * &mu;<sub>S</sub>: 2 <br>
+     * &mu;<sub>k</sub>: 2
      */
-    INERTIUM(0, 100, 1, 1, new Color(0, 0, 0)),
+    INERTIUM(0, 100, 2, 2, new Color(0, 0, 0)),
 
     /**
      * COR: 0.1 <br>
