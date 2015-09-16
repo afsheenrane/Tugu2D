@@ -264,7 +264,9 @@ public class SpeculativeManager2 extends CollisionManager {
             System.out.println("ff: " + fricMag);
         }
 
-        // frictionForce.scaleBy(dt);
+        // TODO implement a "kill all velocity" method for use when static
+        // friction is active and an object is moving very slowly. This should
+        // stop objects creeping.
 
         s1.addForce(frictionForce.getNegated());
         s2.addForce(frictionForce);

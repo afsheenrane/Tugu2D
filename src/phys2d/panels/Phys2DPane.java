@@ -37,7 +37,7 @@ public class Phys2DPane extends AnimatedPane {
         // Add in the world boundaries
 
         addWorldBounds("a");
-        populateWithSmallSquares(entities);
+        // populateWithSmallSquares(entities);
         // populateWithSmallCircles(entities);
 
         Shape s;
@@ -47,13 +47,13 @@ public class Phys2DPane extends AnimatedPane {
         // entities.add(s);
 
         s = new Square(new Vec2D(705, 915), 80, 0);
-        s.setMaterial(Material.REF60);
-        // entities.add(s);
+        s.setMaterial(Material.RUBBER);
+        entities.add(s);
 
         s = new Square(new Vec2D(150, 915), 80, 0);
-        s.setMaterial(Material.INERTIUM);
-        s.setVelocity(new Vec2D(100, 0));
-        // entities.add(s);
+        s.setMaterial(Material.REF90);
+        s.setVelocity(new Vec2D(800, 0));
+        entities.add(s);
 
         // tester();
 
