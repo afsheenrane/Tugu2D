@@ -12,6 +12,7 @@ import phys2d.collisionLogic.collisionCheckers.SimplexDirStruct;
 import phys2d.collisionLogic.spacePartitioning.BSPTree;
 import phys2d.collisionLogic.spacePartitioning.SweptBSPTree;
 import phys2d.collisionLogic.tools.CollisionPair;
+import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
 import phys2d.entities.shapes.polygons.Rectangle;
@@ -43,6 +44,17 @@ public class SpeculativeManager2 extends CollisionManager {
     private final HashSet<Shape> forcedShapes;
 
     /**
+     * Keeps track of all pairs of shapes on which collision resolution has been
+     * computed.
+     */
+    private final HashSet<CollisionPair> collidedPairs;
+
+    /**
+     * A list of all shape groups which could collide in the current frame.
+     */
+    private ArrayList<Shape[]> collisionGroups;
+
+    /**
      * Create a new manager which uses GJKv2 and swept detection.
      * 
      * @param dt the timestep of this simulation.
@@ -53,16 +65,18 @@ public class SpeculativeManager2 extends CollisionManager {
                 Phys2DMain.XRES + 50, Phys2DMain.YRES + 50),
                 BSPTree.HORIZONTAL_SPLIT, 1, dt);
 
+        collidedPairs = new HashSet<CollisionPair>();
+
         movedShapes = new HashSet<Shape>();
         forcedShapes = new HashSet<Shape>();
+
     }
 
     @Override
     protected void manageCollisions(ArrayList<Shape> entities) {
         collisionTree.refresh();
-        HashSet<CollisionPair> collidedPairs = new HashSet<CollisionPair>(
-                entities.size());
 
+        collidedPairs.clear();
         movedShapes.clear();
         forcedShapes.clear();
 
@@ -70,8 +84,7 @@ public class SpeculativeManager2 extends CollisionManager {
             collisionTree.insert(s);
         }
 
-        ArrayList<Shape[]> collisionGroups = collisionTree
-                .getPossibleCollisions();
+        collisionGroups = collisionTree.getPossibleCollisions();
 
         for (Shape[] group : collisionGroups) { // For each group
 
@@ -109,7 +122,7 @@ public class SpeculativeManager2 extends CollisionManager {
              * add collision forces
              * move
              */
-            System.out.println("disc");
+            // System.out.println("disc");
 
             addWorldForcesTo(s1, 1.0);
             addWorldForcesTo(s2, 1.0);
@@ -118,7 +131,7 @@ public class SpeculativeManager2 extends CollisionManager {
             forcedShapes.add(s2);
 
             unstickShapes(s1, s2, gjkInfo);
-            computeForces(s1, s2, gjkInfo);
+            computeCollisionForces(s1, s2, gjkInfo);
 
             s1.move(dt);
             s2.move(dt);
@@ -136,7 +149,7 @@ public class SpeculativeManager2 extends CollisionManager {
              */
             double collisionTime = impendingCollisionChecker(s1, s2, gjkInfo);
             if (collisionTime >= 0) { // Impending coll.
-                System.out.println("full swept");
+                // System.out.println("full swept");
 
                 // Apply pre-collision world forces
                 addWorldForcesTo(s1, collisionTime);
@@ -153,7 +166,7 @@ public class SpeculativeManager2 extends CollisionManager {
 
                 // Add collision forces
                 gjkInfo.getDir().negate(); // Expected by the force computer.
-                computeForces(s1, s2, gjkInfo);
+                computeCollisionForces(s1, s2, gjkInfo);
                 gjkInfo.getDir().negate();
 
                 // Add post-collision world forces.
@@ -178,6 +191,84 @@ public class SpeculativeManager2 extends CollisionManager {
             }
 
         }
+    }
+
+    /**
+     * Applies the corresponding forces to the two shapes because of their
+     * collision.
+     * 
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     * @param gjkInfo the result of running GJKEPA2 on the two shapes.
+     */
+    private void computeCollisionForces(Shape s1, Shape s2,
+            SimplexDirStruct gjkInfo) {
+
+        Vec2D unitDisp = gjkInfo.getDir().getNormalized();
+        Vec2D relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
+
+        relVel.scaleBy(dt);
+
+        // This is the exact speed along collision axis (projection) because
+        // unitDisp is normalized.
+        double relNormSp = relVel.dotProduct(unitDisp);
+
+        // This restitution approximation will give pretty believable results.
+        double restitution = Math.min(s1.getMaterial().getRestitution(),
+                s2.getMaterial().getRestitution());
+
+        // This formula was made almost a year ago. I'm pretty sure it works.
+        Vec2D collForce = Vec2D.getScaled(unitDisp,
+                -(1 + restitution) * relNormSp * (1.0 / dt));
+
+        collForce.scaleBy(1.0 / (s1.getInvMass() + s2.getInvMass()));
+
+        s1.addForce(collForce);
+        s2.addForce(collForce.getNegated());
+
+        s1.incrementMove(dt, 0);
+        s2.incrementMove(dt, 0);
+
+        // calculate friction forces
+        relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
+        relVel.scaleBy(dt);
+        Vec2D tanVec = Vec2D.sub(relVel, relVel.vecProjection(unitDisp));
+        if (!tanVec.equals(Vec2D.ORIGIN))
+            tanVec.normalize();
+
+        double fricMag = -Vec2D.dotProduct(relVel, tanVec);
+
+        fricMag /= s1.getInvMass() + s2.getInvMass();
+
+        // Approximate mu using pythagorean theorem
+        double mu = Math.sqrt(Math.pow(s1.getMaterial().getStaticFric(), 2)
+                + Math.pow(s2.getMaterial().getStaticFric(), 2));
+
+        Vec2D frictionForce = Vec2D.ORIGIN;
+
+        if (Math.abs(fricMag) < collForce.getLength() * mu) {
+            if (!MiscTools.tolEquals(-fricMag, 0))
+                frictionForce = tanVec.getScaled(-fricMag);
+
+            System.out.println("stat");
+            System.out.println("ff: " + fricMag);
+        }
+        else {
+            mu = Math.sqrt(Math.pow(s1.getMaterial().getDynFric(), 2)
+                    + Math.pow(s2.getMaterial().getDynFric(), 2));
+
+            System.out.println("dym");
+            if (!MiscTools.tolEquals(-fricMag * mu, 0))
+                frictionForce = tanVec.getScaled(-fricMag * mu);
+
+            System.out.println("ff: " + fricMag);
+        }
+
+        // frictionForce.scaleBy(dt);
+
+        s1.addForce(frictionForce.getNegated());
+        s2.addForce(frictionForce);
+
     }
 
     /**
@@ -275,43 +366,8 @@ public class SpeculativeManager2 extends CollisionManager {
 
     }
 
-    /**
-     * Applies the corresponding forces to the two shapes because of their
-     * collision.
-     * 
-     * @param s1 the first shape.
-     * @param s2 the second shape.
-     * @param gjkInfo the result of running GJKEPA2 on the two shapes.
-     */
-    private void computeForces(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
-
-        Vec2D unitDisp = gjkInfo.getDir().getNormalized();
-        Vec2D relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
-
-        relVel.scaleBy(dt);
-
-        // This is the exact speed along collision axis (projection) because
-        // unitDisp is normalized.
-        double relNormSp = relVel.dotProduct(unitDisp);
-
-        // This restitution approximation will give pretty believable results.
-        double restitution = Math.min(s1.getMaterial().getRestitution(),
-                s2.getMaterial().getRestitution());
-
-        // This formula was made almost a year ago. I'm pretty sure it works.
-        Vec2D force = Vec2D.getScaled(unitDisp,
-                -(1 + restitution) * relNormSp * (1.0 / dt));
-
-        force.scaleBy(1.0 / (s1.getInvMass() + s2.getInvMass()));
-
-        s1.addForce(force);
-        s2.addForce(force.getNegated());
-
-    }
-
     @Override
     public void runManager(ArrayList<Shape> entities) {
-        // addWorldForces(entities); // TODO one day...
 
         manageCollisions(entities);
 
