@@ -1,6 +1,7 @@
 package phys2d.collisionLogic.collisionCheckers;
 
 import phys2d.collisionLogic.tools.LinePolyTools;
+import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
 import phys2d.entities.shapes.polygons.Polygon;
@@ -24,7 +25,7 @@ public final class CollisionCheckerGJKEPA2 {
      */
     private static SimplexDirStruct computeSimplex(Shape s1, Shape s2) {
 
-        System.out.println(LinePolyTools.polyDifference(s1, s2));
+        // System.out.println(LinePolyTools.polyDifference(s1, s2));
 
         Vec2D newPt;
         SimplexDirStruct gjkInfo = new SimplexDirStruct();
@@ -185,7 +186,7 @@ public final class CollisionCheckerGJKEPA2 {
             }
 
         }
-        else if (tolEquals(t, 0)) {
+        else if (MiscTools.tolEquals(t, 0)) {
             gjkInfo.simplex.remove(2); // Remove C
             gjkInfo.setDir(Vec2D.ORIGIN);
             gjkInfo.isColliding = false;
@@ -214,7 +215,7 @@ public final class CollisionCheckerGJKEPA2 {
                 return;
             }
         }
-        else if (tolEquals(t, 0)) {
+        else if (MiscTools.tolEquals(t, 0)) {
             gjkInfo.simplex.remove(1); // Remove B
             gjkInfo.setDir(Vec2D.ORIGIN);
             gjkInfo.isColliding = false;
@@ -451,19 +452,6 @@ public final class CollisionCheckerGJKEPA2 {
      */
     public static boolean isColliding(Shape s1, Shape s2) {
         return computeSimplex(s1, s2).isColliding;
-    }
-
-    /**
-     * Checks whether two doubles are equal to each other given a specific
-     * tolerance. (0.001) in this case.
-     * 
-     * @param t1 the first double.
-     * @param t2 the second double.
-     * @return whether t1 almost equals t2.
-     */
-    private static boolean tolEquals(double t1, double t2) {
-        final double TOL = 0.001;
-        return Math.abs(t1 - t2) < TOL;
     }
 
 }
