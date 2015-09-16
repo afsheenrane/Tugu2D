@@ -81,7 +81,7 @@ public enum Material {
      * COR: 0 <br>
      * DENSITY: 100 <br>
      * &mu;<sub>S</sub>: 1 <br>
-     * &mu;<sub>k</sub>: 1
+     * &mu;<sub>k</sub>: 1000
      */
     INERTIUM(0, 100, 1, 1, new Color(0, 0, 0)),
 
