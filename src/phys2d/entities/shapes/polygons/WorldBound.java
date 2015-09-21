@@ -1,33 +1,37 @@
 package phys2d.entities.shapes.polygons;
 
-import phys2d.entities.Material;
 import phys2d.entities.Vec2D;
 
-public final class WorldBound extends Rectangle {
+public final class WorldBound extends Polygon {
 
     /**
-     * Initialize an immovable world boundary.
+     * Initializes a world bound in the shape of a generic polygon.
      * 
-     * @param center the center of the shape.
-     * @param length the x extent of the shape.
-     * @param height the y extent of the shape.
-     * @param angle the current rotation of the shape.
+     * @param points the vertices of the world bound.
      */
-    public WorldBound(Vec2D center, double length, double height,
-            double angle) {
-        super(center, length, height, angle, Material.REFLECTIUM);
+    public WorldBound(Vec2D[] points) {
+        super(points);
         setMass(0);
     }
 
     /**
-     * Initialize an immovable world boundary.
+     * Initialize an immovable rectangular world boundary.
      * 
      * @param center the center of the shape.
      * @param length the x extent of the shape.
      * @param height the y extent of the shape.
      */
     public WorldBound(Vec2D center, double length, double height) {
-        this(center, length, height, 0);
+        this(new Vec2D[] {
+                new Vec2D(center.getX() - (length / 2), center.getY()
+                        - (height / 2)),
+                new Vec2D(center.getX() + (length / 2), center.getY()
+                        - (height / 2)),
+                new Vec2D(center.getX() + (length / 2), center.getY()
+                        + (height / 2)),
+                new Vec2D(center.getX() - (length / 2), center.getY()
+                        + (height / 2)) });
+        setMass(0);
     }
 
     /**
@@ -38,8 +42,8 @@ public final class WorldBound extends Rectangle {
      */
     public WorldBound(Vec2D min, Vec2D max) {
         this(new Vec2D((min.getX() + max.getX()) / 2,
-                (min.getY() + max.getY()) / 2), max.getX() - min.getX(),
-                max.getY() - min.getY());
+                (min.getY() + max.getY()) / 2), max.getX() - min.getX(), max
+                .getY() - min.getY());
     }
 
     @Override
