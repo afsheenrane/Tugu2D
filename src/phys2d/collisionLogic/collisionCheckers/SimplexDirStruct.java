@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import phys2d.entities.Vec2D;
 
 /**
- * This class holds all the vital information used by th GJK algorithm while it
- * computes whether a collision has taken place.
+ * This class holds all the vital information used by any collision detection
+ * algorithm which computes a CSO simplex, while it computes whether a collision
+ * has taken place.
  * 
  * @author Afsheen
  *
@@ -14,7 +15,7 @@ import phys2d.entities.Vec2D;
 public final class SimplexDirStruct {
 
     /**
-     * The simplex for the gjk algorithm.
+     * The simplex for the gjk/mpr algorithm.
      */
     protected ArrayList<Vec2D> simplex;
 
@@ -26,37 +27,17 @@ public final class SimplexDirStruct {
     protected boolean isColliding;
 
     /**
-     * Initialize a new GJKStruct with an empty simplex of size 3 and a search
-     * direction = [0,0].
+     * Initialize a new SimplexDirStruct with an empty simplex of size 3 and a
+     * search direction = [0,0].
      */
     protected SimplexDirStruct() {
         this(3);
     }
 
     protected SimplexDirStruct(int size) {
-        this.simplex = new ArrayList<Vec2D>(3);
+        this.simplex = new ArrayList<Vec2D>(size);
         this.dir = new Vec2D();
         this.isColliding = false;
-    }
-
-    /**
-     * Be very careful when editing this parameters outside the collision
-     * checkers.
-     * 
-     * @param simplex the simplex to set
-     */
-    public void setSimplex(ArrayList<Vec2D> simplex) {
-        this.simplex = simplex;
-    }
-
-    /**
-     * Be very careful when editing this parameters outside the collision
-     * checkers.
-     * 
-     * @param dir the dir to set
-     */
-    public void setDir(Vec2D dir) {
-        this.dir = dir;
     }
 
     /**
@@ -77,6 +58,16 @@ public final class SimplexDirStruct {
      */
     public Vec2D getDir() {
         return dir;
+    }
+
+    /**
+     * Sets the last search direction for this structure.
+     * This is only to be used outside a collision detection algorithm. Careful.
+     * 
+     * @param dir the dir to set.
+     */
+    public void setDir(Vec2D dir) {
+        this.dir = dir;
     }
 
     /**
