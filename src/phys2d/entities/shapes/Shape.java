@@ -20,13 +20,16 @@ public abstract class Shape extends PhysEntity {
     protected Vec2D netForce;
     protected Vec2D lastAccel;
 
-    public Shape(Vec2D[] points, Vec2D centerOfMass, double angle, double mass) {
+    protected double momentOfInertia;
+
+    public Shape(Vec2D[] points, Vec2D centerOfMass, double angle,
+            double mass) {
         super(mass);
         this.points = points;
         this.centerOfMass = centerOfMass;
         this.angle = angle;
         this.netForce = new Vec2D(0, 0);
-
+        calculateMomentOfInertia();
     }
 
     public void setAngle(double angle) {
@@ -105,6 +108,8 @@ public abstract class Shape extends PhysEntity {
     public abstract Vec2D getMin(Vec2D ref);
 
     public abstract Vec2D getMax(Vec2D ref);
+
+    protected abstract void calculateMomentOfInertia();
 
     public abstract void translate(Vec2D translation);
 

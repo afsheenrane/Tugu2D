@@ -489,4 +489,42 @@ public final class LinePolyTools {
         return circSumDif(c1, c2, -1);
     }
 
+    /**
+     * Assuming uniform density, calculate the centroid of the polygon defined
+     * by 'points'.
+     * 
+     * @param points the vertices of the polygon.
+     * @return the centroid of the polygon formed by 'points'.
+     */
+    public static Vec2D getCentroid(Vec2D[] points) {
+        double xSum = 0.0;
+        double ySum = 0.0;
+        double areaSum = 0.0;
+
+        double area = 0.0;
+
+        Vec2D p1, p2;
+
+        for (int i = 0; i < points.length; i++) {
+
+            p1 = points[i];
+            p2 = (i + 1 == points.length) ? points[0] : points[i + 1];
+
+            areaSum = ((p1.getX() * p2.getY()) - (p2.getX() * p1.getY()));
+
+            xSum += (p1.getX() + p2.getX()) * areaSum;
+            ySum += (p1.getY() + p2.getY()) * areaSum;
+
+            area += areaSum;
+        }
+
+        area *= 0.5;
+
+        area /= 10000.0; // convert from px^2 (cm^2) to m^2
+
+        area = Math.abs(area);
+
+        return new Vec2D(xSum / (6.0 * area), ySum / (6.0 * area));
+
+    }
 }

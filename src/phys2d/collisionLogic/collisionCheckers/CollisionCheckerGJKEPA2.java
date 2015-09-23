@@ -188,7 +188,7 @@ public final class CollisionCheckerGJKEPA2 {
         }
         else if (MiscTools.tolEquals(t, 0)) {
             gjkInfo.simplex.remove(2); // Remove C
-            gjkInfo.setDir(Vec2D.ORIGIN);
+            gjkInfo.dir = Vec2D.ORIGIN;
             gjkInfo.isColliding = false;
             return;
         }
@@ -217,7 +217,7 @@ public final class CollisionCheckerGJKEPA2 {
         }
         else if (MiscTools.tolEquals(t, 0)) {
             gjkInfo.simplex.remove(1); // Remove B
-            gjkInfo.setDir(Vec2D.ORIGIN);
+            gjkInfo.dir = Vec2D.ORIGIN;
             gjkInfo.isColliding = false;
             return;
         }
