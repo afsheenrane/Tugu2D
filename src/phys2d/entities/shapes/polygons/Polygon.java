@@ -147,10 +147,10 @@ public class Polygon extends Shape {
             double pureY = purePoly[i].getY();
 
             // rotate the point
-            points[i].setX((pureX * Math.cos(angle))
-                    - (pureY * Math.sin(angle)));
-            points[i].setY((pureX * Math.sin(angle))
-                    + (pureY * Math.cos(angle)));
+            points[i].setX(
+                    (pureX * Math.cos(angle)) - (pureY * Math.sin(angle)));
+            points[i].setY(
+                    (pureX * Math.sin(angle)) + (pureY * Math.cos(angle)));
 
             // Translate the point so that it is centered around center of mass
             points[i].add(centerOfMass);
@@ -199,8 +199,8 @@ public class Polygon extends Shape {
     public Vec2D[] getNormals() {
         Vec2D[] normals = new Vec2D[points.length];
 
-        normals[normals.length - 1] = Vec2D.sub(points[0],
-                points[points.length - 1]).getNormal();
+        normals[normals.length - 1] = Vec2D
+                .sub(points[0], points[points.length - 1]).getNormal();
         for (int i = 0; i < points.length - 1; i++) {
             normals[i] = Vec2D.sub(points[i + 1], points[i]).getNormal();
         }
@@ -301,6 +301,59 @@ public class Polygon extends Shape {
         area = Math.abs(area);
 
         centerOfMass = new Vec2D(xSum / (6.0 * area), ySum / (6.0 * area));
+    }
+
+    @Override
+    protected void calculateMomentOfInertia() {
+        // TODO Auto-generated method stub
+
+        // The centroids of the sub-triangles
+        Vec2D[] centroids = new Vec2D[points.length];
+
+        double[] trigI = new double[centroids.length];
+
+        double breadth, height, a;
+
+        Vec2D AB, AC;
+        // Find centroids of each sub triangle
+        Vec2D A, B, C;
+
+        for (int i = 0; i < points.length - 1; i++) {
+            A = points[i];
+            B = points[i + 1];
+            C = centerOfMass;
+
+            // @formatter:off
+            /*
+             * Triangle:
+             * ....C....
+             * .../|\...
+             * ../.h.\..
+             * .B__|__A.
+             * 
+             * ....|-a-|
+             * |---br--|
+             */
+            // @formatter:on
+
+            AB = Vec2D.sub(B, A); // AB
+            breadth = AB.getLength();
+
+            // height = |AC proj AB.norm|
+            AC = Vec2D.sub(C, A);
+            height = AC.vecProjection(AB.getNormal().getNegated()).getLength();
+
+            a = AC.vecProjection(AB).getLength();
+
+            trigI[i] = ((Math.pow(breadth, 3) * height)
+                    - (breadth * breadth * height * a)
+                    + (breadth * height * a * a)
+                    + (breadth * Math.pow(height, 3))) / 36;
+
+            // TODO the mass and displacement summation thing
+
+        }
+
     }
 
     public static ArrayList<Vec2D> arrangePoints(ArrayList<Vec2D> pts) {
@@ -406,8 +459,7 @@ public class Polygon extends Shape {
         Vec2D[] xmm = MiscTools.getMinMax(pts, new Vec2D(1, 0));
         Vec2D[] ymm = MiscTools.getMinMax(pts, new Vec2D(0, 1));
 
-        Vec2D[] aabbPts = new Vec2D[] {
-                new Vec2D(xmm[0].getX(), ymm[0].getY()), // Min
+        Vec2D[] aabbPts = new Vec2D[] { new Vec2D(xmm[0].getX(), ymm[0].getY()), // Min
                 new Vec2D(xmm[1].getX(), ymm[1].getY()) // Max
         };
 
@@ -424,8 +476,7 @@ public class Polygon extends Shape {
         Vec2D[] xmm = MiscTools.getMinMax(pts, new Vec2D(1, 0));
         Vec2D[] ymm = MiscTools.getMinMax(pts, new Vec2D(0, 1));
 
-        Vec2D[] aabbPts = new Vec2D[] {
-                new Vec2D(xmm[0].getX(), ymm[0].getY()), // Min
+        Vec2D[] aabbPts = new Vec2D[] { new Vec2D(xmm[0].getX(), ymm[0].getY()), // Min
                 new Vec2D(xmm[0].getX(), ymm[1].getY()),
                 new Vec2D(xmm[1].getX(), ymm[1].getY()), // Max
                 new Vec2D(xmm[1].getX(), ymm[0].getY()) };
@@ -463,7 +514,8 @@ public class Polygon extends Shape {
                                                                 // populating
         }
 
-        return generateAABBbounds(allPts); // "generate a bunch of minmax's and let god sort out the rest"
+        return generateAABBbounds(allPts); // "generate a bunch of minmax's and
+                                           // let god sort out the rest"
     }
 
     /**
@@ -483,10 +535,10 @@ public class Polygon extends Shape {
         g2d.setColor(material.getColor());
         // allocate the points into arrays for use in the g2d methods
         for (int i = 0; i < points.length; i++) {
-            xCoords[i] = (int) Math
-                    .round(((points[i].getX() * alpha) + (prevPos.get(i).getX() * (1.0 - alpha))));
-            yCoords[i] = (int) Math
-                    .round(((points[i].getY() * alpha) + (prevPos.get(i).getY() * (1.0 - alpha))));
+            xCoords[i] = (int) Math.round(((points[i].getX() * alpha)
+                    + (prevPos.get(i).getX() * (1.0 - alpha))));
+            yCoords[i] = (int) Math.round(((points[i].getY() * alpha)
+                    + (prevPos.get(i).getY() * (1.0 - alpha))));
             // System.out.println(xCoords[i] + " " + yCoords[i]);
         }
 
@@ -504,10 +556,10 @@ public class Polygon extends Shape {
         // draw COM
         g2d.setColor(Color.RED);
         int xInterp, yInterp;
-        xInterp = (int) Math.round(((centerOfMass.getX() * alpha) + (prevPos
-                .get(prevPos.size() - 1).getX() * (1.0 - alpha))));
-        yInterp = (int) Math.round(((centerOfMass.getY() * alpha) + (prevPos
-                .get(prevPos.size() - 1).getY() * (1.0 - alpha))));
+        xInterp = (int) Math.round(((centerOfMass.getX() * alpha)
+                + (prevPos.get(prevPos.size() - 1).getX() * (1.0 - alpha))));
+        yInterp = (int) Math.round(((centerOfMass.getY() * alpha)
+                + (prevPos.get(prevPos.size() - 1).getY() * (1.0 - alpha))));
         g2d.drawString(centerOfMass + "", xInterp - 35, yInterp + 13);
         g2d.fillOval(xInterp, yInterp, 3, 3);
         /*
@@ -588,5 +640,4 @@ public class Polygon extends Shape {
         return String.format("new Polygon(new Vec2D[]{%s}, %.2f);", ptsRepr,
                 mass);
     }
-
 }
