@@ -29,7 +29,6 @@ public abstract class Shape extends PhysEntity {
         this.centerOfMass = centerOfMass;
         this.angle = angle;
         this.netForce = new Vec2D(0, 0);
-        calculateMomentOfInertia();
     }
 
     public void setAngle(double angle) {

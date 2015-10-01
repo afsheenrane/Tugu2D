@@ -76,6 +76,8 @@ public class Polygon extends Shape {
         this.purePoly = generatePurePoly(); // generate the pure poly before
                                             // rotation is applied.
 
+        calculateMomentOfInertia();
+
         if (angle != 0.0)
             setAngle(angle);
     }

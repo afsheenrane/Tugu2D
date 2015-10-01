@@ -216,4 +216,9 @@ public class Circle extends Shape {
         return "Circle: " + points[0] + " Radius: " + radius + " Velocity: "
                 + velocity;
     }
+
+    @Override
+    protected void calculateMomentOfInertia() {
+        momentOfInertia = mass * radius * radius * 0.5;
+    }
 }
