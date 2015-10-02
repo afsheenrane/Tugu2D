@@ -87,6 +87,13 @@ public class Circle extends Shape {
         return radius;
     }
 
+    @Override
+    protected void calculateMomentOfInertia() {
+        // TODO Auto-generated method stub
+        this.momentOfInertia = this.mass * radius * radius;
+        this.momentOfInertia /= 4.0;
+    }
+
     public void setRadius(double radius) {
         this.radius = radius;
     }
@@ -184,8 +191,7 @@ public class Circle extends Shape {
                 (int) Math.round(((points[0].getX() - 1) * alpha)
                         + ((prevPos.get(0).getX() - 1) * (1.0 - alpha))),
                 (int) Math.round(((points[0].getY() - 1) * alpha)
-                        + ((prevPos.get(0).getY() - 1) * (1.0 - alpha))),
-                3, 3);
+                        + ((prevPos.get(0).getY() - 1) * (1.0 - alpha))), 3, 3);
 
         g2d.setColor(t);
     }
