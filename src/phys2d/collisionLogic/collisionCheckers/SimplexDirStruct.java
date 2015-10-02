@@ -20,6 +20,13 @@ public final class SimplexDirStruct {
     protected ArrayList<Vec2D> simplex;
 
     /**
+     * Stores which Shape vertices created which simplex points. <br>
+     * The indices of this list are directly mapped to the simplex list indices.
+     * The indices of the inner array correspond to s1 and s2.
+     */
+    protected ArrayList<Vec2D[]> corrShapePts;
+
+    /**
      * The current search direction.
      */
     protected Vec2D dir;
@@ -36,6 +43,7 @@ public final class SimplexDirStruct {
 
     protected SimplexDirStruct(int size) {
         this.simplex = new ArrayList<Vec2D>(size);
+        this.corrShapePts = new ArrayList<Vec2D[]>(3);
         this.dir = new Vec2D();
         this.isColliding = false;
     }
