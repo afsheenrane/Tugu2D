@@ -1,5 +1,6 @@
 package phys2d.collisionLogic.spacePartitioning;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,33 +95,25 @@ public class BSPTree {
 
             com.setX(com.getX() - (bounds.getLength() / 4));
             newBounds = new Rectangle(com.getCopy(), bounds.getLength() / 2,
-                    bounds.getHeight()); // doing com copy because com is being
-                                         // aliased.
-                                         // not copying newbounds because it is
-                                         // being being re-assigned
+                    bounds.getHeight()); // doing com copy because com is being aliased. not copying newbounds because it is being being re-assigned
             c0 = new BSPTree(newBounds, splitMode * -1, depth + 1); // left rect
 
             com.setX(com.getX() + bounds.getLength() / 2);
             newBounds = new Rectangle(com.getCopy(), bounds.getLength() / 2,
                     bounds.getHeight());
-            c1 = new BSPTree(newBounds, splitMode * -1, depth + 1); // right
-                                                                    // rect
+            c1 = new BSPTree(newBounds, splitMode * -1, depth + 1); // right rect
         }
         else {
 
             com.setY(com.getY() - (bounds.getHeight() / 4));
             newBounds = new Rectangle(com.getCopy(), bounds.getLength(),
                     bounds.getHeight() / 2);
-            c0 = new BSPTree(newBounds, splitMode * -1, depth + 1); // bottom
-                                                                    // (top in
-                                                                    // GUI)
+            c0 = new BSPTree(newBounds, splitMode * -1, depth + 1); // bottom (top in GUI)
 
             com.setY(com.getY() + bounds.getHeight() / 2);
             newBounds = new Rectangle(com.getCopy(), bounds.getLength(),
                     bounds.getHeight() / 2);
-            c1 = new BSPTree(newBounds, splitMode * -1, depth + 1); // top
-                                                                    // (bottom
-                                                                    // in gui)
+            c1 = new BSPTree(newBounds, splitMode * -1, depth + 1); // top (bottom in gui)
         }
 
         children[0] = c0;
@@ -130,13 +123,9 @@ public class BSPTree {
 
     protected int getInsertionSideAABB(Vec2D[] aabb) {
         if (splitMode == VERTICAL_SPLIT) {
-            if (aabb[1].getX() < bounds.getCOM().getX()) // max of the aabb <
-                                                         // center split line
+            if (aabb[1].getX() < bounds.getCOM().getX()) // max of the aabb < center split line
                 return 0; // LEFT SIDE
-
-            else if (aabb[0].getX() >= bounds.getCOM().getX()) // min of aabb >
-                                                               // center split
-                                                               // line
+            else if (aabb[0].getX() >= bounds.getCOM().getX()) // min of aabb > center split line
                 return 1; // RIGHT SIDE
         }
         else { // if horizontal split
@@ -170,13 +159,9 @@ public class BSPTree {
         // if no children, try adding to parent
 
         if (children[0] != null) { // if there are children
-            int insertionSide = getInsertionSide(s); // if there are children,
-                                                     // check whether they will
-                                                     // go left/top or
-                                                     // right/bottom
+            int insertionSide = getInsertionSide(s); // if there are children, check whether they will go left/top or right/bottom
 
-            if (insertionSide != -1) { // if a suitable spot for the shape is
-                                       // found, insert it in there
+            if (insertionSide != -1) { // if a suitable spot for the shape is found, insert it in there
                 children[insertionSide].insert(s);
                 return;
             }
@@ -187,37 +172,28 @@ public class BSPTree {
             }
         }
 
-        items.add(s); // If no children were found, add the s into the current
-                      // node
+        items.add(s); // If no children were found, add the s into the current node
 
-        // But, now if we have overloaded this node, we need to split it down
-        // some more.
-        // Also, we can only split if we havent exceeded the level_cap (depth
-        // cap).
+        // But, now if we have overloaded this node, we need to split it down some more.
+        // Also, we can only split if we havent exceeded the level_cap (depth cap).
         if (items.size() > MAX_ITEMS && depth < DEPTH_CAP) {
 
-            // if(children[0] == null){ //if there are no children, split the
-            // current tree.
+            // if(children[0] == null){ //if there are no children, split the current tree.
             split();
 
-            // Now that there are children, we will offload the items into the
-            // children to get below the max_items threshold
+            // Now that there are children, we will offload the items into the children to get below the max_items threshold
 
-            for (int i = items.size() - 1; i >= 0; i--) { // items size is not
-                                                          // guaranteed
+            for (int i = items.size() - 1; i >= 0; i--) { // items size is not guaranteed
+
                 // see which items can be offloaded into the children nodes
                 int insertionSide = getInsertionSide(items.get(i));
-                if (insertionSide != -1) { // if a valid insertion side is
-                                           // found, insert the item into that
-                                           // side
+                int x = 0;
+                if (insertionSide != -1) { // if a valid insertion side is found, insert the item into that side
                     children[insertionSide].insert(items.remove(i));
                 }
                 else {
                     children[0].insert(items.get(i));
-                    children[1].insert(items.remove(i)); // both do the same
-                                                         // thing.
-                    // im just saving a line by doing the removal at the same
-                    // time.
+                    children[1].insert(items.remove(i));
                 }
             }
         }
@@ -292,6 +268,10 @@ public class BSPTree {
     }
 
     public void draw(Graphics2D g2d) {
+        Color t = g2d.getColor();
+
+        g2d.setColor(Color.ORANGE);
+
         Vec2D com = bounds.getCOM();
         g2d.drawString(depth + " " + items.size(), (int) com.getX() - 10,
                 (int) (com.getY() + 5));
@@ -312,5 +292,8 @@ public class BSPTree {
                 child.draw(g2d);
             }
         }
+
+        g2d.setColor(t);
+
     }
 }

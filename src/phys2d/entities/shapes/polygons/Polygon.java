@@ -356,8 +356,8 @@ public class Polygon extends Shape {
                                                        // exactly the left/right
                                                        // points. Not ignore
                                                        // dupes.
-                    // if( !p.equals(leftmost) && !p.equals(rightmost)){
-                    // //exclude the points of interest
+                                                       // if( !p.equals(leftmost) && !p.equals(rightmost)){
+                                                       // //exclude the points of interest
 
                     if (relVec.dotProduct(divAxisNorm) >= 0) // positive dot
                                                              // product of the
@@ -442,12 +442,7 @@ public class Polygon extends Shape {
     @Override
     public Vec2D[] getSweptAABBbounds(double dt) {
 
-        Vec2D[] currentAABB = Polygon.generateAABBbounds(this.points); // get
-                                                                       // minmax
-                                                                       // aabb
-                                                                       // of
-                                                                       // this
-                                                                       // shape
+        Vec2D[] currentAABB = Polygon.generateAABBbounds(this.points); // get minmax aabb of this shape
         Vec2D[] translatedAABB = new Vec2D[2]; // the array which will store the
                                                // velocity shifted minmax
         Vec2D[] allPts = new Vec2D[4]; // the points in the old and swept aabb
@@ -458,9 +453,7 @@ public class Polygon extends Shape {
             translatedAABB[i] = Vec2D.add(currentAABB[i],
                     Vec2D.getScaled(this.velocity, dt));
             allPts[i] = currentAABB[i]; // just populating allpts
-            allPts[currentAABB.length + i] = translatedAABB[i]; // same thing.
-                                                                // just
-                                                                // populating
+            allPts[currentAABB.length + i] = translatedAABB[i]; // same thing. just populating
         }
 
         return generateAABBbounds(allPts); // "generate a bunch of minmax's and let god sort out the rest"

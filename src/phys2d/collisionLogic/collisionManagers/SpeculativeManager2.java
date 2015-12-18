@@ -403,4 +403,9 @@ public class SpeculativeManager2 extends CollisionManager {
             addForceOfGravity(entity, increment);
     }
 
+    @Override
+    public BSPTree getCollisionTree() {
+        return collisionTree;
+    }
+
 }

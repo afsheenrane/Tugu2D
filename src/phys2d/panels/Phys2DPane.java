@@ -13,6 +13,7 @@ import phys2d.entities.Material;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Circle;
 import phys2d.entities.shapes.Shape;
+import phys2d.entities.shapes.polygons.Rectangle;
 import phys2d.entities.shapes.polygons.Square;
 import phys2d.entities.shapes.polygons.WorldBound;
 
@@ -42,17 +43,18 @@ public class Phys2DPane extends AnimatedPane {
 
         Shape s;
 
-        s = new Circle(new Vec2D(550, 925), 30);
-        s.setMaterial(Material.REF30);
-        // entities.add(s);
-
-        s = new Square(new Vec2D(705, 915), 80, 0);
+        s = new Rectangle(new Vec2D(500, 915), 2, 300);
         s.setMaterial(Material.RUBBER);
         entities.add(s);
 
-        s = new Square(new Vec2D(150, 915), 80, 0);
+        s = new Square(new Vec2D(150, 875), 1, 0);
         s.setMaterial(Material.REF90);
-        s.setVelocity(new Vec2D(800, 0));
+        s.setVelocity(new Vec2D(7000, 0));
+        entities.add(s);
+
+        s = new Square(new Vec2D(630, 805), 1, 0);
+        s.setMaterial(Material.REF70);
+        s.setVelocity(new Vec2D(7500, 0));
         entities.add(s);
 
         // tester();
@@ -86,6 +88,8 @@ public class Phys2DPane extends AnimatedPane {
         for (Shape entity : entities) {
             entity.draw(g2d, alpha);
         }
+
+        sm.getCollisionTree().draw(g2d);
 
     }
 
