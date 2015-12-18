@@ -43,7 +43,7 @@ public class Phys2DPane extends AnimatedPane {
 
         Shape s;
 
-        s = new Rectangle(new Vec2D(500, 915), 2, 300);
+        s = new Rectangle(new Vec2D(500, 915), 5, 300);
         s.setMaterial(Material.RUBBER);
         entities.add(s);
 
@@ -89,7 +89,7 @@ public class Phys2DPane extends AnimatedPane {
             entity.draw(g2d, alpha);
         }
 
-        sm.getCollisionTree().draw(g2d);
+        //sm.getCollisionTree().draw(g2d);
 
     }
 
