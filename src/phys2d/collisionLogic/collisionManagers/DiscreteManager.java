@@ -26,15 +26,13 @@ public final class DiscreteManager extends CollisionManager {
     private void checkAndResolveCollisions(Shape[] shapes) {
 
         // Using BSPTree
-        Rectangle baseRect = new Rectangle(new Vec2D(500, 500),
-                Phys2DMain.XRES + 50, Phys2DMain.YRES + 50);
+        Rectangle baseRect = new Rectangle(new Vec2D(500, 500), Phys2DMain.XRES + 50, Phys2DMain.YRES + 50);
 
         collisionTree = new BSPTree(baseRect, BSPTree.HORIZONTAL_SPLIT, 1);
 
         ArrayList<Shape[]> collidedPairs = new ArrayList<Shape[]>();
 
-        for (Shape s : shapes) { // populate the space partitioning tree with
-                                 // entities
+        for (Shape s : shapes) { // populate the space partitioning tree with entities
             collisionTree.insert(s);
         }
 
@@ -49,19 +47,8 @@ public final class DiscreteManager extends CollisionManager {
                                                      // collision check
                 for (int j = i + 1; j < group.length; j++) {
 
-                    if (!(group[i] instanceof WorldBound && group[j] instanceof WorldBound) // if
-                                                                                            // two
-                                                                                            // pairs
-                                                                                            // aren't
-                                                                                            // worldbounds
-                            && !deepContains(collidedPairs, new Shape[] { // check
-                                                                          // if
-                                                                          // they
-                                                                          // have
-                                                                          // been
-                                                                          // collided
-                                                                          // before
-                                            group[i], group[j] })) {
+                    if (!(group[i] instanceof WorldBound && group[j] instanceof WorldBound) // if two pairs aren't worldbounds
+                            && !deepContains(collidedPairs, new Shape[] { group[i], group[j] })) { // check if they have been collided before
 
                         // check for collisions and apply impulse if needed
                         resolveCollision(group[i], group[j]);
@@ -72,6 +59,7 @@ public final class DiscreteManager extends CollisionManager {
                 }
             }
         }
+
         // System.out.println(checks);
     }
 
@@ -130,8 +118,8 @@ public final class DiscreteManager extends CollisionManager {
         // TODO clean this up.
 
         // Find the axis of collision between the two shapes
-        Vec2D collisionAxis = CollisionCheckerGJKEPA
-                .getCollisionResolutionGJKEPA(s1, s2);
+        Vec2D collisionAxis = CollisionCheckerGJKEPA.getCollisionResolutionGJKEPA(s1, s2);
+
         if (!collisionAxis.equals(Vec2D.ORIGIN)) { // if they are colliding
 
             unstickShapes(s1, s2, collisionAxis);
@@ -169,7 +157,7 @@ public final class DiscreteManager extends CollisionManager {
     @Override
     public void runManager(ArrayList<Shape> entities) {
 
-        // addWorldForces(entities);
+        addWorldForces(entities);
 
         manageCollisions(entities.toArray(new Shape[] {}));
 

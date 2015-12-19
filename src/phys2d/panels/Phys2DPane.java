@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
+import phys2d.collisionLogic.collisionManagers.DiscreteManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager2;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
@@ -27,6 +28,7 @@ public class Phys2DPane extends AnimatedPane {
     private final ArrayList<Shape> entities = new ArrayList<Shape>();
 
     private final SpeculativeManager2 sm = new SpeculativeManager2(dt);
+    private final DiscreteManager dm = new DiscreteManager(dt);
 
     public Phys2DPane(int updateRate, int maxFps, int maxFramesSkippable) {
         super(updateRate, maxFps, maxFramesSkippable);
@@ -41,21 +43,23 @@ public class Phys2DPane extends AnimatedPane {
         // populateWithSmallSquares(entities);
         // populateWithSmallCircles(entities);
 
+        addRefSquares();
+
         Shape s;
 
-        s = new Rectangle(new Vec2D(500, 915), 5, 300);
+        s = new Rectangle(new Vec2D(700, 700), 5, 300);
         s.setMaterial(Material.RUBBER);
         entities.add(s);
 
         s = new Square(new Vec2D(150, 875), 1, 0);
         s.setMaterial(Material.REF90);
         s.setVelocity(new Vec2D(7000, 0));
-        entities.add(s);
+        //entities.add(s);
 
         s = new Square(new Vec2D(630, 805), 1, 0);
         s.setMaterial(Material.REF70);
         s.setVelocity(new Vec2D(7500, 0));
-        entities.add(s);
+        //entities.add(s);
 
         // tester();
 
@@ -68,16 +72,8 @@ public class Phys2DPane extends AnimatedPane {
 
     @Override
     public void update() {
-        // System.out.println(entities.get(1).getCOM());
-        if (upCt >= updateRate) {
-            // System.out.println();
-        }
         sm.runManager(entities);
-        System.out.println(++upCt + ": " + entities.get(1).getCOM() + " "
-                + entities.get(1).getVelocity());
-        // System.out.println(entities.get(4).getVelocity());
-        // System.out.println(entities.get(5).getVelocity());
-        // System.out.println();
+        //System.out.println(++upCt + ": " + entities.get(1).getCOM() + " " + entities.get(1).getVelocity());
     }
 
     @Override
@@ -102,14 +98,12 @@ public class Phys2DPane extends AnimatedPane {
     private void addWorldBounds(String s) {
         // Left
         if (s.indexOf('a') != -1 || s.indexOf('l') != -1) {
-            entities.add(new WorldBound(new Vec2D(Phys2DMain.XRES * -1.5, -20),
-                    new Vec2D(10, Phys2DMain.YRES + 20)));
+            entities.add(new WorldBound(new Vec2D(Phys2DMain.XRES * -1.5, -20), new Vec2D(10, Phys2DMain.YRES + 20)));
         }
 
-        // Top
-        if (s.indexOf('a') != -1 || s.indexOf('t') != -1) {
-            entities.add(new WorldBound(new Vec2D(10, Phys2DMain.YRES * -1.5),
-                    new Vec2D(Phys2DMain.XRES - 10, 10)));
+        // Bottom
+        if (s.indexOf('a') != -1 || s.indexOf('b') != -1) {
+            entities.add(new WorldBound(new Vec2D(10, Phys2DMain.YRES * -1.5), new Vec2D(Phys2DMain.XRES - 10, 40)));
         }
 
         // Right
@@ -117,9 +111,9 @@ public class Phys2DPane extends AnimatedPane {
             entities.add(new WorldBound(new Vec2D(Phys2DMain.XRES - 15, -20),
                     new Vec2D(Phys2DMain.XRES * 1.5, Phys2DMain.YRES + 20)));
         }
-        // Bottom
-        if (s.indexOf('a') != -1 || s.indexOf('b') != -1) {
-            entities.add(new WorldBound(new Vec2D(-10, Phys2DMain.YRES - 45),
+        // Top
+        if (s.indexOf('a') != -1 || s.indexOf('t') != -1) {
+            entities.add(new WorldBound(new Vec2D(-10, Phys2DMain.YRES - 10),
                     new Vec2D(Phys2DMain.XRES + 10, Phys2DMain.YRES * 1.5)));
         }
         for (Shape w : entities) {
@@ -170,37 +164,37 @@ public class Phys2DPane extends AnimatedPane {
 
     private void addRefSquares() {
         Shape s;
-        s = new Square(new Vec2D(50, 150), 40, 0);
+        s = new Square(new Vec2D(50, 800), 40, 0);
         s.setMaterial(Material.INERTIUM);
         entities.add(s);
-        s = new Square(new Vec2D(100, 150), 40, 0);
+        s = new Square(new Vec2D(100, 800), 40, 0);
         s.setMaterial(Material.REF10);
         entities.add(s);
-        s = new Square(new Vec2D(150, 150), 40, 0);
+        s = new Square(new Vec2D(150, 800), 40, 0);
         s.setMaterial(Material.REF20);
         entities.add(s);
-        s = new Square(new Vec2D(200, 150), 40, 0);
+        s = new Square(new Vec2D(200, 800), 40, 0);
         s.setMaterial(Material.REF30);
         entities.add(s);
-        s = new Square(new Vec2D(250, 150), 40, 0);
+        s = new Square(new Vec2D(250, 800), 40, 0);
         s.setMaterial(Material.REF40);
         entities.add(s);
-        s = new Square(new Vec2D(300, 150), 40, 0);
+        s = new Square(new Vec2D(300, 800), 40, 0);
         s.setMaterial(Material.REF50);
         entities.add(s);
-        s = new Square(new Vec2D(350, 150), 40, 0);
+        s = new Square(new Vec2D(350, 800), 40, 0);
         s.setMaterial(Material.REF60);
         entities.add(s);
-        s = new Square(new Vec2D(400, 150), 40, 0);
+        s = new Square(new Vec2D(400, 800), 40, 0);
         s.setMaterial(Material.REF70);
         entities.add(s);
-        s = new Square(new Vec2D(450, 150), 40, 0);
+        s = new Square(new Vec2D(450, 800), 40, 0);
         s.setMaterial(Material.REF80);
         entities.add(s);
-        s = new Square(new Vec2D(500, 150), 40, 0);
+        s = new Square(new Vec2D(500, 800), 40, 0);
         s.setMaterial(Material.REF90);
         entities.add(s);
-        s = new Square(new Vec2D(550, 150), 40, 0);
+        s = new Square(new Vec2D(550, 800), 40, 0);
         s.setMaterial(Material.REFLECTIUM);
         entities.add(s);
     }

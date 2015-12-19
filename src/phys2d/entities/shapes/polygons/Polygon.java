@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import phys2d.Phys2DMain;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
 import phys2d.entities.Vec2D;
@@ -476,16 +477,16 @@ public class Polygon extends Shape {
         g2d.setColor(material.getColor());
         // allocate the points into arrays for use in the g2d methods
         for (int i = 0; i < points.length; i++) {
-            xCoords[i] = (int) Math
-                    .round(((points[i].getX() * alpha) + (prevPos.get(i).getX() * (1.0 - alpha))));
-            yCoords[i] = (int) Math
-                    .round(((points[i].getY() * alpha) + (prevPos.get(i).getY() * (1.0 - alpha))));
-            // System.out.println(xCoords[i] + " " + yCoords[i]);
+            xCoords[i] = (int) Math.round(((points[i].getX() * alpha) + (prevPos.get(i).getX() * (1.0 - alpha))));
+            yCoords[i] = (int) Math.round(((points[i].getY() * alpha) + (prevPos.get(i).getY() * (1.0 - alpha))));
+
+            yCoords[i] = Phys2DMain.YRES - yCoords[i];
         }
 
         // draw the polygon
         if (points.length == 2)
             g2d.drawLine(xCoords[0], yCoords[0], xCoords[1], yCoords[1]);
+
         else if (mode != 2) {
             g2d.fillPolygon(xCoords, yCoords, points.length); // full polygon
             g2d.setColor(Color.blue);
@@ -497,28 +498,15 @@ public class Polygon extends Shape {
         // draw COM
         g2d.setColor(Color.RED);
         int xInterp, yInterp;
-        xInterp = (int) Math.round(((centerOfMass.getX() * alpha) + (prevPos
-                .get(prevPos.size() - 1).getX() * (1.0 - alpha))));
-        yInterp = (int) Math.round(((centerOfMass.getY() * alpha) + (prevPos
-                .get(prevPos.size() - 1).getY() * (1.0 - alpha))));
-        g2d.drawString(centerOfMass + "", xInterp - 35, yInterp + 13);
+
+        xInterp = (int) Math.round(((centerOfMass.getX() * alpha) + (prevPos.get(prevPos.size() - 1).getX() * (1.0 - alpha))));
+        yInterp = (int) Math.round(((centerOfMass.getY() * alpha) + (prevPos.get(prevPos.size() - 1).getY() * (1.0 - alpha))));
+
+        yInterp = Phys2DMain.YRES - yInterp;
+
+        g2d.drawString(centerOfMass + "", xInterp - 35, yInterp - 13);
         g2d.fillOval(xInterp, yInterp, 3, 3);
-        /*
-         * //draw points
-         * //g2d.setColor(Color.white);
-         * //g2d.fillOval((int)points[0].getX() - 1, (int)points[0].getY() - 1,
-         * 3, 3);
-         * 
-         * if(mode != 2){
-         * //g2d.drawString(centerOfMass + "", (int)centerOfMass.getX() - 30,
-         * (int)centerOfMass.getY());
-         * for(Vec2D p : points){
-         * //g2d.drawString(p + "", (int)p.getX() - 30, (int)p.getY() + 12);
-         * g2d.fillOval((int)((p.getX() - 1) + (velocity.getX() * alpha)),
-         * (int)((p.getY() - 1) + (velocity.getY() * alpha)), 3, 3);
-         * }
-         * }
-         */
+
         // if mode 1, draw AABB
         if (mode == 1) {
             Vec2D[] AABBPts = getAABBbounds();
@@ -529,6 +517,8 @@ public class Polygon extends Shape {
             for (int i = 0; i < xCoords.length; i++) {
                 xCoords[i] = (int) AABBPts[i].getX();
                 yCoords[i] = (int) AABBPts[i].getY();
+
+                yCoords[i] = Phys2DMain.YRES - yCoords[i];
             }
             g2d.drawPolygon(xCoords, yCoords, xCoords.length);
         }

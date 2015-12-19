@@ -122,7 +122,7 @@ public class SpeculativeManager2 extends CollisionManager {
              * add collision forces
              * move
              */
-            // System.out.println("disc");
+            //System.out.println("disc");
 
             addWorldForcesTo(s1, 1.0);
             addWorldForcesTo(s2, 1.0);
@@ -149,7 +149,7 @@ public class SpeculativeManager2 extends CollisionManager {
              */
             double collisionTime = impendingCollisionChecker(s1, s2, gjkInfo);
             if (collisionTime >= 0) { // Impending coll.
-                // System.out.println("full swept");
+                System.out.println("full swept");
 
                 // Apply pre-collision world forces
                 addWorldForcesTo(s1, collisionTime);
@@ -249,19 +249,14 @@ public class SpeculativeManager2 extends CollisionManager {
         if (Math.abs(fricMag) < collForce.getLength() * mu) {
             if (!MiscTools.tolEquals(-fricMag, 0))
                 frictionForce = tanVec.getScaled(-fricMag);
-
-            System.out.println("stat");
-            System.out.println("ff: " + fricMag);
         }
         else {
             mu = Math.sqrt(Math.pow(s1.getMaterial().getDynFric(), 2)
                     + Math.pow(s2.getMaterial().getDynFric(), 2));
 
-            System.out.println("dym");
             if (!MiscTools.tolEquals(-fricMag * mu, 0))
                 frictionForce = tanVec.getScaled(-fricMag * mu);
 
-            System.out.println("ff: " + fricMag);
         }
 
         // TODO implement a "kill all velocity" method for use when static

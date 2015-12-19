@@ -13,8 +13,7 @@ public final class WorldBound extends Rectangle {
      * @param height the y extent of the shape.
      * @param angle the current rotation of the shape.
      */
-    public WorldBound(Vec2D center, double length, double height,
-            double angle) {
+    public WorldBound(Vec2D center, double length, double height, double angle) {
         super(center, length, height, angle, Material.REFLECTIUM);
         setMass(0);
     }
@@ -37,8 +36,8 @@ public final class WorldBound extends Rectangle {
      * @param max the maximum x and y position of the rectangle.
      */
     public WorldBound(Vec2D min, Vec2D max) {
-        this(new Vec2D((min.getX() + max.getX()) / 2,
-                (min.getY() + max.getY()) / 2), max.getX() - min.getX(),
+        this(new Vec2D((min.getX() + max.getX()) / 2, (min.getY() + max.getY()) / 2),
+                max.getX() - min.getX(),
                 max.getY() - min.getY());
     }
 

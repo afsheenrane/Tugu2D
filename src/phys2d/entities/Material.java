@@ -14,14 +14,6 @@ public enum Material {
     RUBBER(0.828, 1.1, 0.95, 0.8, Color.LIGHT_GRAY),
 
     /**
-     * COR: 1 <br>
-     * DENSITY: 1 <br>
-     * &mu;<sub>S</sub>: 0 <br>
-     * &mu;<sub>k</sub>: 0
-     */
-    REFLECTIUM(1, 1, 0, 0, Color.GREEN),
-
-    /**
      * COR: 0.597 <br>
      * DENSITY: 7.82 <br>
      * &mu;<sub>S</sub>: 0.55 <br>
@@ -155,7 +147,15 @@ public enum Material {
      * &mu;<sub>S</sub>: 0.1 <br>
      * &mu;<sub>k</sub>: 0.05
      */
-    REF90(0.9, 1, 0.1, 0.05, new Color(0, 190, 50));
+    REF90(0.9, 1, 0.1, 0.05, new Color(0, 190, 50)),
+
+    /**
+     * COR: 1 <br>
+     * DENSITY: 1 <br>
+     * &mu;<sub>S</sub>: 0 <br>
+     * &mu;<sub>k</sub>: 0
+     */
+    REFLECTIUM(1, 1, 0, 0, Color.GREEN);
 
     protected final double restitution;
     protected final double density; // 1 kg per 1m^2
