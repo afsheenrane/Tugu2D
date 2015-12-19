@@ -43,23 +43,28 @@ public class Phys2DPane extends AnimatedPane {
         // populateWithSmallSquares(entities);
         // populateWithSmallCircles(entities);
 
-        addRefSquares();
+        //addRefSquares();
 
         Shape s;
 
-        s = new Rectangle(new Vec2D(700, 700), 5, 300);
+        s = new Rectangle(new Vec2D(700, 200), 30, 300);
         s.setMaterial(Material.RUBBER);
-        entities.add(s);
+        //entities.add(s);
 
-        s = new Square(new Vec2D(150, 875), 1, 0);
-        s.setMaterial(Material.REF90);
-        s.setVelocity(new Vec2D(7000, 0));
+        s = new Square(new Vec2D(150, 200), 80, 0);
+        s.setMaterial(Material.REF10);
+        s.setVelocity(new Vec2D(2000, 0));
         //entities.add(s);
 
         s = new Square(new Vec2D(630, 805), 1, 0);
         s.setMaterial(Material.REF70);
         s.setVelocity(new Vec2D(7500, 0));
         //entities.add(s);
+
+        s = new Circle(new Vec2D(300, 300), 30);
+        s.setMaterial(Material.REF50);
+        s.setVelocity(new Vec2D(0, 0));
+        entities.add(s);
 
         // tester();
 
@@ -85,7 +90,7 @@ public class Phys2DPane extends AnimatedPane {
             entity.draw(g2d, alpha);
         }
 
-        sm.getCollisionTree().draw(g2d);
+        //sm.getCollisionTree().draw(g2d);
 
     }
 

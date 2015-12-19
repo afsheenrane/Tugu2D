@@ -157,7 +157,7 @@ public class Circle extends Shape {
         int xInterp, yInterp; // The interpolated positions
 
         xInterp = (int) Math.round(((points[0].getX() - radius) * alpha) + ((prevPos.get(0).getX() - radius) * (1.0 - alpha)));
-        yInterp = (int) Math.round(((points[0].getY() - radius) * alpha) + ((prevPos.get(0).getY() - radius) * (1.0 - alpha)));
+        yInterp = (int) Math.round(((points[0].getY() + radius) * alpha) + ((prevPos.get(0).getY() + radius) * (1.0 - alpha)));
         yInterp = Phys2DMain.YRES - yInterp;
 
         // Inner circle
