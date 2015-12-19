@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
+import phys2d.Phys2DMain;
 import phys2d.entities.Material;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.polygons.Polygon;
@@ -64,8 +65,6 @@ public class Circle extends Shape {
         velocity.add(accel);
         translate(Vec2D.getScaled(velocity, dt));
 
-        // Velocity verlet integrator
-
         netForce = new Vec2D(0, 0);
 
     }
@@ -116,12 +115,8 @@ public class Circle extends Shape {
     @Override
     public Vec2D[] getAABBbounds() {
         return new Vec2D[] {
-                new Vec2D(points[0].getX() - radius, points[0].getY() - radius), // bottom
-                                                                                 // left
-                                                                                 // (conventional
-                                                                                 // cartesian)
-                new Vec2D(points[0].getX() + radius, points[0].getY() + radius), // top
-                                                                                 // right
+                new Vec2D(points[0].getX() - radius, points[0].getY() - radius), // bottom left
+                new Vec2D(points[0].getX() + radius, points[0].getY() + radius), // top right
         };
     }
 
@@ -161,30 +156,26 @@ public class Circle extends Shape {
 
         int xInterp, yInterp; // The interpolated positions
 
-        xInterp = (int) Math.round(((points[0].getX() - radius) * alpha)
-                + ((prevPos.get(0).getX() - radius) * (1.0 - alpha)));
-        yInterp = (int) Math.round(((points[0].getY() - radius) * alpha)
-                + ((prevPos.get(0).getY() - radius) * (1.0 - alpha)));
+        xInterp = (int) Math.round(((points[0].getX() - radius) * alpha) + ((prevPos.get(0).getX() - radius) * (1.0 - alpha)));
+        yInterp = (int) Math.round(((points[0].getY() - radius) * alpha) + ((prevPos.get(0).getY() - radius) * (1.0 - alpha)));
+        yInterp = Phys2DMain.YRES - yInterp;
 
         // Inner circle
-        g2d.fillOval(xInterp, yInterp, (int) (radius * 2.0),
-                (int) (radius * 2.0));
+        g2d.fillOval(xInterp, yInterp, (int) (radius * 2.0), (int) (radius * 2.0));
 
         // outer border
         g2d.setColor(Color.blue);
-        g2d.drawOval(xInterp, yInterp, (int) (radius * 2.0),
-                (int) (radius * 2.0));
+        g2d.drawOval(xInterp, yInterp, (int) (radius * 2.0), (int) (radius * 2.0));
 
         // Draw COM
         g2d.setColor(Color.RED);
         g2d.drawString(centerOfMass + "", (int) centerOfMass.getX() - 35,
-                (int) centerOfMass.getY() + 13);
+                Phys2DMain.YRES - (int) centerOfMass.getY() - 13);
 
         g2d.fillOval(
-                (int) Math.round(((points[0].getX() - 1) * alpha)
-                        + ((prevPos.get(0).getX() - 1) * (1.0 - alpha))),
-                (int) Math.round(((points[0].getY() - 1) * alpha)
-                        + ((prevPos.get(0).getY() - 1) * (1.0 - alpha))),
+                (int) Math.round(((points[0].getX() - 1) * alpha) + ((prevPos.get(0).getX() - 1) * (1.0 - alpha))),
+                Phys2DMain.YRES - (int) Math.round(((points[0].getY() - 1) * alpha) + ((prevPos.get(0).getY() - 1) * (1.0
+                        - alpha))),
                 3, 3);
 
         g2d.setColor(t);
@@ -200,20 +191,15 @@ public class Circle extends Shape {
     public void drawWithGuides(Graphics2D g2d, double delta) {
         draw(g2d, delta);
 
-        g2d.drawLine((int) (points[0].getX() - radius), 0,
-                (int) (points[0].getX() - radius), 1000);
-        g2d.drawLine((int) (points[0].getX() + radius), 0,
-                (int) (points[0].getX() + radius), 1000);
+        g2d.drawLine((int) (points[0].getX() - radius), 0, (int) (points[0].getX() - radius), 1000);
+        g2d.drawLine((int) (points[0].getX() + radius), 0, (int) (points[0].getX() + radius), 1000);
 
-        g2d.drawLine(0, (int) (points[0].getY() - radius), 1000,
-                (int) (points[0].getY() - radius));
-        g2d.drawLine(0, (int) (points[0].getY() + radius), 1000,
-                (int) (points[0].getY() + radius));
+        g2d.drawLine(0, (int) (points[0].getY() - radius), 1000, (int) (points[0].getY() - radius));
+        g2d.drawLine(0, (int) (points[0].getY() + radius), 1000, (int) (points[0].getY() + radius));
     }
 
     @Override
     public String toString() {
-        return "Circle: " + points[0] + " Radius: " + radius + " Velocity: "
-                + velocity;
+        return "Circle: " + points[0] + " Radius: " + radius + " Velocity: " + velocity;
     }
 }
