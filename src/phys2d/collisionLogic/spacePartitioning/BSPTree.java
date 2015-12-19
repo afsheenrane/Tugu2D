@@ -273,20 +273,19 @@ public class BSPTree {
         g2d.setColor(Color.ORANGE);
 
         Vec2D com = bounds.getCOM();
-        g2d.drawString(depth + " " + items.size(), (int) com.getX() - 10,
-                (int) (com.getY() + 5));
+        g2d.drawString(depth + " " + items.size(), (int) com.getX() - 10, Phys2DMain.YRES - (int) (com.getY() + 5));
         if (children[0] != null) {
             if (splitMode == VERTICAL_SPLIT)
                 g2d.drawLine((int) com.getX(),
-                        (int) (com.getY() - (bounds.getHeight() / 2)),
+                        Phys2DMain.YRES - (int) (com.getY() - (bounds.getHeight() / 2)),
                         (int) com.getX(),
-                        (int) (com.getY() + (bounds.getHeight() / 2)));
+                        Phys2DMain.YRES - (int) (com.getY() + (bounds.getHeight() / 2)));
 
             else
                 g2d.drawLine((int) (com.getX() - (bounds.getLength() / 2)),
-                        (int) com.getY(),
+                        Phys2DMain.YRES - (int) com.getY(),
                         (int) (com.getX() + (bounds.getLength() / 2)),
-                        (int) com.getY());
+                        Phys2DMain.YRES - (int) com.getY());
 
             for (BSPTree child : children) {
                 child.draw(g2d);

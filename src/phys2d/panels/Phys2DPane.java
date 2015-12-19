@@ -85,7 +85,7 @@ public class Phys2DPane extends AnimatedPane {
             entity.draw(g2d, alpha);
         }
 
-        //sm.getCollisionTree().draw(g2d);
+        sm.getCollisionTree().draw(g2d);
 
     }
 
