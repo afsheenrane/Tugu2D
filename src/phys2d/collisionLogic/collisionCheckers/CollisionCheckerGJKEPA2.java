@@ -385,15 +385,16 @@ public final class CollisionCheckerGJKEPA2 {
                     gjkInfo.simplex.get(gjkInfo.simplex.size() - 1),
                     gjkInfo.simplex.get(0) };
 
+            //double closestDist = LinePolyTools.ptToLineSegDisp(Vec2D.ORIGIN, closestEdge).getSquaredLength();
             double closestDist = computeRelativeDist(Vec2D.ORIGIN, closestEdge);
             int insertionIndex = 0;
 
             Vec2D[] edge;
             double dist;
             // 2 => simplex.size - 1
-            for (int i = 0; i < 2; i++) {
-                edge = new Vec2D[] { gjkInfo.simplex.get(i),
-                        gjkInfo.simplex.get(i + 1) };
+            for (int i = 0; i < gjkInfo.simplex.size() - 1; i++) {
+                edge = new Vec2D[] { gjkInfo.simplex.get(i), gjkInfo.simplex.get(i + 1) };
+                //dist = LinePolyTools.ptToLineSegDisp(Vec2D.ORIGIN, edge).getSquaredLength();
                 dist = computeRelativeDist(Vec2D.ORIGIN, edge);
 
                 if (dist < closestDist) {
@@ -403,15 +404,13 @@ public final class CollisionCheckerGJKEPA2 {
                 }
             }
 
-            Vec2D edgeNorm = Vec2D.sub(closestEdge[1], closestEdge[0])
-                    .getNormal();
+            Vec2D edgeNorm = Vec2D.sub(closestEdge[1], closestEdge[0]).getNormal();
             Vec2D newPt = support(s1, s2, edgeNorm);
 
             double newPtDistFromOrigin = Math.abs(newPt.dotProduct(edgeNorm));
 
             if (newPtDistFromOrigin - closestDist <= TOL) {
-                gjkInfo.dir = LinePolyTools.ptToLineDisp(Vec2D.ORIGIN,
-                        closestEdge);
+                gjkInfo.dir = LinePolyTools.ptToLineDisp(Vec2D.ORIGIN, closestEdge);
                 return;
             }
             else {

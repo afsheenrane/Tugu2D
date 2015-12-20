@@ -175,17 +175,13 @@ public final class LinePolyTools {
         if (lineSeg.length == 1)
             return Vec2D.sub(lineSeg[0], p);
 
-        // First translate p and lineSeg to the ORIGIN. That is, make lineSeg
-        // into
-        // a vector and translate p so that the displacement from linSeg is the
-        // same
+        // First translate p and lineSeg to the ORIGIN. That is, make lineSeg into a vector and translate
+        // p so that the displacement from linSeg is the same
         Vec2D transP = Vec2D.sub(p, lineSeg[0]);
         Vec2D transLineSeg = Vec2D.sub(lineSeg[lineSeg.length - 1], lineSeg[0]);
         // doing lineSeg.length - 1, because this method is mostly going to be
-        // called by the GJK collision checker. It is possible that the lineSeg
-        // is only
-        // a single point. Hence, this is being used to prevent an index out of
-        // bounds exception.
+        // called by the GJK collision checker. It is possible that the lineSeg is only
+        // a single point. Hence, this is being used to prevent an index out of bounds exception.
 
         // Scalar project p onto lineSeg. If negative, then disp is the
         // translated p

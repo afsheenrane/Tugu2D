@@ -9,6 +9,7 @@ import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
 import phys2d.collisionLogic.collisionManagers.DiscreteManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager2;
+import phys2d.collisionLogic.tools.LinePolyTools;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
 import phys2d.entities.Vec2D;
@@ -39,7 +40,7 @@ public class Phys2DPane extends AnimatedPane {
     public void init() {
         // Add in the world boundaries
 
-        addWorldBounds("a");
+        addWorldBounds("b");
         // populateWithSmallSquares(entities);
         // populateWithSmallCircles(entities);
 
@@ -61,15 +62,14 @@ public class Phys2DPane extends AnimatedPane {
         s.setVelocity(new Vec2D(7500, 0));
         //entities.add(s);
 
-        s = new Circle(new Vec2D(300, 300), 30);
+        s = new Circle(new Vec2D(300, 70), 30);
         s.setMaterial(Material.REF50);
         s.setVelocity(new Vec2D(0, 0));
         entities.add(s);
 
         // tester();
 
-        // System.out.println(
-        // LinePolyTools.polyDifference(entities.get(0), entities.get(1)));
+        System.out.println(LinePolyTools.polyDifference(entities.get(0), entities.get(1)));
         // System.exit(0);
     }
 
@@ -78,13 +78,12 @@ public class Phys2DPane extends AnimatedPane {
     @Override
     public void update() {
         sm.runManager(entities);
-        //System.out.println(++upCt + ": " + entities.get(1).getCOM() + " " + entities.get(1).getVelocity());
+        System.out.println(++upCt);
     }
 
     @Override
     public void render(Graphics2D g2d) {
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         for (Shape entity : entities) {
             entity.draw(g2d, alpha);

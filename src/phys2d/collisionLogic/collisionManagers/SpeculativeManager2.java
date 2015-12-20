@@ -97,8 +97,7 @@ public class SpeculativeManager2 extends CollisionManager {
                 for (int j = i + 1; j < group.length; j++) {
                     if (!(group[i] instanceof WorldBound
                             && group[j] instanceof WorldBound)
-                            && collidedPairs.add(
-                                    new CollisionPair(group[i], group[j]))) {
+                            && collidedPairs.add(new CollisionPair(group[i], group[j]))) {
                         resolveCollision(group[i], group[j]);
                     }
                 }
@@ -112,8 +111,7 @@ public class SpeculativeManager2 extends CollisionManager {
      * @param s2
      */
     private void resolveCollision(Shape s1, Shape s2) {
-        SimplexDirStruct gjkInfo = CollisionCheckerGJKEPA2
-                .getCollisionResolution(s1, s2);
+        SimplexDirStruct gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1, s2);
 
         if (gjkInfo.isColliding()) { // Discrete collision
             /*
