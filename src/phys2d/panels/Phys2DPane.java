@@ -44,7 +44,7 @@ public class Phys2DPane extends AnimatedPane {
         // populateWithSmallSquares(entities);
         // populateWithSmallCircles(entities);
 
-        //addRefSquares();
+        addRefSquares(300);
 
         Shape s;
 
@@ -65,7 +65,7 @@ public class Phys2DPane extends AnimatedPane {
         s = new Circle(new Vec2D(300, 70), 30);
         s.setMaterial(Material.REF50);
         s.setVelocity(new Vec2D(0, 0));
-        entities.add(s);
+        //entities.add(s);
 
         // tester();
 
@@ -79,6 +79,10 @@ public class Phys2DPane extends AnimatedPane {
     public void update() {
         sm.runManager(entities);
         System.out.println(++upCt);
+
+        if (upCt == 43) {
+            System.out.println("break pt");
+        }
     }
 
     @Override
@@ -166,39 +170,39 @@ public class Phys2DPane extends AnimatedPane {
         }
     }
 
-    private void addRefSquares() {
+    private void addRefSquares(double height) {
         Shape s;
-        s = new Square(new Vec2D(50, 800), 40, 0);
+        s = new Square(new Vec2D(50, height), 40, 0);
         s.setMaterial(Material.INERTIUM);
         entities.add(s);
-        s = new Square(new Vec2D(100, 800), 40, 0);
+        s = new Square(new Vec2D(100, height), 40, 0);
         s.setMaterial(Material.REF10);
         entities.add(s);
-        s = new Square(new Vec2D(150, 800), 40, 0);
+        s = new Square(new Vec2D(150, height), 40, 0);
         s.setMaterial(Material.REF20);
         entities.add(s);
-        s = new Square(new Vec2D(200, 800), 40, 0);
+        s = new Square(new Vec2D(200, height), 40, 0);
         s.setMaterial(Material.REF30);
         entities.add(s);
-        s = new Square(new Vec2D(250, 800), 40, 0);
+        s = new Square(new Vec2D(250, height), 40, 0);
         s.setMaterial(Material.REF40);
         entities.add(s);
-        s = new Square(new Vec2D(300, 800), 40, 0);
+        s = new Square(new Vec2D(300, height), 40, 0);
         s.setMaterial(Material.REF50);
         entities.add(s);
-        s = new Square(new Vec2D(350, 800), 40, 0);
+        s = new Square(new Vec2D(350, height), 40, 0);
         s.setMaterial(Material.REF60);
         entities.add(s);
-        s = new Square(new Vec2D(400, 800), 40, 0);
+        s = new Square(new Vec2D(400, height), 40, 0);
         s.setMaterial(Material.REF70);
         entities.add(s);
-        s = new Square(new Vec2D(450, 800), 40, 0);
+        s = new Square(new Vec2D(450, height), 40, 0);
         s.setMaterial(Material.REF80);
         entities.add(s);
-        s = new Square(new Vec2D(500, 800), 40, 0);
+        s = new Square(new Vec2D(500, height), 40, 0);
         s.setMaterial(Material.REF90);
         entities.add(s);
-        s = new Square(new Vec2D(550, 800), 40, 0);
+        s = new Square(new Vec2D(550, height), 40, 0);
         s.setMaterial(Material.REFLECTIUM);
         entities.add(s);
     }
