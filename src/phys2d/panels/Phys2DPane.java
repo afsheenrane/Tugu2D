@@ -63,13 +63,14 @@ public class Phys2DPane extends AnimatedPane {
         //entities.add(s);
 
         s = new Circle(new Vec2D(300, 70), 30);
-        s.setMaterial(Material.REF50);
+        s.setMaterial(Material.REF60);
         s.setVelocity(new Vec2D(0, 0));
         //entities.add(s);
 
         // tester();
 
         System.out.println(LinePolyTools.polyDifference(entities.get(0), entities.get(1)));
+
         // System.exit(0);
     }
 
@@ -78,9 +79,10 @@ public class Phys2DPane extends AnimatedPane {
     @Override
     public void update() {
         sm.runManager(entities);
+        System.out.println(entities.get(1).getCOM());
         System.out.println(++upCt);
 
-        if (upCt == 43) {
+        if (upCt == 1) {
             System.out.println("break pt");
         }
     }

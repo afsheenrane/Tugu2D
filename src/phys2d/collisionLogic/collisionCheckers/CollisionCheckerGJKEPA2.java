@@ -15,6 +15,9 @@ import phys2d.entities.shapes.polygons.Polygon;
  */
 public final class CollisionCheckerGJKEPA2 {
 
+    private final static int CLOCKWISE_WINDING = 1;
+    private final static int ANTICLOCKWISE_WINDING = -1;
+
     /**
      * Using GJK, return the result of the algorithm on the two shapes.
      * 
@@ -38,12 +41,11 @@ public final class CollisionCheckerGJKEPA2 {
         gjkInfo.simplex.add(support(s1, s2, gjkInfo.dir));
 
         gjkInfo.dir = gjkInfo.simplex.get(0).getNegated();
-        int x = 0;
+
         while (count < 20) {
             newPt = support(s1, s2, gjkInfo.dir);
 
-            // If the new point is not past the origin, then the origin cannot
-            // be encapsulated.
+            // If the new point is not past the origin, then the origin cannot be encapsulated.
             if (newPt.dotProduct(gjkInfo.dir) <= 0) {
                 gjkInfo.isColliding = false;
                 return gjkInfo;
@@ -81,8 +83,7 @@ public final class CollisionCheckerGJKEPA2 {
                 computeTriangleSimplex(gjkInfo);
                 break;
             default:
-                System.err.println(
-                        "Simplex size error: " + gjkInfo.simplex.size());
+                System.err.println("Simplex size error: " + gjkInfo.simplex.size());
 
                 System.exit(0);
                 break;
@@ -106,16 +107,16 @@ public final class CollisionCheckerGJKEPA2 {
 
         Vec2D AB, AO;
 
-        AB = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(1));
+        AB = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(1)); // B - A
         AO = gjkInfo.simplex.get(1).getNegated();
 
-        // If the line segment body is closest:
+        // If the line segment body is closest (this check works because the origin cant be past B)
         if (AB.dotProduct(AO) > 0) {
 
-            if (AB.perpDotProduct(AO) > 0)
-                gjkInfo.dir = AB.getNormal();
+            if (AB.perpDotProduct(AO) > 0) // To the left of AB
+                gjkInfo.dir = AB.getNormal(); // Then use the left normal
             else
-                gjkInfo.dir = AB.getNormal().getNegated();
+                gjkInfo.dir = AB.getNormal().getNegated(); // Otherwise use the right normal
 
         }
         // Otherwise, point A is closest.
@@ -158,58 +159,83 @@ public final class CollisionCheckerGJKEPA2 {
         Vec2D AB, AC, AO;
 
         // The normal pointing outwards from the triangle.
-        Vec2D ABnorm, ACnorm;
+        Vec2D ABOutNorm, ACOutNorm;
 
-        AB = Vec2D.sub(gjkInfo.simplex.get(1), gjkInfo.simplex.get(2));
+        /*
+         * The following variable is required to correctly identify if the left or right normal of AB and AC are required.
+         * That is, the modifier is applied to ABOutNorm and ACOutNorm.
+         * This modifier is required due to the nature of the triple product operation being implemented. The triple product
+         * produces a different vector depending on the winding of the points it is applied to. And because AB, AC will have
+         * opposite windings by definition, the modifier is flipped after the ABOutNorm is calculated.
+         */
+        int currentWindingModifier;
+
+        AB = Vec2D.sub(gjkInfo.simplex.get(1), gjkInfo.simplex.get(2)); // B - A
+        AC = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(2)); // C - A
+
         AO = gjkInfo.simplex.get(2).getNegated();
 
-        ABnorm = AB.getNormal().getNegated(); // Because we need the right norm.
+        currentWindingModifier = calculateInitialWindingModifier(AB, gjkInfo.simplex.get(0));
 
-        double t = ABnorm.dotProduct(AO);
-        // Somewhere past AB
+        //TODO, calculate the correct winding modifier.
+
+        //ABOutNorm = tripleProduct(AB, AO, AB);
+        ABOutNorm = AB.getNormal();
+        ABOutNorm.scaleBy(currentWindingModifier);
+        ABOutNorm.normalize(); //TODO remove?
+
+        double t = ABOutNorm.dotProduct(AO);
+
+        // Somewhere outside AB (outside the triangle's boundary)
         if (t > 0) {
 
             // Somewhere past A's voronoi region, inside AB's voro region
             if (AB.dotProduct(AO) > 0) {
-                gjkInfo.simplex.remove(2); // Remove C
-                gjkInfo.dir = ABnorm;
+                gjkInfo.simplex.remove(0); // Remove C
+                gjkInfo.dir = ABOutNorm;
                 gjkInfo.isColliding = false;
                 return;
             }
             // Inside A's voro region.
             else {
-                gjkInfo.simplex.remove(0); // Remove C.
                 gjkInfo.simplex.remove(1); // Remove B.
+                gjkInfo.simplex.remove(0); // Remove C.
                 gjkInfo.dir = AO;
                 gjkInfo.isColliding = false;
                 return;
             }
 
         }
-        else if (MiscTools.tolEquals(t, 0)) {
-            gjkInfo.simplex.remove(2); // Remove C
+        else if (MiscTools.tolEquals(t, 0)) { // Very close to AB.
+            gjkInfo.simplex.remove(0); // Remove C
             gjkInfo.setDir(Vec2D.ORIGIN);
             gjkInfo.isColliding = false;
             return;
         }
 
-        AC = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(2));
-        ACnorm = AC.getNormal();
-        t = ACnorm.dotProduct(AO);
-        // Somewhere past AC
-        if (ACnorm.dotProduct(AO) > 0) {
+        //Not in AB's line or A's voronoi region
+
+        //ACOutNorm = tripleProduct(AC, AO, AC);
+        ACOutNorm = AC.getNormal();
+        ACOutNorm.scaleBy(-currentWindingModifier);
+        ACOutNorm.normalize(); //TODO remove
+
+        t = ACOutNorm.dotProduct(AO);
+
+        // Somewhere outside AC (outside the triangle's boundary)
+        if (t > 0) {
 
             // Somewhere past A's voro region, inside AC's voro region.
             if (AC.dotProduct(AO) > 0) {
                 gjkInfo.simplex.remove(1); // Remove B
-                gjkInfo.dir = ACnorm;
+                gjkInfo.dir = ACOutNorm;
                 gjkInfo.isColliding = false;
                 return;
             }
             // Inside A's voronoi region.
             else {
-                gjkInfo.simplex.remove(0); // Remove C.
                 gjkInfo.simplex.remove(1); // Remove B.
+                gjkInfo.simplex.remove(0); // Remove C.
                 gjkInfo.dir = AO;
                 gjkInfo.isColliding = false;
                 return;
@@ -241,6 +267,49 @@ public final class CollisionCheckerGJKEPA2 {
     }
 
     /**
+     * Calculates the winding of the points of the current simplex.
+     * 
+     * @param AB
+     * @param C
+     * @return
+     */
+    private static int calculateInitialWindingModifier(Vec2D AB, Vec2D C) {
+
+        if (AB.perpDotProduct(C) >= 0)
+            return ANTICLOCKWISE_WINDING;
+
+        return CLOCKWISE_WINDING;
+    }
+
+    /**
+     * Computes the vector triple product of A, B, C.
+     * 
+     * @param A
+     * @param B
+     * @param C
+     * @return the vector result of <b>(A x B) x C</b>
+     */
+    private static Vec2D tripleProduct(Vec2D A, Vec2D B, Vec2D C) {
+        //B(C.dot(A)) – A(C.dot(B)) 
+        //return Vec2D.sub(Vec2D.getScaled(B, C.dotProduct(A)), (Vec2D.getScaled(A, C.dotProduct(B))));
+
+        //B(A.dot(C)) - C(A.dot(B))
+        return Vec2D.sub(Vec2D.getScaled(B, A.dotProduct(C)), Vec2D.getScaled(C, A.dotProduct(B)));
+
+        /*
+        Vec2D r = new Vec2D();
+        // perform a.dot(c)
+        double ac = A.getX() * C.getX() + A.getY() * C.getY();
+        // perform b.dot(c)
+        double bc = B.getX() * C.getX() + B.getY() * C.getY();
+        // perform b * a.dot(c) - a * b.dot(c)
+        r.setX(B.getX() * ac - A.getX() * bc);
+        r.setY(B.getY() * ac - A.getY() * bc);
+        return r;
+        */
+    }
+
+    /**
      * Returns the resolution vector if the two shapes are colliding, by using
      * the EPA algorithm. Otherwise, returns the minimum displacement between
      * the two shapes using GJK.<br>
@@ -257,6 +326,7 @@ public final class CollisionCheckerGJKEPA2 {
     public static SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
 
         SimplexDirStruct gjkInfo = computeSimplex(s1, s2);
+
         if (gjkInfo.isColliding)
             computeCollisionResolutionEPA(s1, s2, gjkInfo);
         else
