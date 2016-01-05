@@ -164,9 +164,6 @@ public final class CollisionCheckerGJKEPA2 {
         /*
          * The following variable is required to correctly identify if the left or right normal of AB and AC are required.
          * That is, the modifier is applied to ABOutNorm and ACOutNorm.
-         * This modifier is required due to the nature of the triple product operation being implemented. The triple product
-         * produces a different vector depending on the winding of the points it is applied to. And because AB, AC will have
-         * opposite windings by definition, the modifier is flipped after the ABOutNorm is calculated.
          */
         int currentWindingModifier;
 
@@ -177,10 +174,8 @@ public final class CollisionCheckerGJKEPA2 {
 
         currentWindingModifier = calculateInitialWindingModifier(AB, gjkInfo.simplex.get(0));
 
-        //ABOutNorm = tripleProduct(AB, AO, AB);
         ABOutNorm = AB.getNormal();
         ABOutNorm.scaleBy(currentWindingModifier);
-        //ABOutNorm.normalize(); //TODO remove?
 
         double t = ABOutNorm.dotProduct(AO);
 
@@ -213,10 +208,8 @@ public final class CollisionCheckerGJKEPA2 {
 
         //Not in AB's line or A's voronoi region
 
-        //ACOutNorm = tripleProduct(AC, AO, AC);
         ACOutNorm = AC.getNormal();
         ACOutNorm.scaleBy(-currentWindingModifier);
-        //ACOutNorm.normalize(); //TODO remove
 
         t = ACOutNorm.dotProduct(AO);
 
@@ -267,9 +260,9 @@ public final class CollisionCheckerGJKEPA2 {
     /**
      * Calculates the winding of the points of the current simplex.
      * 
-     * @param AB
-     * @param C
-     * @return
+     * @param AB any arbitrary edge of the triangular simplex.
+     * @param C the vertex that is not included in the above edge.
+     * @return the winding of the simplex ABC.
      */
     private static int calculateInitialWindingModifier(Vec2D AB, Vec2D C) {
 
