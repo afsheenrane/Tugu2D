@@ -28,7 +28,7 @@ public final class CollisionCheckerGJKEPA2 {
      */
     private static SimplexDirStruct computeSimplex(Shape s1, Shape s2) {
 
-        System.out.println(LinePolyTools.polyDifference(s1, s2));
+        //System.out.println(LinePolyTools.polyDifference(s1, s2));
 
         Vec2D newPt;
         SimplexDirStruct gjkInfo = new SimplexDirStruct();
@@ -177,12 +177,10 @@ public final class CollisionCheckerGJKEPA2 {
 
         currentWindingModifier = calculateInitialWindingModifier(AB, gjkInfo.simplex.get(0));
 
-        //TODO, calculate the correct winding modifier.
-
         //ABOutNorm = tripleProduct(AB, AO, AB);
         ABOutNorm = AB.getNormal();
         ABOutNorm.scaleBy(currentWindingModifier);
-        ABOutNorm.normalize(); //TODO remove?
+        //ABOutNorm.normalize(); //TODO remove?
 
         double t = ABOutNorm.dotProduct(AO);
 
@@ -218,7 +216,7 @@ public final class CollisionCheckerGJKEPA2 {
         //ACOutNorm = tripleProduct(AC, AO, AC);
         ACOutNorm = AC.getNormal();
         ACOutNorm.scaleBy(-currentWindingModifier);
-        ACOutNorm.normalize(); //TODO remove
+        //ACOutNorm.normalize(); //TODO remove
 
         t = ACOutNorm.dotProduct(AO);
 
@@ -279,34 +277,6 @@ public final class CollisionCheckerGJKEPA2 {
             return ANTICLOCKWISE_WINDING;
 
         return CLOCKWISE_WINDING;
-    }
-
-    /**
-     * Computes the vector triple product of A, B, C.
-     * 
-     * @param A
-     * @param B
-     * @param C
-     * @return the vector result of <b>(A x B) x C</b>
-     */
-    private static Vec2D tripleProduct(Vec2D A, Vec2D B, Vec2D C) {
-        //B(C.dot(A)) – A(C.dot(B)) 
-        //return Vec2D.sub(Vec2D.getScaled(B, C.dotProduct(A)), (Vec2D.getScaled(A, C.dotProduct(B))));
-
-        //B(A.dot(C)) - C(A.dot(B))
-        return Vec2D.sub(Vec2D.getScaled(B, A.dotProduct(C)), Vec2D.getScaled(C, A.dotProduct(B)));
-
-        /*
-        Vec2D r = new Vec2D();
-        // perform a.dot(c)
-        double ac = A.getX() * C.getX() + A.getY() * C.getY();
-        // perform b.dot(c)
-        double bc = B.getX() * C.getX() + B.getY() * C.getY();
-        // perform b * a.dot(c) - a * b.dot(c)
-        r.setX(B.getX() * ac - A.getX() * bc);
-        r.setY(B.getY() * ac - A.getY() * bc);
-        return r;
-        */
     }
 
     /**
@@ -461,9 +431,9 @@ public final class CollisionCheckerGJKEPA2 {
             double dist;
 
             //Find closest edge to the origin.
-            for (int i = 0; i < gjkInfo.simplex.size() - 1; i++) {
+            for (int i = 0; i < gjkInfo.simplex.size(); i++) {
 
-                int j = (i + 1 == gjkInfo.simplex.size() - 1) ? 0 : i + 1;
+                int j = (i + 1 == gjkInfo.simplex.size()) ? 0 : i + 1;
 
                 edge = new Vec2D[] { gjkInfo.simplex.get(i), gjkInfo.simplex.get(j) };
                 dist = LinePolyTools.ptToLineSegDisp(Vec2D.ORIGIN, edge).getSquaredLength();

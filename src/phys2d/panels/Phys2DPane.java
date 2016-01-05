@@ -40,11 +40,11 @@ public class Phys2DPane extends AnimatedPane {
     public void init() {
         // Add in the world boundaries
 
-        addWorldBounds("b");
-        // populateWithSmallSquares(entities);
-        // populateWithSmallCircles(entities);
+        addWorldBounds("a");
+        populateWithSmallSquares(entities);
+        populateWithSmallCircles(entities);
 
-        addRefSquares(300);
+        //addRefSquares(300);
 
         Shape s;
 
@@ -52,9 +52,9 @@ public class Phys2DPane extends AnimatedPane {
         s.setMaterial(Material.RUBBER);
         //entities.add(s);
 
-        s = new Square(new Vec2D(150, 200), 80, 0);
-        s.setMaterial(Material.REF10);
-        s.setVelocity(new Vec2D(2000, 0));
+        s = new Square(new Vec2D(150, 200), 40, 0);
+        s.setMaterial(Material.REF60);
+        s.setVelocity(new Vec2D(300, 40));
         //entities.add(s);
 
         s = new Square(new Vec2D(630, 805), 1, 0);
@@ -62,9 +62,9 @@ public class Phys2DPane extends AnimatedPane {
         s.setVelocity(new Vec2D(7500, 0));
         //entities.add(s);
 
-        s = new Circle(new Vec2D(300, 70), 30);
+        s = new Circle(new Vec2D(300, 150), 30); //For ground contact: [300,70],30
         s.setMaterial(Material.REF60);
-        s.setVelocity(new Vec2D(0, 0));
+        s.setVelocity(new Vec2D(-200, 80));
         //entities.add(s);
 
         // tester();
@@ -137,9 +137,8 @@ public class Phys2DPane extends AnimatedPane {
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 6; j++) {
 
-                Vec2D pos = MiscTools.genRandVecs(1, new Vec2D(20, 20),
-                        new Vec2D(970, 970))[0];
-                double size = 50;
+                Vec2D pos = MiscTools.genRandVecs(1, new Vec2D(20, 20), new Vec2D(970, 970))[0];
+                double size = 30;
                 double ang = 0;// MiscTools.genRandVecs(1, new Vec2D(-(Math.PI *
                                // 2f), 5),new Vec2D(Math.PI * 2f,10))[0].getX();
 
@@ -164,8 +163,7 @@ public class Phys2DPane extends AnimatedPane {
                                 new Vec2D(50 + radius, 50 + radius),
                                 new Vec2D(900 - radius, 900 - radius))[0],
                         radius);
-                s.setVelocity(MiscTools.genRandVecs(1, new Vec2D(-200, -200),
-                        new Vec2D(200, 200))[0]);
+                s.setVelocity(MiscTools.genRandVecs(1, new Vec2D(-200, -200), new Vec2D(200, 200))[0]);
                 // s.setMaterial(Material.REFLECTIUM);
                 entities.add(s);
             }
