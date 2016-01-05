@@ -211,6 +211,19 @@ public class Vec2D {
     }
 
     /**
+     * Computes the vector triple product of A, B, C.
+     * 
+     * @param A
+     * @param B
+     * @param C
+     * @return the vector result of <b>(A x B) x C</b>
+     */
+    public static Vec2D tripleProduct(Vec2D A, Vec2D B, Vec2D C) {
+        //B(A.dot(C)) - C(A.dot(B))
+        return Vec2D.sub(Vec2D.getScaled(B, A.dotProduct(C)), Vec2D.getScaled(C, A.dotProduct(B)));
+    }
+
+    /**
      * Find the angle between this vector and ref.
      * 
      * @param ref the reference vector.
