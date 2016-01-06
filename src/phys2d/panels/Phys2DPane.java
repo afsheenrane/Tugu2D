@@ -41,8 +41,8 @@ public class Phys2DPane extends AnimatedPane {
         // Add in the world boundaries
 
         addWorldBounds("a");
-        populateWithSmallSquares(entities);
-        populateWithSmallCircles(entities);
+        populateWithSmallSquares(entities, 10, 2000);
+        //populateWithSmallCircles(entities);
 
         //addRefSquares(300);
 
@@ -52,14 +52,14 @@ public class Phys2DPane extends AnimatedPane {
         s.setMaterial(Material.RUBBER);
         //entities.add(s);
 
-        s = new Square(new Vec2D(150, 200), 40, 0);
-        s.setMaterial(Material.REF60);
-        s.setVelocity(new Vec2D(300, 40));
+        s = new Square(new Vec2D(200, 250), 50, 0);
+        s.setMaterial(Material.REF70);
+        s.setVelocity(new Vec2D(300, 0));
         //entities.add(s);
 
-        s = new Square(new Vec2D(630, 805), 1, 0);
+        s = new Square(new Vec2D(200, 200), 50, 0);
         s.setMaterial(Material.REF70);
-        s.setVelocity(new Vec2D(7500, 0));
+        s.setVelocity(new Vec2D(300, 0));
         //entities.add(s);
 
         s = new Circle(new Vec2D(300, 150), 30); //For ground contact: [300,70],30
@@ -79,8 +79,8 @@ public class Phys2DPane extends AnimatedPane {
     @Override
     public void update() {
         sm.runManager(entities);
-        System.out.println(entities.get(1).getCOM());
-        System.out.println(++upCt);
+        //System.out.println(entities.get(1).getCOM());
+        //System.out.println(++upCt);
 
         if (upCt == 1) {
             System.out.println("break pt");
@@ -132,41 +132,37 @@ public class Phys2DPane extends AnimatedPane {
 
     }
 
-    private void populateWithSmallSquares(ArrayList<Shape> entities) {
+    private void populateWithSmallSquares(ArrayList<Shape> entities, int num, long seed) {
+
         Shape s;
-        for (int i = 0; i < 6; i++) {
-            for (int j = 0; j < 6; j++) {
+        Vec2D[] pos = MiscTools.genRandVecs(num, new Vec2D(20, 20), new Vec2D(970, 970), seed);
+        Vec2D[] vel = MiscTools.genRandVecs(num, new Vec2D(-150, -150), new Vec2D(150, 150), seed);
+        double size = 30;
+        double ang = 0;
 
-                Vec2D pos = MiscTools.genRandVecs(1, new Vec2D(20, 20), new Vec2D(970, 970))[0];
-                double size = 30;
-                double ang = 0;// MiscTools.genRandVecs(1, new Vec2D(-(Math.PI *
-                               // 2f), 5),new Vec2D(Math.PI * 2f,10))[0].getX();
+        Material m = Material.REF60;
 
-                s = new Square(pos, size, ang);
-                // s.setMaterial(Material.REFLECTIUM);
-                s.setVelocity(MiscTools.genRandVecs(1, new Vec2D(-150, -150),
-                        new Vec2D(150, 150))[0]);
-                // s.setMass(5);
-                // s.setVelocity(new Vec2D(40,70), updateRate);
-                entities.add(s);
-            }
+        for (int i = 0; i < num; i++) {
+            s = new Square(pos[i], size, ang);
+            s.setMaterial(m);
+            s.setVelocity(vel[i]);
+            entities.add(s);
         }
     }
 
-    private void populateWithSmallCircles(ArrayList<Shape> entities) {
+    private void populateWithSmallCircles(ArrayList<Shape> entities, int num, long seed) {
+
         Shape s;
-        int radius = 20;
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 2; j++) {
-                s = new Circle(
-                        MiscTools.genRandVecs(1,
-                                new Vec2D(50 + radius, 50 + radius),
-                                new Vec2D(900 - radius, 900 - radius))[0],
-                        radius);
-                s.setVelocity(MiscTools.genRandVecs(1, new Vec2D(-200, -200), new Vec2D(200, 200))[0]);
-                // s.setMaterial(Material.REFLECTIUM);
-                entities.add(s);
-            }
+        double radius = 20;
+        Vec2D[] pos = MiscTools.genRandVecs(num, new Vec2D(20, 20), new Vec2D(970, 970), seed);
+        Vec2D[] vel = MiscTools.genRandVecs(num, new Vec2D(-150, -150), new Vec2D(150, 150), seed);
+        Material m = Material.REF60;
+
+        for (int i = 0; i < num; i++) {
+            s = new Circle(pos[i], radius);
+            s.setMaterial(m);
+            s.setVelocity(vel[i]);
+            entities.add(s);
         }
     }
 
