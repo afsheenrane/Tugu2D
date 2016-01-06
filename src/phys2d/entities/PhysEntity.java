@@ -50,9 +50,9 @@ public abstract class PhysEntity {
     }
 
     /**
-     * Return the velocity in px/update
+     * Return the velocity in px/s
      * 
-     * @return the velocity in pixels/update
+     * @return the velocity in pixels/s
      */
     public Vec2D getVelocity() {
         return velocity;

@@ -147,7 +147,7 @@ public class SpeculativeManager2 extends CollisionManager {
              */
             double collisionTime = impendingCollisionChecker(s1, s2, gjkInfo);
             if (collisionTime >= 0) { // Impending coll.
-                System.out.println("full swept");
+                //System.out.println("full swept");
 
                 // Apply pre-collision world forces
                 addWorldForcesTo(s1, collisionTime);
@@ -199,8 +199,7 @@ public class SpeculativeManager2 extends CollisionManager {
      * @param s2 the second shape.
      * @param gjkInfo the result of running GJKEPA2 on the two shapes.
      */
-    private void computeCollisionForces(Shape s1, Shape s2,
-            SimplexDirStruct gjkInfo) {
+    private void computeCollisionForces(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
 
         Vec2D unitDisp = gjkInfo.getDir().getNormalized();
         Vec2D relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
@@ -234,7 +233,7 @@ public class SpeculativeManager2 extends CollisionManager {
         if (!tanVec.equals(Vec2D.ORIGIN))
             tanVec.normalize();
 
-        double fricMag = -Vec2D.dotProduct(relVel, tanVec);
+        double fricMag = -Vec2D.dotProduct(relVel, tanVec); //Because opposite direction
 
         fricMag /= s1.getInvMass() + s2.getInvMass();
 
@@ -261,9 +260,33 @@ public class SpeculativeManager2 extends CollisionManager {
         // friction is active and an object is moving very slowly. This should
         // stop objects creeping.
 
+        //        Vec2D velocityKillValue = getKillVelocityValue(s1, tanVec);
+        //        if (velocityKillValue != Vec2D.ORIGIN) {
+        //            //Negate it, because it represents the tangential velocity, not the friction direction
+        //            velocityKillValue.negate();
+        //            velocityKillValue.scaleBy(s1.getMass()); //Yeah yeah, it's a force now. Sue me on the naming scheme.
+        //
+        //            s1.addForce(velocityKillValue);
+        //        }
+        //        else {
+        //            s1.addForce(frictionForce.getNegated());
+        //        }
+        //
+        //        //Because we're checking ALONG the shape's velocity vector, not opposite to it.
+        //        velocityKillValue = getKillVelocityValue(s2, tanVec.getNegated());
+        //
+        //        if (velocityKillValue != Vec2D.ORIGIN) {
+        //            velocityKillValue.negate();
+        //            velocityKillValue.scaleBy(s2.getMass());
+        //
+        //            s2.addForce(velocityKillValue);
+        //        }
+        //        else {
+        //            s2.addForce(frictionForce);
+        //        }
+
         s1.addForce(frictionForce.getNegated());
         s2.addForce(frictionForce);
-
     }
 
     /**
@@ -304,6 +327,29 @@ public class SpeculativeManager2 extends CollisionManager {
         }
 
         return -1;
+    }
+
+    /**
+     * Advises whether the shape should be stationary along the given friction
+     * vector.
+     * 
+     * @param s the shape to check.
+     * @param tanVec the tangential vector along which friction is to be
+     *            applied.
+     * @return whether the Shape is moving very slowly along it's friction
+     *         vector. True when there is very little movement and the shape
+     *         should really just be stationary.
+     */
+    private Vec2D getKillVelocityValue(Shape s, Vec2D tanVec) {
+        final double SPEED_TOL = 0.5; //Magic number that works all right
+
+        Vec2D tanVel = s.getVelocity().vecProjection(tanVec);
+
+        if (tanVel.getSquaredLength() <= SPEED_TOL * SPEED_TOL) {
+            return tanVel;
+        }
+
+        return Vec2D.ORIGIN;
     }
 
     private void computeMinimumDisplacement(SimplexDirStruct gjkInfo) {
