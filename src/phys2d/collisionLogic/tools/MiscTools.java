@@ -55,19 +55,24 @@ public final class MiscTools {
         return getMin(points, Vec2D.getNegated(ref));
     }
 
+    public static Vec2D[] genRandVecs(int count, Vec2D floor, Vec2D ceiling) {
+        return genRandVecs(count, floor, ceiling, new Random().nextLong());
+    }
+
     /**
      * Generate a number of random vectors within the floor and ceiling
-     * parameters
+     * parameters.
      * 
-     * @param count the number of vectors to generate
-     * @param floor the lowest x and y values that can be generated
-     * @param ceiling the highest x and y values that can be generated
-     * @return a vector array of size count containing randomly generated
-     *         vectors
-     *         within the giving floor and ceiling parameters.
+     * @param count the number of vectors to generate.
+     * @param floor the lowest x and y values that can be generated.
+     * @param ceiling the highest x and y values that can be generated.
+     * @param seed the seed to use the for random generator.
+     * @return a vector array of size count containing randomly generated.
+     *         vectors within the giving floor and ceiling parameters.
      */
-    public static Vec2D[] genRandVecs(int count, Vec2D floor, Vec2D ceiling) {
-        Random randGen = new Random();
+    public static Vec2D[] genRandVecs(int count, Vec2D floor, Vec2D ceiling, long seed) {
+        System.out.println("seed: " + seed);
+        Random randGen = new Random(seed);
         Vec2D[] results = new Vec2D[count];
 
         double rx, ry;
