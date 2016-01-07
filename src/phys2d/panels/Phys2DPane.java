@@ -9,7 +9,6 @@ import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
 import phys2d.collisionLogic.collisionManagers.DiscreteManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager2;
-import phys2d.collisionLogic.tools.LinePolyTools;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
 import phys2d.entities.Vec2D;
@@ -54,9 +53,9 @@ public class Phys2DPane extends AnimatedPane {
         s.setMaterial(Material.RUBBER);
         //entities.add(s);
 
-        s = new Square(new Vec2D(200, 100), 30, 0);
+        s = new Square(new Vec2D(200, 400), 30, 0);
         s.setMaterial(Material.REF60);
-        s.setVelocity(new Vec2D(50, 0));
+        s.setVelocity(new Vec2D(0, 0));
         //entities.add(s);
 
         s = new Square(new Vec2D(800, 200), 50, 0);
@@ -71,7 +70,7 @@ public class Phys2DPane extends AnimatedPane {
 
         // tester();
 
-        System.out.println(LinePolyTools.polyDifference(entities.get(0), entities.get(1)));
+        //System.out.println(LinePolyTools.polyDifference(entities.get(0), entities.get(1)));
 
         // System.exit(0);
     }
@@ -81,10 +80,9 @@ public class Phys2DPane extends AnimatedPane {
     @Override
     public void update() {
         sm.runManager(entities);
-        System.out.println(entities.get(3).getVelocity().getX());
         System.out.println(++upCt);
 
-        if (upCt == 375) {
+        if (upCt == 20) {
             System.out.println("break pt");
         }
     }
@@ -95,9 +93,10 @@ public class Phys2DPane extends AnimatedPane {
 
         for (Shape entity : entities) {
             entity.draw(g2d, alpha);
+            entity.getVelocity().drawTranslatedVec(g2d, entity.getCOM());
         }
 
-        //sm.getCollisionTree().draw(g2d);
+        sm.getCollisionTree().draw(g2d);
 
     }
 

@@ -223,9 +223,6 @@ public class SpeculativeManager2 extends CollisionManager {
         s1.addForce(collForce);
         s2.addForce(collForce.getNegated());
 
-        s1.incrementMove(dt, 0);
-        s2.incrementMove(dt, 0);
-
         // calculate friction forces
         relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
         relVel.scaleBy(dt);
@@ -260,56 +257,59 @@ public class SpeculativeManager2 extends CollisionManager {
         // friction is active and an object is moving very slowly. This should
         // stop objects creeping.
 
-        //        Vec2D velocityKillValue = getKillVelocityValue(s1, tanVec);
-        //        if (velocityKillValue != Vec2D.ORIGIN) {
-        //            //Negate it, because it represents the tangential velocity, not the friction direction
-        //            velocityKillValue.negate();
-        //            velocityKillValue.scaleBy(s1.getMass()); //Yeah yeah, it's a force now. Sue me on the naming scheme.
-        //
-        //            s1.addForce(velocityKillValue);
-        //
-        //            /*
-        //             * Check for any floating point error inside the shape's velocity.
-        //             * The only way to kill tangential velocity in the \general\ case is to apply a force along the tangential vector.
-        //             * We can't just 0 out the velocity along the x or y component. 
-        //             * But very often, 0ing out the x/y component of velocity, IS the correct step. The force application itself might fail 
-        //             * by a miniscule amount (<1e-15), therefore, we must manually 0 out the component. 
-        //             */
-        //            s1.incrementMove(dt, 1);
-        //
-        //            if (MiscTools.tolEquals(s1.getVelocity().getX(), 0)) {
-        //                s1.getVelocity().setX(0);
-        //            }
-        //            movedShapes.add(s1);
-        //            System.out.println("killing fric1 " + s1.getClass().getSimpleName());
-        //        }
-        //        else { //Friction value high enough, no problemo!
-        //            s1.addForce(frictionForce.getNegated());
-        //        }
-        //
-        //        //Because we're checking ALONG the shape's velocity vector, not opposite to it.
-        //        velocityKillValue = getKillVelocityValue(s2, tanVec.getNegated());
-        //
-        //        if (velocityKillValue != Vec2D.ORIGIN) {
-        //            velocityKillValue.negate();
-        //            velocityKillValue.scaleBy(s2.getMass());
-        //
-        //            s2.addForce(velocityKillValue);
-        //
-        //            s2.incrementMove(dt, 1);
-        //
-        //            if (MiscTools.tolEquals(s2.getVelocity().getX(), 0)) {
-        //                s2.getVelocity().setX(0);
-        //            }
-        //            movedShapes.add(s2);
-        //            System.out.println("killing fric2 " + s2.getClass().getSimpleName());
-        //        }
-        //        else { //Friction value high enough, no problemo!
-        //            s2.addForce(frictionForce);
-        //        }
+        Vec2D velocityKillValue = getKillVelocityValue(s1, tanVec);
+        if (velocityKillValue != Vec2D.ORIGIN) {
+            //Negate it, because it represents the tangential velocity, not the friction direction
+            velocityKillValue.negate();
+            velocityKillValue.scaleBy(s1.getMass()); //Yeah yeah, it's a force now. Sue me on the naming scheme.
 
-        s1.addForce(frictionForce.getNegated());
-        s2.addForce(frictionForce);
+            s1.addForce(velocityKillValue);
+
+            /*
+             * Check for any floating point error inside the shape's velocity.
+             * The only way to kill tangential velocity in the \general\ case is to apply a force along the tangential vector.
+             * We can't just 0 out the velocity along the x or y component. 
+             * But very often, 0ing out the x/y component of velocity, IS the correct step. The force application itself might fail 
+             * by a miniscule amount (<1e-15), therefore, we must manually 0 out the component. 
+             */
+            s1.incrementMove(dt, 1);
+
+            if (MiscTools.tolEquals(s1.getVelocity().getX(), 0)) {
+                s1.getVelocity().setX(0);
+            }
+            movedShapes.add(s1);
+            System.out.println("killing fric1 " + s1.getClass().getSimpleName());
+        }
+        else { //Friction value high enough, no problemo!
+            s1.addForce(frictionForce.getNegated());
+        }
+
+        //Because we're checking ALONG the shape's velocity vector, not opposite to it.
+        velocityKillValue = getKillVelocityValue(s2, tanVec.getNegated());
+
+        if (velocityKillValue != Vec2D.ORIGIN) {
+            velocityKillValue.negate();
+            velocityKillValue.scaleBy(s2.getMass());
+
+            s2.addForce(velocityKillValue);
+
+            s2.incrementMove(dt, 1);
+
+            if (MiscTools.tolEquals(s2.getVelocity().getX(), 0)) {
+                s2.getVelocity().setX(0);
+            }
+            movedShapes.add(s2);
+            System.out.println("killing fric2 " + s2.getClass().getSimpleName());
+        }
+        else { //Friction value high enough, no problemo!
+            s2.addForce(frictionForce);
+        }
+
+        //        s1.addForce(frictionForce.getNegated());
+        //        s2.addForce(frictionForce);
+
+        s1.incrementMove(dt, 0);
+        s2.incrementMove(dt, 0);
     }
 
     /**
@@ -457,16 +457,18 @@ public class SpeculativeManager2 extends CollisionManager {
     @Override
     protected void addWorldForces(ArrayList<Shape> entities) {
         for (Shape s : entities) {
-            if (forcedShapes.add(s)) {
+            if (!forcedShapes.contains(s)) {
                 addWorldForcesTo(s, 1.0);
+                forcedShapes.add(s);
             }
         }
     }
 
     @Override
     protected void addWorldForcesTo(Shape entity, double increment) {
-        if (!forcedShapes.contains(entity))
+        if (!forcedShapes.contains(entity)) {
             addForceOfGravity(entity, increment);
+        }
     }
 
     @Override
