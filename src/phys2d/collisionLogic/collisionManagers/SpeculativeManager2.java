@@ -244,14 +244,14 @@ public class SpeculativeManager2 extends CollisionManager {
         Vec2D frictionForce = Vec2D.ORIGIN;
 
         if (Math.abs(fricMag) < collForce.getLength() * mu) {
-            if (!MiscTools.tolEquals(-fricMag, 0))
+            if (!MiscTools.tolEquals(-fricMag, 0, 1e-6))
                 frictionForce = tanVec.getScaled(-fricMag);
         }
         else {
             mu = Math.sqrt(Math.pow(s1.getMaterial().getDynFric(), 2)
                     + Math.pow(s2.getMaterial().getDynFric(), 2));
 
-            if (!MiscTools.tolEquals(-fricMag * mu, 0))
+            if (!MiscTools.tolEquals(-fricMag * mu, 0, 1e-6))
                 frictionForce = tanVec.getScaled(-fricMag * mu);
 
         }
@@ -267,8 +267,23 @@ public class SpeculativeManager2 extends CollisionManager {
         //            velocityKillValue.scaleBy(s1.getMass()); //Yeah yeah, it's a force now. Sue me on the naming scheme.
         //
         //            s1.addForce(velocityKillValue);
+        //
+        //            /*
+        //             * Check for any floating point error inside the shape's velocity.
+        //             * The only way to kill tangential velocity in the \general\ case is to apply a force along the tangential vector.
+        //             * We can't just 0 out the velocity along the x or y component. 
+        //             * But very often, 0ing out the x/y component of velocity, IS the correct step. The force application itself might fail 
+        //             * by a miniscule amount (<1e-15), therefore, we must manually 0 out the component. 
+        //             */
+        //            s1.incrementMove(dt, 1);
+        //
+        //            if (MiscTools.tolEquals(s1.getVelocity().getX(), 0)) {
+        //                s1.getVelocity().setX(0);
+        //            }
+        //            movedShapes.add(s1);
+        //            System.out.println("killing fric1 " + s1.getClass().getSimpleName());
         //        }
-        //        else {
+        //        else { //Friction value high enough, no problemo!
         //            s1.addForce(frictionForce.getNegated());
         //        }
         //
@@ -280,8 +295,16 @@ public class SpeculativeManager2 extends CollisionManager {
         //            velocityKillValue.scaleBy(s2.getMass());
         //
         //            s2.addForce(velocityKillValue);
+        //
+        //            s2.incrementMove(dt, 1);
+        //
+        //            if (MiscTools.tolEquals(s2.getVelocity().getX(), 0)) {
+        //                s2.getVelocity().setX(0);
+        //            }
+        //            movedShapes.add(s2);
+        //            System.out.println("killing fric2 " + s2.getClass().getSimpleName());
         //        }
-        //        else {
+        //        else { //Friction value high enough, no problemo!
         //            s2.addForce(frictionForce);
         //        }
 
@@ -341,6 +364,10 @@ public class SpeculativeManager2 extends CollisionManager {
      *         should really just be stationary.
      */
     private Vec2D getKillVelocityValue(Shape s, Vec2D tanVec) {
+
+        if (s instanceof WorldBound)
+            return Vec2D.ORIGIN;
+
         final double SPEED_TOL = 0.5; //Magic number that works all right
 
         Vec2D tanVel = s.getVelocity().vecProjection(tanVec);
