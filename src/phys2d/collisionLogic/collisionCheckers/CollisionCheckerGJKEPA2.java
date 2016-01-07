@@ -42,7 +42,7 @@ public final class CollisionCheckerGJKEPA2 {
 
         gjkInfo.dir = gjkInfo.simplex.get(0).getNegated();
 
-        while (count < 20) {
+        while (count < 50) {
             newPt = support(s1, s2, gjkInfo.dir);
 
             // If the new point is not past the origin, then the origin cannot be encapsulated.
@@ -62,6 +62,7 @@ public final class CollisionCheckerGJKEPA2 {
         }
 
         System.err.println("GJK TOL failure.");
+        System.exit(1);
         gjkInfo.isColliding = false;
         return gjkInfo;
 
@@ -139,17 +140,7 @@ public final class CollisionCheckerGJKEPA2 {
      */
     private static void computeTriangleSimplex(SimplexDirStruct gjkInfo) {
 
-        // @formatter:off
-        /*
-         * Triangle:
-         * ....A....
-         * .../.\...
-         * ../...\..
-         * .B_____C.
-         * 
-         * simplex mapping: A=2, B=1, C=0
-         */
-        // @formatter:on
+        //simplex mapping: A=2, B=1, C=0
 
         /*
          * A is the newest point added. So we dont have to check edge BC because
@@ -459,26 +450,9 @@ public final class CollisionCheckerGJKEPA2 {
         }
 
         System.err.println("EPA v2 checker failure!");
-
+        System.exit(1);
         gjkInfo.dir = Vec2D.ORIGIN;
         return;
-    }
-
-    /**
-     * Compute the relative displacement of p from the line.
-     * 
-     * @param p the point to check.
-     * @param line the line to check p's displacement from.
-     * @return a number directly proportional to the point's displacement from
-     *         the line. <b> This is not an actual displacement.</b>
-     */
-    private static double computeRelativeDist(Vec2D p, Vec2D[] line) {
-        Vec2D lineNorm = Vec2D.sub(line[1], line[0]).getNormal();
-        Vec2D relVec = Vec2D.sub(p, line[0]);
-
-        double dist = relVec.dotProduct(lineNorm);
-
-        return Math.abs(dist);
     }
 
     /**
