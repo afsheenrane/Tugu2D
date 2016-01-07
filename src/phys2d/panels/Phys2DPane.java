@@ -41,7 +41,9 @@ public class Phys2DPane extends AnimatedPane {
         // Add in the world boundaries
 
         addWorldBounds("a");
-        populateWithSmallSquares(entities, 10, 2000);
+        //populateWithSmallSquares(entities, 5, new Random().nextLong());
+        populateWithSmallSquares(entities, 5, 7080428363394061133l);
+
         //populateWithSmallCircles(entities);
 
         //addRefSquares(300);
@@ -52,14 +54,14 @@ public class Phys2DPane extends AnimatedPane {
         s.setMaterial(Material.RUBBER);
         //entities.add(s);
 
-        s = new Square(new Vec2D(200, 250), 50, 0);
-        s.setMaterial(Material.REF70);
-        s.setVelocity(new Vec2D(300, 0));
+        s = new Square(new Vec2D(200, 100), 30, 0);
+        s.setMaterial(Material.REF60);
+        s.setVelocity(new Vec2D(50, 0));
         //entities.add(s);
 
-        s = new Square(new Vec2D(200, 200), 50, 0);
+        s = new Square(new Vec2D(800, 200), 50, 0);
         s.setMaterial(Material.REF70);
-        s.setVelocity(new Vec2D(300, 0));
+        s.setVelocity(new Vec2D(-40, 0));
         //entities.add(s);
 
         s = new Circle(new Vec2D(300, 150), 30); //For ground contact: [300,70],30
@@ -79,10 +81,10 @@ public class Phys2DPane extends AnimatedPane {
     @Override
     public void update() {
         sm.runManager(entities);
-        //System.out.println(entities.get(1).getCOM());
-        //System.out.println(++upCt);
+        System.out.println(entities.get(3).getVelocity().getX());
+        System.out.println(++upCt);
 
-        if (upCt == 1) {
+        if (upCt == 375) {
             System.out.println("break pt");
         }
     }
