@@ -305,8 +305,8 @@ public class SpeculativeManager2 extends CollisionManager {
             s2.addForce(frictionForce);
         }
 
-        //        s1.addForce(frictionForce.getNegated());
-        //        s2.addForce(frictionForce);
+        //s1.addForce(frictionForce.getNegated());
+        //s2.addForce(frictionForce);
 
         s1.incrementMove(dt, 0);
         s2.incrementMove(dt, 0);
