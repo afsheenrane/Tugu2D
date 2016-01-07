@@ -169,8 +169,7 @@ public class Circle extends Shape {
 
         // Draw COM
         g2d.setColor(Color.RED);
-        g2d.drawString(centerOfMass + "", (int) centerOfMass.getX() - 35,
-                Phys2DMain.YRES - (int) centerOfMass.getY() - 13);
+        //g2d.drawString(centerOfMass + "", (int) centerOfMass.getX() - 35, Phys2DMain.YRES - (int) centerOfMass.getY() - 13);
 
         g2d.fillOval(
                 (int) Math.round(((points[0].getX() - 1) * alpha) + ((prevPos.get(0).getX() - 1) * (1.0 - alpha))),

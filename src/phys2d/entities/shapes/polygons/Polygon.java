@@ -504,7 +504,7 @@ public class Polygon extends Shape {
 
         yInterp = Phys2DMain.YRES - yInterp;
 
-        g2d.drawString(centerOfMass + "", xInterp - 35, yInterp - 13);
+        //g2d.drawString(centerOfMass + "", xInterp - 35, yInterp - 13);
         g2d.fillOval(xInterp, yInterp, 3, 3);
 
         // if mode 1, draw AABB

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
+import java.util.Random;
 
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
@@ -40,10 +41,10 @@ public class Phys2DPane extends AnimatedPane {
         // Add in the world boundaries
 
         addWorldBounds("a");
-        //populateWithSmallSquares(entities, 5, new Random().nextLong());
-        populateWithSmallSquares(entities, 5, 7080428363394061133l);
+        populateWithSmallSquares(entities, 20, new Random().nextLong());
+        //populateWithSmallSquares(entities, 5, 7080428363394061133l);
 
-        //populateWithSmallCircles(entities);
+        populateWithSmallCircles(entities, 20, new Random().nextLong());
 
         //addRefSquares(300);
 
@@ -93,10 +94,10 @@ public class Phys2DPane extends AnimatedPane {
 
         for (Shape entity : entities) {
             entity.draw(g2d, alpha);
-            entity.getVelocity().drawTranslatedVec(g2d, entity.getCOM());
+            //entity.getVelocity().drawTranslatedVec(g2d, entity.getCOM());
         }
 
-        sm.getCollisionTree().draw(g2d);
+        //sm.getCollisionTree().draw(g2d);
 
     }
 
@@ -154,7 +155,7 @@ public class Phys2DPane extends AnimatedPane {
     private void populateWithSmallCircles(ArrayList<Shape> entities, int num, long seed) {
 
         Shape s;
-        double radius = 20;
+        double radius = 15;
         Vec2D[] pos = MiscTools.genRandVecs(num, new Vec2D(20, 20), new Vec2D(970, 970), seed);
         Vec2D[] vel = MiscTools.genRandVecs(num, new Vec2D(-150, -150), new Vec2D(150, 150), seed);
         Material m = Material.REF60;
