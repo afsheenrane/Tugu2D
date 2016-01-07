@@ -120,4 +120,18 @@ public final class MiscTools {
         final double TOL = 0.001;
         return Math.abs(t1 - t2) < TOL;
     }
+
+    /**
+     * Checks whether two doubles are equal to each other given a specific
+     * tolerance.
+     * 
+     * @param t1 the first double.
+     * @param t2 the second double.
+     * @param TOL the tolerance to check equality to.
+     * @return whether t1 almost equals t2.
+     */
+    public static boolean tolEquals(double t1, double t2, double TOL) {
+        return Math.abs(t1 - t2) < TOL;
+    }
+
 }
