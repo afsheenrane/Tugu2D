@@ -2,6 +2,8 @@ package phys2d.entities;
 
 import java.awt.Graphics2D;
 
+import phys2d.Phys2DMain;
+
 public class Vec2D {
 
     public static final Vec2D ORIGIN = new Vec2D();
@@ -325,7 +327,7 @@ public class Vec2D {
      * @param g2d
      */
     public void drawPoint(Graphics2D g2d) {
-        g2d.fillOval((int) x - 1, (int) y - 1, 3, 3);
+        g2d.fillOval((int) x - 1, Phys2DMain.YRES - (int) y - 1, 3, 3);
     }
 
     /**
@@ -334,10 +336,9 @@ public class Vec2D {
      * @param g2d
      */
     public void drawVector(Graphics2D g2d) {
-        g2d.drawLine(0, 0, (int) x, (int) y);
-        g2d.drawString(String.format("[%.2f, %.2f]", x, y), (int) x - 20,
-                (int) y - 10);
-        g2d.fillOval((int) x - 1, (int) y - 1, 2, 2);
+        g2d.drawLine(0, Phys2DMain.YRES, (int) x, Phys2DMain.YRES - (int) y);
+        g2d.drawString(String.format("[%.2f, %.2f]", x, Phys2DMain.YRES - y), (int) x - 20, Phys2DMain.YRES - (int) y - 10);
+        g2d.fillOval((int) x - 1, Phys2DMain.YRES - (int) y - 1, 2, 2);
     }
 
     /**
@@ -347,7 +348,7 @@ public class Vec2D {
      * @param trans the displacement vector from the origin.
      */
     public void drawTranslatedVec(Graphics2D g2d, Vec2D trans) {
-        g2d.drawLine((int) trans.x, (int) trans.y, (int) x, (int) y);
+        g2d.drawLine((int) trans.x, Phys2DMain.YRES - (int) trans.y, (int) (x + trans.x), Phys2DMain.YRES - (int) (y + trans.y));
     }
 
     /**
