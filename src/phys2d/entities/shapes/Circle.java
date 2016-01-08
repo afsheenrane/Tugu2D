@@ -2,7 +2,6 @@ package phys2d.entities.shapes;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
 import phys2d.entities.Material;
@@ -39,8 +38,8 @@ public class Circle extends Shape {
      */
     public Circle(Vec2D[] pos, double radius, Material material) {
         super(pos, pos[0], 0, 10);
-        this.prevPos = new ArrayList<Vec2D>(2);
-        prevPos.add(pos[0]);
+        this.prevPos = new Vec2D[1];
+        prevPos[0] = pos[0];
         this.material = material;
         double temp = Math.PI * (radius * radius);
         temp /= 10000.0; // unit conversion cm^2 -> m^2
@@ -57,8 +56,7 @@ public class Circle extends Shape {
     @Override
     public void move(double dt) {
 
-        prevPos = new ArrayList<Vec2D>(1);
-        prevPos.add(centerOfMass);
+        prevPos[0] = this.centerOfMass;
 
         // Symplectic euler integrator
         Vec2D accel = Vec2D.getScaled(netForce, invMass);
@@ -71,8 +69,7 @@ public class Circle extends Shape {
 
     @Override
     public void incrementMove(double dt, double modifier) {
-        prevPos = new ArrayList<Vec2D>(1);
-        prevPos.add(centerOfMass);
+        prevPos[0] = this.centerOfMass;
 
         // Symplectic euler integrator
         Vec2D accel = Vec2D.getScaled(netForce, invMass);
@@ -156,8 +153,8 @@ public class Circle extends Shape {
 
         int xInterp, yInterp; // The interpolated positions
 
-        xInterp = (int) Math.round(((points[0].getX() - radius) * alpha) + ((prevPos.get(0).getX() - radius) * (1.0 - alpha)));
-        yInterp = (int) Math.round(((points[0].getY() + radius) * alpha) + ((prevPos.get(0).getY() + radius) * (1.0 - alpha)));
+        xInterp = (int) Math.round(((points[0].getX() - radius) * alpha) + ((prevPos[0].getX() - radius) * (1.0 - alpha)));
+        yInterp = (int) Math.round(((points[0].getY() + radius) * alpha) + ((prevPos[0].getY() + radius) * (1.0 - alpha)));
         yInterp = Phys2DMain.YRES - yInterp;
 
         // Inner circle
@@ -172,8 +169,8 @@ public class Circle extends Shape {
         //g2d.drawString(centerOfMass + "", (int) centerOfMass.getX() - 35, Phys2DMain.YRES - (int) centerOfMass.getY() - 13);
 
         g2d.fillOval(
-                (int) Math.round(((points[0].getX() - 1) * alpha) + ((prevPos.get(0).getX() - 1) * (1.0 - alpha))),
-                Phys2DMain.YRES - (int) Math.round(((points[0].getY() - 1) * alpha) + ((prevPos.get(0).getY() - 1) * (1.0
+                (int) Math.round(((points[0].getX() - 1) * alpha) + ((prevPos[0].getX() - 1) * (1.0 - alpha))),
+                Phys2DMain.YRES - (int) Math.round(((points[0].getY() - 1) * alpha) + ((prevPos[0].getY() - 1) * (1.0
                         - alpha))),
                 3, 3);
 

@@ -1,7 +1,6 @@
 package phys2d.entities.shapes;
 
 import java.awt.Graphics2D;
-import java.util.ArrayList;
 
 import phys2d.entities.Material;
 import phys2d.entities.PhysEntity;
@@ -10,7 +9,7 @@ import phys2d.entities.Vec2D;
 public abstract class Shape extends PhysEntity {
 
     protected Vec2D[] points;
-    protected ArrayList<Vec2D> prevPos;
+    protected Vec2D[] prevPos;
 
     protected double angle; // Angle CCW from +ve axis
     protected double area = 0;
