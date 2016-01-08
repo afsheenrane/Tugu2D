@@ -20,6 +20,8 @@ public abstract class CollisionManager {
     protected BSPTree collisionTree;
     protected final double dt;
 
+    protected double g = -100.0; // m/s^2
+
     public CollisionManager(double dt) {
         this.dt = dt;
     }
@@ -76,7 +78,7 @@ public abstract class CollisionManager {
     }
 
     protected void addForceOfGravity(Shape s, double increment) {
-        final double g = -100.0; // m/s^2
+
         Vec2D weightForce = new Vec2D(0, g);
         weightForce.scaleBy(s.getMass());
         weightForce.scaleBy(increment);
@@ -105,5 +107,14 @@ public abstract class CollisionManager {
      */
     protected void addWorldForcesTo(Shape entity, double increment) {
         addForceOfGravity(entity, increment);
+    }
+
+    /**
+     * Sets the force of gravity in the simulation to g.
+     * 
+     * @param g the force of gravity to set.
+     */
+    public void setForceOfGravity(double g) {
+        this.g = g;
     }
 }
