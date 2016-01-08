@@ -41,12 +41,12 @@ public class Phys2DPane extends AnimatedPane {
         // Add in the world boundaries
 
         addWorldBounds("a");
-        populateWithSmallSquares(entities, 20, new Random().nextLong());
-        //populateWithSmallSquares(entities, 5, 7080428363394061133l);
+        populateWithSmallSquares(entities, 30, new Random().nextLong());
+        // populateWithSmallSquares(entities, 5, 8214902465421688640l);
 
-        populateWithSmallCircles(entities, 20, new Random().nextLong());
-
-        //addRefSquares(300);
+        populateWithSmallCircles(entities, 30, new Random().nextLong());
+        //populateWithSmallCircles(entities, 16, -3426968064628761430l);
+        //addRefSquares(700);
 
         Shape s;
 
@@ -69,6 +69,8 @@ public class Phys2DPane extends AnimatedPane {
         s.setVelocity(new Vec2D(-200, 80));
         //entities.add(s);
 
+        sm.setForceOfGravity(-100);
+
         // tester();
 
         //System.out.println(LinePolyTools.polyDifference(entities.get(0), entities.get(1)));
@@ -80,8 +82,11 @@ public class Phys2DPane extends AnimatedPane {
 
     @Override
     public void update() {
+        long t = System.nanoTime();
+        long tn = 0;
         sm.runManager(entities);
-        System.out.println(++upCt);
+        System.out.println((System.nanoTime() - t) / 1e6 + "    " + dt * 1000);
+        //System.out.println(++upCt);
 
         if (upCt == 20) {
             System.out.println("break pt");
@@ -138,11 +143,11 @@ public class Phys2DPane extends AnimatedPane {
 
         Shape s;
         Vec2D[] pos = MiscTools.genRandVecs(num, new Vec2D(20, 20), new Vec2D(970, 970), seed);
-        Vec2D[] vel = MiscTools.genRandVecs(num, new Vec2D(-150, -150), new Vec2D(150, 150), seed);
-        double size = 30;
+        Vec2D[] vel = MiscTools.genRandVecs(num, new Vec2D(-250, -250), new Vec2D(250, 250), seed);
+        double size = 20;
         double ang = 0;
 
-        Material m = Material.REF60;
+        Material m = Material.REF70;
 
         for (int i = 0; i < num; i++) {
             s = new Square(pos[i], size, ang);
@@ -155,10 +160,10 @@ public class Phys2DPane extends AnimatedPane {
     private void populateWithSmallCircles(ArrayList<Shape> entities, int num, long seed) {
 
         Shape s;
-        double radius = 15;
+        double radius = 10;
         Vec2D[] pos = MiscTools.genRandVecs(num, new Vec2D(20, 20), new Vec2D(970, 970), seed);
-        Vec2D[] vel = MiscTools.genRandVecs(num, new Vec2D(-150, -150), new Vec2D(150, 150), seed);
-        Material m = Material.REF60;
+        Vec2D[] vel = MiscTools.genRandVecs(num, new Vec2D(-250, -250), new Vec2D(250, 250), seed);
+        Material m = Material.REF70;
 
         for (int i = 0; i < num; i++) {
             s = new Circle(pos[i], radius);
