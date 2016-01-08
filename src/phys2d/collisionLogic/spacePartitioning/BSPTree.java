@@ -16,8 +16,8 @@ public class BSPTree {
     public static final int HORIZONTAL_SPLIT = -1;
     public static final int VERTICAL_SPLIT = 1;
 
-    protected static final int MAX_ITEMS = 3;
-    protected static int DEPTH_CAP = 20; // TODO make protected from public
+    protected static final int MAX_ITEMS = 4;
+    protected static int DEPTH_CAP = 11; // TODO make protected from public
 
     protected int depth = 0;
 
