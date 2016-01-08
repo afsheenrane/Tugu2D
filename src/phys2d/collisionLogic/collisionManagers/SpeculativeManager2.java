@@ -95,8 +95,7 @@ public class SpeculativeManager2 extends CollisionManager {
              */
             for (int i = 0; i < group.length; i++) {
                 for (int j = i + 1; j < group.length; j++) {
-                    if (!(group[i] instanceof WorldBound
-                            && group[j] instanceof WorldBound)
+                    if (!(group[i] instanceof WorldBound && group[j] instanceof WorldBound)
                             && collidedPairs.add(new CollisionPair(group[i], group[j]))) {
                         resolveCollision(group[i], group[j]);
                     }
@@ -211,12 +210,10 @@ public class SpeculativeManager2 extends CollisionManager {
         double relNormSp = relVel.dotProduct(unitDisp);
 
         // This restitution approximation will give pretty believable results.
-        double restitution = Math.min(s1.getMaterial().getRestitution(),
-                s2.getMaterial().getRestitution());
+        double restitution = Math.min(s1.getMaterial().getRestitution(), s2.getMaterial().getRestitution());
 
         // This formula was made almost a year ago. I'm pretty sure it works.
-        Vec2D collForce = Vec2D.getScaled(unitDisp,
-                -(1 + restitution) * relNormSp * (1.0 / dt));
+        Vec2D collForce = Vec2D.getScaled(unitDisp, -(1 + restitution) * relNormSp * (1.0 / dt));
 
         collForce.scaleBy(1.0 / (s1.getInvMass() + s2.getInvMass()));
 
@@ -227,6 +224,7 @@ public class SpeculativeManager2 extends CollisionManager {
         relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
         relVel.scaleBy(dt);
         Vec2D tanVec = Vec2D.sub(relVel, relVel.vecProjection(unitDisp));
+
         if (!tanVec.equals(Vec2D.ORIGIN))
             tanVec.normalize();
 
@@ -245,20 +243,19 @@ public class SpeculativeManager2 extends CollisionManager {
                 frictionForce = tanVec.getScaled(-fricMag);
         }
         else {
-            mu = Math.sqrt(Math.pow(s1.getMaterial().getDynFric(), 2)
-                    + Math.pow(s2.getMaterial().getDynFric(), 2));
+            mu = Math.sqrt(Math.pow(s1.getMaterial().getDynFric(), 2) + Math.pow(s2.getMaterial().getDynFric(), 2));
 
             if (!MiscTools.tolEquals(-fricMag * mu, 0, 1e-6))
                 frictionForce = tanVec.getScaled(-fricMag * mu);
 
         }
 
-        // TODO implement a "kill all velocity" method for use when static
-        // friction is active and an object is moving very slowly. This should
-        // stop objects creeping.
+        // The following is a "kill all velocity" routine for when static friction is active and 
+        // an object is moving very slowly. This should stop objects creeping.
 
         Vec2D velocityKillValue = getKillVelocityValue(s1, tanVec);
         if (velocityKillValue != Vec2D.ORIGIN) {
+
             //Negate it, because it represents the tangential velocity, not the friction direction
             velocityKillValue.negate();
             velocityKillValue.scaleBy(s1.getMass()); //Yeah yeah, it's a force now. Sue me on the naming scheme.
@@ -277,8 +274,11 @@ public class SpeculativeManager2 extends CollisionManager {
             if (MiscTools.tolEquals(s1.getVelocity().getX(), 0)) {
                 s1.getVelocity().setX(0);
             }
+            if (MiscTools.tolEquals(s1.getVelocity().getY(), 0)) {
+                s1.getVelocity().setY(0);
+            }
+
             movedShapes.add(s1);
-            System.out.println("killing fric1 " + s1.getClass().getSimpleName());
         }
         else { //Friction value high enough, no problemo!
             s1.addForce(frictionForce.getNegated());
@@ -298,15 +298,15 @@ public class SpeculativeManager2 extends CollisionManager {
             if (MiscTools.tolEquals(s2.getVelocity().getX(), 0)) {
                 s2.getVelocity().setX(0);
             }
+            if (MiscTools.tolEquals(s2.getVelocity().getY(), 0)) {
+                s2.getVelocity().setY(0);
+            }
+
             movedShapes.add(s2);
-            System.out.println("killing fric2 " + s2.getClass().getSimpleName());
         }
         else { //Friction value high enough, no problemo!
             s2.addForce(frictionForce);
         }
-
-        //s1.addForce(frictionForce.getNegated());
-        //s2.addForce(frictionForce);
 
         s1.incrementMove(dt, 0);
         s2.incrementMove(dt, 0);
