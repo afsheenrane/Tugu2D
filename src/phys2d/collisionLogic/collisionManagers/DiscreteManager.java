@@ -18,7 +18,6 @@ public final class DiscreteManager extends CollisionManager {
         super(dt);
     }
 
-    @Override
     public BSPTree getCollisionTree() {
         return collisionTree;
     }

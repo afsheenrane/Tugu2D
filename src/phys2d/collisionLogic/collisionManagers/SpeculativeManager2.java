@@ -9,8 +9,8 @@ import java.util.HashSet;
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
 import phys2d.collisionLogic.collisionCheckers.SimplexDirStruct;
-import phys2d.collisionLogic.spacePartitioning.BSPTree;
-import phys2d.collisionLogic.spacePartitioning.SweptBSPTree;
+import phys2d.collisionLogic.spacePartitioning.SpacePartitioningTree;
+import phys2d.collisionLogic.spacePartitioning.SweptQuadTree;
 import phys2d.collisionLogic.tools.CollisionPair;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Vec2D;
@@ -29,7 +29,7 @@ import phys2d.entities.shapes.polygons.WorldBound;
  */
 public class SpeculativeManager2 extends CollisionManager {
 
-    //private final SweptBSPTree collisionTree;
+    private final SpacePartitioningTree collisionTree;
 
     /**
      * Keeps track of all objects which have been moved for the current
@@ -60,8 +60,11 @@ public class SpeculativeManager2 extends CollisionManager {
      */
     public SpeculativeManager2(double dt) {
         super(dt);
-        collisionTree = new SweptBSPTree(new Vec2D[] { new Vec2D(-25, -25),
-                new Vec2D(Phys2DMain.XRES + 25, Phys2DMain.YRES + 25) }, BSPTree.HORIZONTAL_SPLIT, 1, dt);
+        collisionTree = new SweptQuadTree(new Vec2D[] { new Vec2D(-10, -10),
+                new Vec2D(Phys2DMain.XRES + 10, Phys2DMain.YRES + 10) }, 1, dt);
+
+        //collisionTree = new SweptBSPTree(new Vec2D[] { new Vec2D(-10, -10),
+        //       new Vec2D(Phys2DMain.XRES + 10, Phys2DMain.YRES + 10) }, BSPTree.HORIZONTAL_SPLIT, 1, dt);
 
         collidedPairs = new HashSet<CollisionPair>();
 
@@ -73,7 +76,6 @@ public class SpeculativeManager2 extends CollisionManager {
     @Override
     protected void manageCollisions(ArrayList<Shape> entities) {
 
-        long t = System.nanoTime();
         collisionTree.refresh();
 
         collidedPairs.clear();
@@ -86,9 +88,6 @@ public class SpeculativeManager2 extends CollisionManager {
 
         collisionGroups = collisionTree.getPossibleCollisions();
 
-        System.out.println("tree time: " + (System.nanoTime() - t) / 1e6);
-
-        t = System.nanoTime();
         for (Shape[] group : collisionGroups) { // For each group
 
             /*
@@ -105,7 +104,6 @@ public class SpeculativeManager2 extends CollisionManager {
                 }
             }
         }
-        System.out.println("res time: " + (System.nanoTime() - t) / 1e6);
 
         // The following is just to simulate full brute force without space partitioning
         //        for (int i = 0; i < entities.size(); i++) {
@@ -484,8 +482,12 @@ public class SpeculativeManager2 extends CollisionManager {
         }
     }
 
-    @Override
-    public BSPTree getCollisionTree() {
+    /**
+     * Return the collision tree being used to partition the entities.
+     * 
+     * @return the space partitioning binary tree.
+     */
+    public SpacePartitioningTree getCollisionTree() {
         return collisionTree;
     }
 

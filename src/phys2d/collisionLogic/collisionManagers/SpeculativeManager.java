@@ -18,11 +18,6 @@ public final class SpeculativeManager extends CollisionManager {
         super(dt);
     }
 
-    @Override
-    public BSPTree getCollisionTree() {
-        return collisionTree;
-    }
-
     private void checkAndResolveCollisions(Shape[] shapes) {
 
         collisionTree = new SweptBSPTree(new Vec2D[] { new Vec2D(-25, -25),
@@ -144,13 +139,13 @@ public final class SpeculativeManager extends CollisionManager {
                                                                // along
                                                                // collision
                                                                // normal
-            // System.out.println("relNormSpeed: " + relNormSpeed);
-            // System.out.println("i: " + i);
-            // if a collision is imminent next frame. That is, if the relative
-            // normal velocity (px/dt) is greater than the distance between the
-            // objects
-            // Unless ofcourse a collision has already happened, then immediate
-            // resolve the collision.
+                                                               // System.out.println("relNormSpeed: " + relNormSpeed);
+                                                               // System.out.println("i: " + i);
+                                                               // if a collision is imminent next frame. That is, if the relative
+                                                               // normal velocity (px/dt) is greater than the distance between the
+                                                               // objects
+                                                               // Unless ofcourse a collision has already happened, then immediate
+                                                               // resolve the collision.
             if (i == 0) {
                 if (relNormSpeed >= disp.getLength() || isColliding) {
                     System.out.println("disp: " + disp);
