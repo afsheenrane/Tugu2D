@@ -10,13 +10,10 @@ import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
 import phys2d.entities.shapes.polygons.WorldBound;
 
-public class BSPTree {
+public class BSPTree extends SpacePartitioningTree {
 
     public static final int HORIZONTAL_SPLIT = -1;
     public static final int VERTICAL_SPLIT = 1;
-
-    protected static final int MAX_ITEMS = 4;
-    protected static int DEPTH_CAP = 12; // TODO make protected from public
 
     protected int depth = 0;
 
@@ -35,6 +32,7 @@ public class BSPTree {
      * @param level the current level of this node.
      */
     public BSPTree(Vec2D[] bounds, int splitMode, int level) {
+        super(12, 4);
         this.bounds = bounds;
         this.splitMode = splitMode;
         this.depth = level;
@@ -43,7 +41,7 @@ public class BSPTree {
         children = new BSPTree[2];
     }
 
-    public static void calculateDepthCap(ArrayList<Shape> shapes) {
+    public static int calculateDepthCap(ArrayList<Shape> shapes) {
         Vec2D[] aabb;
         double avgBound = 0;
         double wbs = 0; // world bounds
@@ -74,21 +72,7 @@ public class BSPTree {
         }
         cap = (int) Math.ceil(cap * 2.0);
         cap--;
-        DEPTH_CAP = cap;
-    }
-
-    /**
-     * Clears this BSPTree and all its children
-     */
-    public void clear() {
-        items.clear();
-
-        for (BSPTree child : children) {
-            if (child != null) {
-                child.clear();
-                child = null;
-            }
-        }
+        return cap;
     }
 
     // http://gamedevelopment.tutsplus.com/tutorials/quick-tip-use-quadtrees-to-detect-likely-collisions-in-2d-space--gamedev-374
@@ -189,6 +173,7 @@ public class BSPTree {
      * 
      * @param s the shape to insert
      */
+    @Override
     public void insert(Shape s) {
         // if no children, try adding to parent
 
@@ -219,7 +204,7 @@ public class BSPTree {
 
                 // see which items can be offloaded into the children nodes
                 int insertionSide = getInsertionSide(items.get(i));
-                int x = 0;
+
                 if (insertionSide != -1) { // if a valid insertion side is found, insert the item into that side
                     children[insertionSide].insert(items.remove(i));
                 }
@@ -231,11 +216,13 @@ public class BSPTree {
         }
     }
 
+    @Deprecated
     public Shape[] getPossibleColliders(Shape s) {
         ArrayList<Shape> possibleColliders = new ArrayList<Shape>(5);
         return getPossibleCollidersHelper(s, possibleColliders).toArray(new Shape[] {});
     }
 
+    @Deprecated
     protected ArrayList<Shape> getPossibleCollidersHelper(Shape s, ArrayList<Shape> colliders) {
         int shapeSide = getInsertionSide(s); // Get which side the shape fits
                                              // into
@@ -283,6 +270,7 @@ public class BSPTree {
      * @return an arraylist of all shape groups that need to be checked in the
      *         narrowphase.
      */
+    @Override
     public ArrayList<Shape[]> getPossibleCollisions() {
         ArrayList<Shape[]> collisionGroups = new ArrayList<Shape[]>();
         getCollisionGroupsHelper(collisionGroups);
@@ -292,11 +280,13 @@ public class BSPTree {
     /**
      * Cleans this tree by reseting it's children and items.
      */
+    @Override
     public void refresh() {
         items = new ArrayList<Shape>();
         children = new BSPTree[2];
     }
 
+    @Override
     public void draw(Graphics2D g2d) {
         Color t = g2d.getColor();
 
