@@ -23,9 +23,7 @@ public class CollisionPair {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime
-                * (result + ((s1 == null) ? 0 : s1.hashCode()) + ((s2 == null) ? 0
-                        : s2.hashCode()));
+        result = prime * (result + ((s1 == null) ? 0 : s1.hashCode()) + ((s2 == null) ? 0 : s2.hashCode()));
         return result;
     }
 
@@ -44,21 +42,6 @@ public class CollisionPair {
         if (this.hashCode() == other.hashCode())
             return true;
 
-        /*
-         * if (s1 == null) {
-         * if (other.s1 != null)
-         * return false;
-         * }
-         * else if (!s1.equals(other.s1))
-         * return false;
-         * 
-         * if (s2 == null) {
-         * if (other.s2 != null)
-         * return false;
-         * }
-         * else if (!s2.equals(other.s2))
-         * return false;
-         */
         return false;
     }
 
