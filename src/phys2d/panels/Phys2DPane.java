@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
-import java.util.Random;
 
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
@@ -41,11 +40,11 @@ public class Phys2DPane extends AnimatedPane {
         // Add in the world boundaries
 
         addWorldBounds("a");
-        populateWithSmallSquares(entities, 30, new Random().nextLong());
-        // populateWithSmallSquares(entities, 5, 8214902465421688640l);
+        //populateWithSmallSquares(entities, 2, new Random().nextLong());
+        populateWithSmallSquares(entities, 200, -111089002341966575l);
 
-        populateWithSmallCircles(entities, 30, new Random().nextLong());
-        //populateWithSmallCircles(entities, 16, -3426968064628761430l);
+        //populateWithSmallCircles(entities, 30, new Random().nextLong());
+        populateWithSmallCircles(entities, 200, 3801484226869149488l);
         //addRefSquares(700);
 
         Shape s;
@@ -69,7 +68,7 @@ public class Phys2DPane extends AnimatedPane {
         s.setVelocity(new Vec2D(-200, 80));
         //entities.add(s);
 
-        sm.setForceOfGravity(-100);
+        sm.setForceOfGravity(0);
 
         // tester();
 
@@ -83,7 +82,6 @@ public class Phys2DPane extends AnimatedPane {
     @Override
     public void update() {
         long t = System.nanoTime();
-        long tn = 0;
         sm.runManager(entities);
         System.out.println((System.nanoTime() - t) / 1e6 + "    " + dt * 1000);
         //System.out.println(++upCt);
@@ -147,7 +145,7 @@ public class Phys2DPane extends AnimatedPane {
         double size = 20;
         double ang = 0;
 
-        Material m = Material.REF70;
+        Material m = Material.REF80;
 
         for (int i = 0; i < num; i++) {
             s = new Square(pos[i], size, ang);
@@ -163,7 +161,7 @@ public class Phys2DPane extends AnimatedPane {
         double radius = 10;
         Vec2D[] pos = MiscTools.genRandVecs(num, new Vec2D(20, 20), new Vec2D(970, 970), seed);
         Vec2D[] vel = MiscTools.genRandVecs(num, new Vec2D(-250, -250), new Vec2D(250, 250), seed);
-        Material m = Material.REF70;
+        Material m = Material.REF80;
 
         for (int i = 0; i < num; i++) {
             s = new Circle(pos[i], radius);
