@@ -6,7 +6,6 @@ package phys2d.collisionLogic.collisionManagers;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import phys2d.collisionLogic.spacePartitioning.BSPTree;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
 import phys2d.entities.shapes.polygons.WorldBound;
@@ -17,7 +16,6 @@ import phys2d.entities.shapes.polygons.WorldBound;
  */
 public abstract class CollisionManager {
 
-    protected BSPTree collisionTree;
     protected final double dt;
 
     protected double g = -100.0; // m/s^2
@@ -48,15 +46,6 @@ public abstract class CollisionManager {
                 return true;
         }
         return false;
-    }
-
-    /**
-     * Return the collision tree being used to partition the entities.
-     * 
-     * @return the space partitioning binary tree.
-     */
-    public BSPTree getCollisionTree() {
-        return collisionTree;
     }
 
     /**
