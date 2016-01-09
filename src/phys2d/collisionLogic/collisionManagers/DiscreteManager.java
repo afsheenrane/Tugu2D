@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA;
 import phys2d.collisionLogic.spacePartitioning.BSPTree;
+import phys2d.collisionLogic.spacePartitioning.SweptBSPTree;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
-import phys2d.entities.shapes.polygons.Rectangle;
 import phys2d.entities.shapes.polygons.WorldBound;
 
 public final class DiscreteManager extends CollisionManager {
@@ -26,9 +26,8 @@ public final class DiscreteManager extends CollisionManager {
     private void checkAndResolveCollisions(Shape[] shapes) {
 
         // Using BSPTree
-        Rectangle baseRect = new Rectangle(new Vec2D(500, 500), Phys2DMain.XRES + 50, Phys2DMain.YRES + 50);
-
-        collisionTree = new BSPTree(baseRect, BSPTree.HORIZONTAL_SPLIT, 1);
+        collisionTree = new SweptBSPTree(new Vec2D[] { new Vec2D(-25, -25),
+                new Vec2D(Phys2DMain.XRES + 25, Phys2DMain.YRES + 25) }, BSPTree.HORIZONTAL_SPLIT, 1, dt);
 
         ArrayList<Shape[]> collidedPairs = new ArrayList<Shape[]>();
 
@@ -136,11 +135,9 @@ public final class DiscreteManager extends CollisionManager {
                 return;
             }
 
-            double restitution = Math.min(s1.getMaterial().getRestitution(), s2
-                    .getMaterial().getRestitution());
+            double restitution = Math.min(s1.getMaterial().getRestitution(), s2.getMaterial().getRestitution());
 
-            Vec2D force = Vec2D.getScaled(collisionAxis, -(1 + restitution)
-                    * normalSpeed);
+            Vec2D force = Vec2D.getScaled(collisionAxis, -(1 + restitution) * normalSpeed);
 
             force.scaleBy(1.0 / (s1.getInvMass() + s2.getInvMass()));
 

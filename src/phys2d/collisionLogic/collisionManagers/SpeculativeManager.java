@@ -8,7 +8,6 @@ import phys2d.collisionLogic.spacePartitioning.BSPTree;
 import phys2d.collisionLogic.spacePartitioning.SweptBSPTree;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
-import phys2d.entities.shapes.polygons.Rectangle;
 import phys2d.entities.shapes.polygons.WorldBound;
 
 public final class SpeculativeManager extends CollisionManager {
@@ -26,9 +25,9 @@ public final class SpeculativeManager extends CollisionManager {
 
     private void checkAndResolveCollisions(Shape[] shapes) {
 
-        collisionTree = new SweptBSPTree(new Rectangle(new Vec2D(500, 500),
-                Phys2DMain.XRES + 50, Phys2DMain.YRES + 50),
-                BSPTree.HORIZONTAL_SPLIT, 1, dt);
+        collisionTree = new SweptBSPTree(new Vec2D[] { new Vec2D(-25, -25),
+                new Vec2D(Phys2DMain.XRES + 25, Phys2DMain.YRES + 25) }, BSPTree.HORIZONTAL_SPLIT, 1, dt);
+
         ArrayList<Shape[]> collidedPairs = new ArrayList<Shape[]>();
 
         for (Shape s : shapes) {
@@ -42,10 +41,8 @@ public final class SpeculativeManager extends CollisionManager {
             for (int i = 0; i < group.length; i++) { // perform a "brute force"
                                                      // collision check
                 for (int j = i + 1; j < group.length; j++) {
-                    if (!(group[i] instanceof WorldBound && group[j] instanceof WorldBound)
-                            && // world bounds dont collide with each other
-                            !deepContains(collidedPairs, new Shape[] {
-                                    group[i], group[j] })) {
+                    if (!(group[i] instanceof WorldBound && group[j] instanceof WorldBound) && // world bounds dont collide with each other
+                            !deepContains(collidedPairs, new Shape[] { group[i], group[j] })) {
                         resolveCollision(group[i], group[j]);
                         collidedPairs.add(new Shape[] { group[i], group[j] });
                         collidedPairs.add(new Shape[] { group[j], group[i] });
@@ -55,8 +52,7 @@ public final class SpeculativeManager extends CollisionManager {
         }
     }
 
-    private void computeForce(Shape s1, Shape s2, double relNormSpeed,
-            Vec2D dispUnit) {
+    private void computeForce(Shape s1, Shape s2, double relNormSpeed, Vec2D dispUnit) {
         System.out
                 .println("doing a full resolution*************************************************************************");
         System.out.println(s1 + "\n" + s2);
@@ -67,12 +63,10 @@ public final class SpeculativeManager extends CollisionManager {
         // double overSpeed = Math.abs(relNormSpeed) - disp.getLength();
 
         // react to the collision with forces.
-        double restitution = Math.min(s1.getMaterial().getRestitution(), s2
-                .getMaterial().getRestitution());
+        double restitution = Math.min(s1.getMaterial().getRestitution(), s2.getMaterial().getRestitution());
 
         // relVel.scaleBy(1.0 / dt);
-        Vec2D force = Vec2D.getScaled(dispUnit, -(1 + restitution)
-                * relNormSpeed * (1.0 / dt));
+        Vec2D force = Vec2D.getScaled(dispUnit, -(1 + restitution) * relNormSpeed * (1.0 / dt));
         force.scaleBy(1.0 / (s1.getInvMass() + s2.getInvMass()));
 
         s1.addForce(force);
@@ -116,8 +110,7 @@ public final class SpeculativeManager extends CollisionManager {
         }
 
         for (int i = 0; i < 2; i++) {
-            Object[] collisionInfo = CollisionCheckerGJKEPA.hybridGJKSolver(s1,
-                    s2);
+            Object[] collisionInfo = CollisionCheckerGJKEPA.hybridGJKSolver(s1, s2);
             Vec2D disp = ((Vec2D) collisionInfo[0]).getNegated();
             boolean isColliding = (boolean) collisionInfo[1];
             // TODO incorp isColliding
@@ -253,8 +246,7 @@ public final class SpeculativeManager extends CollisionManager {
             s2ratio = s2.getMass() / totalMass;
         }
 
-        System.out.println("\nunsticker" + "\n" + s1 + "\n" + s2 + "\n"
-                + resolution);
+        System.out.println("\nunsticker" + "\n" + s1 + "\n" + s2 + "\n" + resolution);
 
         // first deal with s1
         Vec2D trans = resolution.getCopy();

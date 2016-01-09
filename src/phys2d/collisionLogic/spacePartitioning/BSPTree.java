@@ -8,7 +8,6 @@ import java.util.List;
 import phys2d.Phys2DMain;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
-import phys2d.entities.shapes.polygons.Rectangle;
 import phys2d.entities.shapes.polygons.WorldBound;
 
 public class BSPTree {
@@ -22,11 +21,20 @@ public class BSPTree {
     protected int depth = 0;
 
     protected List<Shape> items;
-    protected final Rectangle bounds;
+    protected final Vec2D[] bounds;
     protected BSPTree[] children;
     protected final int splitMode;
 
-    public BSPTree(Rectangle bounds, int splitMode, int level) {
+    /**
+     * Create a new BSPTree with the given bounds, splitmode of horizonal or
+     * vertical and the current level of this node.
+     * 
+     * @param bounds the bounding rectangle that this node covers in the game
+     *            world, <b>in MIN-MAX notation<b>.
+     * @param splitMode the current split mode of this node.
+     * @param level the current level of this node.
+     */
+    public BSPTree(Vec2D[] bounds, int splitMode, int level) {
         this.bounds = bounds;
         this.splitMode = splitMode;
         this.depth = level;
@@ -84,35 +92,38 @@ public class BSPTree {
     }
 
     // http://gamedevelopment.tutsplus.com/tutorials/quick-tip-use-quadtrees-to-detect-likely-collisions-in-2d-space--gamedev-374
-
-    public void split() {
+    /**
+     * Splits the current node into two separate children depending on the split
+     * mode.
+     */
+    protected void split() {
         BSPTree c0, c1; // child 1, child 2
 
-        Rectangle newBounds;
-        Vec2D com = bounds.getCOM().getCopy();
+        Vec2D[] newBounds = new Vec2D[2]; //Temp var to store the new min-max bounds of each child.
 
         if (splitMode == VERTICAL_SPLIT) {
 
-            com.setX(com.getX() - (bounds.getLength() / 4));
-            newBounds = new Rectangle(com.getCopy(), bounds.getLength() / 2,
-                    bounds.getHeight()); // doing com copy because com is being aliased. not copying newbounds because it is being being re-assigned
+            double midX = (bounds[0].getX() + bounds[1].getX()) / 2.0;
+
+            newBounds[0] = bounds[0].getCopy();
+            newBounds[1] = new Vec2D(midX, bounds[1].getY());
             c0 = new BSPTree(newBounds, splitMode * -1, depth + 1); // left rect
 
-            com.setX(com.getX() + bounds.getLength() / 2);
-            newBounds = new Rectangle(com.getCopy(), bounds.getLength() / 2,
-                    bounds.getHeight());
+            newBounds[0] = new Vec2D(midX, bounds[0].getY());
+            newBounds[1] = bounds[1].getCopy();
             c1 = new BSPTree(newBounds, splitMode * -1, depth + 1); // right rect
         }
-        else {
 
-            com.setY(com.getY() - (bounds.getHeight() / 4));
-            newBounds = new Rectangle(com.getCopy(), bounds.getLength(),
-                    bounds.getHeight() / 2);
+        else { //HORIZONTAL_SPLIT
+
+            double midY = (bounds[0].getY() + bounds[1].getY()) / 2.0;
+
+            newBounds[0] = bounds[0].getCopy();
+            newBounds[1] = new Vec2D(bounds[1].getX(), midY);
             c0 = new BSPTree(newBounds, splitMode * -1, depth + 1); // bottom (top in GUI)
 
-            com.setY(com.getY() + bounds.getHeight() / 2);
-            newBounds = new Rectangle(com.getCopy(), bounds.getLength(),
-                    bounds.getHeight() / 2);
+            newBounds[0] = new Vec2D(bounds[0].getX(), midY);
+            newBounds[1] = bounds[1].getCopy();
             c1 = new BSPTree(newBounds, splitMode * -1, depth + 1); // top (bottom in gui)
         }
 
@@ -121,17 +132,40 @@ public class BSPTree {
 
     }
 
+    /**
+     * Given the aabb of a shape, find out which child the shape get inserted
+     * into.
+     * 
+     * @param aabb the min-max axis aligned bounding box of the shape being
+     *            inserted.
+     * @return the child the shape is inserted into. <br>
+     *         <b><u>VERTICAL SPLIT</u></b> <br>
+     *         <ul>
+     *         <li>0 : Left side</li>
+     *         <li>1 : Right side</li>
+     *         </ul>
+     *         <b><u>HORIZONTAL SPLIT</u></b>
+     *         <ul>
+     *         <li>0 : Top side</li>
+     *         <li>1 : Bottom side</li>
+     *         </ul>
+     *         <li>-1 : Shape is on the dividing line.</li>
+     */
     protected int getInsertionSideAABB(Vec2D[] aabb) {
         if (splitMode == VERTICAL_SPLIT) {
-            if (aabb[1].getX() < bounds.getCOM().getX()) // max of the aabb < center split line
+            double midX = (bounds[0].getX() + bounds[1].getX()) / 2.0;
+
+            if (aabb[1].getX() < midX) // max of the aabb < center split line
                 return 0; // LEFT SIDE
-            else if (aabb[0].getX() >= bounds.getCOM().getX()) // min of aabb > center split line
+            else if (aabb[0].getX() >= midX) // min of aabb > center split line
                 return 1; // RIGHT SIDE
         }
         else { // if horizontal split
-            if (aabb[1].getY() < bounds.getCOM().getY())
+            double midY = (bounds[0].getY() + bounds[1].getY()) / 2.0;
+
+            if (aabb[1].getY() < midY)
                 return 0; // TOP SIDE
-            else if (aabb[0].getY() >= bounds.getCOM().getY())
+            else if (aabb[0].getY() >= midY)
                 return 1; // BOTTOM SIDE
         }
 
@@ -177,8 +211,6 @@ public class BSPTree {
         // But, now if we have overloaded this node, we need to split it down some more.
         // Also, we can only split if we havent exceeded the level_cap (depth cap).
         if (items.size() > MAX_ITEMS && depth < DEPTH_CAP) {
-
-            // if(children[0] == null){ //if there are no children, split the current tree.
             split();
 
             // Now that there are children, we will offload the items into the children to get below the max_items threshold
@@ -201,12 +233,10 @@ public class BSPTree {
 
     public Shape[] getPossibleColliders(Shape s) {
         ArrayList<Shape> possibleColliders = new ArrayList<Shape>(5);
-        return getPossibleCollidersHelper(s, possibleColliders).toArray(
-                new Shape[] {});
+        return getPossibleCollidersHelper(s, possibleColliders).toArray(new Shape[] {});
     }
 
-    protected ArrayList<Shape> getPossibleCollidersHelper(Shape s,
-            ArrayList<Shape> colliders) {
+    protected ArrayList<Shape> getPossibleCollidersHelper(Shape s, ArrayList<Shape> colliders) {
         int shapeSide = getInsertionSide(s); // Get which side the shape fits
                                              // into
 
@@ -272,21 +302,18 @@ public class BSPTree {
 
         g2d.setColor(Color.ORANGE);
 
-        Vec2D com = bounds.getCOM();
+        Vec2D com = new Vec2D((bounds[0].getX() + bounds[1].getX()) / 2.0, (bounds[0].getY() + bounds[1].getY()) / 2.0);
+
         g2d.drawString(depth + " " + items.size(), (int) com.getX() - 10, Phys2DMain.YRES - (int) (com.getY() + 5));
         if (children[0] != null) {
-            if (splitMode == VERTICAL_SPLIT)
-                g2d.drawLine((int) com.getX(),
-                        Phys2DMain.YRES - (int) (com.getY() - (bounds.getHeight() / 2)),
-                        (int) com.getX(),
-                        Phys2DMain.YRES - (int) (com.getY() + (bounds.getHeight() / 2)));
-
-            else
-                g2d.drawLine((int) (com.getX() - (bounds.getLength() / 2)),
-                        Phys2DMain.YRES - (int) com.getY(),
-                        (int) (com.getX() + (bounds.getLength() / 2)),
+            if (splitMode == VERTICAL_SPLIT) {
+                g2d.drawLine((int) com.getX(), Phys2DMain.YRES - (int) bounds[0].getY(), (int) com.getX(),
+                        Phys2DMain.YRES - (int) bounds[1].getY());
+            }
+            else { //Horizontal split
+                g2d.drawLine((int) bounds[0].getX(), Phys2DMain.YRES - (int) com.getY(), (int) bounds[1].getX(),
                         Phys2DMain.YRES - (int) com.getY());
-
+            }
             for (BSPTree child : children) {
                 child.draw(g2d);
             }

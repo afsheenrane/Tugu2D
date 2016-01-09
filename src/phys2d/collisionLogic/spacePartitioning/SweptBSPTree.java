@@ -2,13 +2,23 @@ package phys2d.collisionLogic.spacePartitioning;
 
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
-import phys2d.entities.shapes.polygons.Rectangle;
 
 public class SweptBSPTree extends BSPTree {
 
     private final double dt;
 
-    public SweptBSPTree(Rectangle bounds, int splitMode, int level, double dt) {
+    /**
+     * Create a new SweptBSPTree with the given bounds, splitmode, the current
+     * level of the node, and the current physics delta time (to compute AABB's
+     * of the shapes).
+     * 
+     * @param bounds the bounding rectangle that this node covers in the game
+     *            world, <b>in MIN-MAX notation<b>.
+     * @param splitMode the current split mode of this node.
+     * @param level the current level of this node.
+     * @param dt the physics delta time of the simulation.
+     */
+    public SweptBSPTree(Vec2D[] bounds, int splitMode, int level, double dt) {
         super(bounds, splitMode, level);
         this.dt = dt;
     }
@@ -23,32 +33,31 @@ public class SweptBSPTree extends BSPTree {
     public void split() {
         SweptBSPTree c0, c1; // child 1, child 2
 
-        Rectangle newBounds;
-        Vec2D com = bounds.getCOM().getCopy();
+        Vec2D[] newBounds = new Vec2D[2];
 
         if (splitMode == VERTICAL_SPLIT) {
 
-            com.setX(com.getX() - (bounds.getLength() / 4));
-            newBounds = new Rectangle(com.getCopy(), bounds.getLength() / 2,
-                    bounds.getHeight()); // doing com copy because com is being aliased. not copying newbounds because it is being being re-assigned
-            c0 = new SweptBSPTree(newBounds, splitMode * -1, depth + 1, dt); // left rect
+            double midX = (bounds[0].getX() + bounds[1].getX()) / 2.0;
 
-            com.setX(com.getX() + bounds.getLength() / 2);
-            newBounds = new Rectangle(com.getCopy(), bounds.getLength() / 2,
-                    bounds.getHeight());
-            c1 = new SweptBSPTree(newBounds, splitMode * -1, depth + 1, dt); // right rect
+            newBounds[0] = bounds[0];
+            newBounds[1] = new Vec2D(midX, bounds[1].getY());
+            c0 = new SweptBSPTree(newBounds.clone(), splitMode * -1, depth + 1, dt); // left rect
+
+            newBounds[0] = new Vec2D(midX, bounds[0].getY());
+            newBounds[1] = bounds[1];
+            c1 = new SweptBSPTree(newBounds.clone(), splitMode * -1, depth + 1, dt); // right rect
         }
-        else {
+        else { //HORIZONTAL_SPLIT
 
-            com.setY(com.getY() - (bounds.getHeight() / 4));
-            newBounds = new Rectangle(com.getCopy(), bounds.getLength(),
-                    bounds.getHeight() / 2);
-            c0 = new SweptBSPTree(newBounds, splitMode * -1, depth + 1, dt); // bottom (top in GUI)
+            double midY = (bounds[0].getY() + bounds[1].getY()) / 2.0;
 
-            com.setY(com.getY() + bounds.getHeight() / 2);
-            newBounds = new Rectangle(com.getCopy(), bounds.getLength(),
-                    bounds.getHeight() / 2);
-            c1 = new SweptBSPTree(newBounds, splitMode * -1, depth + 1, dt); // top (bottom in gui)
+            newBounds[0] = bounds[0];
+            newBounds[1] = new Vec2D(bounds[1].getX(), midY);
+            c0 = new SweptBSPTree(newBounds.clone(), splitMode * -1, depth + 1, dt); // bottom (top in GUI)
+
+            newBounds[0] = new Vec2D(bounds[0].getX(), midY);
+            newBounds[1] = bounds[1];
+            c1 = new SweptBSPTree(newBounds.clone(), splitMode * -1, depth + 1, dt); // top (bottom in gui)
         }
 
         children[0] = c0;

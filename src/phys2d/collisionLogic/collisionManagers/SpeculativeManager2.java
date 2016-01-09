@@ -15,7 +15,6 @@ import phys2d.collisionLogic.tools.CollisionPair;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
-import phys2d.entities.shapes.polygons.Rectangle;
 import phys2d.entities.shapes.polygons.WorldBound;
 
 /**
@@ -30,7 +29,7 @@ import phys2d.entities.shapes.polygons.WorldBound;
  */
 public class SpeculativeManager2 extends CollisionManager {
 
-    private final SweptBSPTree collisionTree;
+    //private final SweptBSPTree collisionTree;
 
     /**
      * Keeps track of all objects which have been moved for the current
@@ -61,9 +60,8 @@ public class SpeculativeManager2 extends CollisionManager {
      */
     public SpeculativeManager2(double dt) {
         super(dt);
-        collisionTree = new SweptBSPTree(new Rectangle(new Vec2D(500, 500),
-                Phys2DMain.XRES + 50, Phys2DMain.YRES + 50),
-                BSPTree.HORIZONTAL_SPLIT, 1, dt);
+        collisionTree = new SweptBSPTree(new Vec2D[] { new Vec2D(-25, -25),
+                new Vec2D(Phys2DMain.XRES + 25, Phys2DMain.YRES + 25) }, BSPTree.HORIZONTAL_SPLIT, 1, dt);
 
         collidedPairs = new HashSet<CollisionPair>();
 
@@ -74,6 +72,8 @@ public class SpeculativeManager2 extends CollisionManager {
 
     @Override
     protected void manageCollisions(ArrayList<Shape> entities) {
+
+        long t = System.nanoTime();
         collisionTree.refresh();
 
         collidedPairs.clear();
@@ -86,6 +86,9 @@ public class SpeculativeManager2 extends CollisionManager {
 
         collisionGroups = collisionTree.getPossibleCollisions();
 
+        System.out.println("tree time: " + (System.nanoTime() - t) / 1e6);
+
+        t = System.nanoTime();
         for (Shape[] group : collisionGroups) { // For each group
 
             /*
@@ -102,6 +105,18 @@ public class SpeculativeManager2 extends CollisionManager {
                 }
             }
         }
+        System.out.println("res time: " + (System.nanoTime() - t) / 1e6);
+
+        // The following is just to simulate full brute force without space partitioning
+        //        for (int i = 0; i < entities.size(); i++) {
+        //            for (int j = i + 1; j < entities.size(); j++) {
+        //                if (!(entities.get(i) instanceof WorldBound && entities.get(j) instanceof WorldBound)
+        //                        && collidedPairs.add(new CollisionPair(entities.get(i), entities.get(j)))) {
+        //                    resolveCollision(entities.get(i), entities.get(j));
+        //                }
+        //            }
+        //        }
+
     }
 
     /**
@@ -323,8 +338,7 @@ public class SpeculativeManager2 extends CollisionManager {
      * @return a double between 0.0-1.0 representing when a collision will take
      *         place next frame. If there is no collision next frame, return -1.
      */
-    private double impendingCollisionChecker(Shape s1, Shape s2,
-            SimplexDirStruct gjkInfo) {
+    private double impendingCollisionChecker(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
 
         Vec2D unitDisp = gjkInfo.getDir().getNormalized();
         Vec2D relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
@@ -384,8 +398,7 @@ public class SpeculativeManager2 extends CollisionManager {
             gjkInfo.setDir(gjkInfo.getSimplex().get(0));
 
         else {
-            Vec2D AB = Vec2D.sub(gjkInfo.getSimplex().get(0),
-                    gjkInfo.getSimplex().get(1));
+            Vec2D AB = Vec2D.sub(gjkInfo.getSimplex().get(0), gjkInfo.getSimplex().get(1));
             Vec2D AO = gjkInfo.getSimplex().get(1).getNegated();
 
             gjkInfo.setDir(AO.vecProjection(AB));
