@@ -82,8 +82,7 @@ public final class CollisionCheckerMPR {
      * @param mprInfo the structure where information about the MPR run is
      *            stored.
      */
-    private static void computeSimplex(Shape s1, Shape s2,
-            SimplexDirStruct mprInfo) {
+    private static void computeSimplex(Shape s1, Shape s2, SimplexDirStruct mprInfo) {
         //@formatter:off
         /*
          * A---p>--B
@@ -107,12 +106,10 @@ public final class CollisionCheckerMPR {
         RAnorm = RA.getNormal();
 
         // Find which side origin is on.
-        if (RAnorm.dotProduct(mprInfo.dir) > 0) {
-            mprInfo.dir = RAnorm;
+        if (RAnorm.dotProduct(mprInfo.dir) <= 0) {
+            RAnorm.negate();
         }
-        else {
-            mprInfo.dir = RAnorm.getNegated();
-        }
+        mprInfo.dir = RAnorm;
 
         mprInfo.simplex.add(support(s1, s2, mprInfo.dir)); // B: V2
 
@@ -120,7 +117,7 @@ public final class CollisionCheckerMPR {
         while (true) {
 
             // AB
-            portal = Vec2D.sub(mprInfo.simplex.get(2), mprInfo.simplex.get(1));
+            portal = Vec2D.sub(mprInfo.simplex.get(2), mprInfo.simplex.get(1)); //B - A
 
             // Check if the origin is inside the simplex.
             /*
@@ -132,12 +129,14 @@ public final class CollisionCheckerMPR {
              * of the 3 triangle edges.
              */
             // Check if origin is on correct side of portal.
-            Vec2D newPt;
-            Vec2D portalNorm = portal.getNormal(); // Normal pointing outwards
-                                                   // from the triangle.
+            Vec2D newPt, AO = mprInfo.simplex.get(1).getNegated();
+            Vec2D portalNorm = portal.getNormal(); // Normal axis of the portal. Still need to guarantee that it points outwards.
+
+            if (portal.perpDotProduct(AO) < 0) //This guarantees that portalNorm points outwards.
+                portalNorm.negate();
 
             // If the origin is outside the portal
-            if (portalNorm.dotProduct(RO) > 0) {
+            if (AO.dotProduct(portalNorm) > 0) {
                 mprInfo.dir = portalNorm;
                 newPt = support(s1, s2, mprInfo.dir);
 
@@ -163,16 +162,15 @@ public final class CollisionCheckerMPR {
                     // Check to see which point to discard from the simplex.
                     Vec2D RC = Vec2D.sub(newPt, mprInfo.simplex.get(0));
 
-                    // If in RAC region, discard B.
-                    if (RC.getNormal().dotProduct(RO) > 0) {
+                    // If RO and RA are on the same side (the below checks their sign. Same signs multiplied will be +ve.
+                    if (RC.perpDotProduct(RO) * RC.perpDotProduct(RA) > 0) {
+                        //Discard B.
                         mprInfo.simplex.set(2, newPt);
                     }
-                    else { // Else in RBC region, discard A.
+                    else {
                         mprInfo.simplex.set(1, newPt);
                     }
-
                 }
-
             }
             else {
                 // Else, it is inside the portal.
