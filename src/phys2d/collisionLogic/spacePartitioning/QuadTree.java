@@ -62,41 +62,6 @@ public class QuadTree extends SpacePartitioningTree {
     }
 
     /**
-     * Returns all the children that the entered aabb fits in.
-     * 
-     * @param aabb the axis aligned bounding box to check (probably of a shape).
-     * @return an encoded byte containing all the children that the aabb can fit
-     *         into. The lowest order bit is for child0, second lowest is
-     *         child1, and so forth.
-     */
-    protected byte getInsertionSide(Vec2D[] aabb) {
-        byte retByte = 0;
-        byte curChild = 1;
-
-        for (int i = 0; i < children.length; i++) {
-            if (childCanContainAABB(children[i], aabb)) {
-                retByte |= curChild;
-            }
-            curChild <<= 1;
-        }
-
-        return retByte;
-
-    }
-
-    /**
-     * Get which sides the Shape s can be inserted into.
-     * 
-     * @param s the shape to check.
-     * @return an encoded byte containing all the children that the shape can
-     *         fit into. The lowest order bit is for child0, second lowest is
-     *         child1, and so forth.
-     */
-    protected byte getInsertionSide(Shape s) {
-        return getInsertionSide(s.getAABBbounds());
-    }
-
-    /**
      * Checks to see whether the entered aabb intersects with the bounds of the
      * entered child.
      * 
