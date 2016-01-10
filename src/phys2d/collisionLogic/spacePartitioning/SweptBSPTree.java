@@ -30,7 +30,7 @@ public class SweptBSPTree extends BSPTree {
     }
 
     @Override
-    public void split() {
+    protected void split() {
         SweptBSPTree c0, c1; // child 1, child 2
 
         Vec2D[] newBounds = new Vec2D[2];
