@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
-import phys2d.collisionLogic.collisionManagers.DiscreteManager;
+import phys2d.collisionLogic.collisionManagers.CollisionManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager2;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
@@ -27,8 +27,7 @@ public class Phys2DPane extends AnimatedPane {
 
     private final ArrayList<Shape> entities = new ArrayList<Shape>();
 
-    private final SpeculativeManager2 sm = new SpeculativeManager2(dt);
-    private final DiscreteManager dm = new DiscreteManager(dt);
+    private CollisionManager collManager;
 
     public Phys2DPane(int updateRate, int maxFps, int maxFramesSkippable) {
         super(updateRate, maxFps, maxFramesSkippable);
@@ -37,14 +36,16 @@ public class Phys2DPane extends AnimatedPane {
 
     @Override
     public void init() {
+        collManager = new SpeculativeManager2(dt);
+
         // Add in the world boundaries
 
         addWorldBounds("a");
         //populateWithSmallSquares(entities, 2, new Random().nextLong());
-        populateWithSmallSquares(entities, 200, -111089002341966575l);
+        populateWithSmallSquares(entities, 50, -111089002341966575l);
 
         //populateWithSmallCircles(entities, 30, new Random().nextLong());
-        populateWithSmallCircles(entities, 200, 3801484226869149488l);
+        populateWithSmallCircles(entities, 50, 3801484226869149488l);
         //addRefSquares(700);
 
         Shape s;
@@ -68,7 +69,7 @@ public class Phys2DPane extends AnimatedPane {
         s.setVelocity(new Vec2D(-200, 80));
         //entities.add(s);
 
-        sm.setForceOfGravity(0);
+        collManager.setForceOfGravity(0);
 
         // tester();
 
@@ -82,7 +83,7 @@ public class Phys2DPane extends AnimatedPane {
     @Override
     public void update() {
         long t = System.nanoTime();
-        sm.runManager(entities);
+        collManager.runManager(entities);
         System.out.println((System.nanoTime() - t) / 1e6 + "    " + dt * 1000);
         //System.out.println(++upCt);
 
