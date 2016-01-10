@@ -22,12 +22,6 @@ public class SweptQuadTree extends QuadTree {
         this.dt = dt;
     }
 
-    @Override
-    protected byte getInsertionSide(Shape s) {
-        Vec2D[] sAabb = s.getSweptAABBbounds(dt);
-        return getInsertionSide(sAabb);
-    }
-
     /**
      * Splits the current node into four separate children.
      */
@@ -50,6 +44,20 @@ public class SweptQuadTree extends QuadTree {
                 new Vec2D(center.getX(), bounds[0].getY()),
                 new Vec2D(bounds[1].getX(), center.getY())
         }, depth + 1, dt);
+    }
+
+    /**
+     * Inserts the shape s into all possible children, by taking into account
+     * it's full movement over the course of the current tick.
+     */
+    @Override
+    protected void insertShapeIntoChildren(Shape s) {
+        Vec2D[] aabb = s.getSweptAABBbounds(dt);
+        for (int i = 0; i < children.length; i++) {
+            if (childCanContainAABB(children[i], aabb)) {
+                children[i].insert(s);
+            }
+        }
     }
 
 }
