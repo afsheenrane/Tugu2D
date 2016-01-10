@@ -51,7 +51,7 @@ public final class CollisionCheckerMPR {
     private static void computeCollisionResolution(Shape s1, Shape s2,
             SimplexDirStruct mprInfo) {
         // TODO Auto-generated method stub
-
+        CollisionCheckerGJKEPA2.computeCollisionResolutionEPA(s1, s2, mprInfo);
     }
 
     /**
@@ -64,7 +64,7 @@ public final class CollisionCheckerMPR {
      * @param s1 the first shape.
      * @param s2 the second shape.
      * @param mprInfo the state of the simplex and the last search direction
-     *        after the MPR algorithm searched for the origin.
+     *            after the MPR algorithm searched for the origin.
      */
     private static void computeMinimumDisplacement(Shape s1, Shape s2,
             SimplexDirStruct mprInfo) {
@@ -80,7 +80,7 @@ public final class CollisionCheckerMPR {
      * @param s1 the first shape.
      * @param s2 the second shape.
      * @param mprInfo the structure where information about the MPR run is
-     *        stored.
+     *            stored.
      */
     private static void computeSimplex(Shape s1, Shape s2,
             SimplexDirStruct mprInfo) {

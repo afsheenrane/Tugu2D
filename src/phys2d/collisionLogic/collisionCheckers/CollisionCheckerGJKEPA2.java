@@ -395,7 +395,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @param simplex the result simplex from running GJK on the shapes.
      * @return the collision normal between the two shapes.
      */
-    private static void computeCollisionResolutionEPA(Shape s1, Shape s2,
+    protected static void computeCollisionResolutionEPA(Shape s1, Shape s2,
             SimplexDirStruct gjkInfo) {
 
         // TODO try and make it so that we dont need this function call.
