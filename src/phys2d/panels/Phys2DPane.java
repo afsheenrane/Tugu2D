@@ -40,12 +40,12 @@ public class Phys2DPane extends AnimatedPane {
 
         // Add in the world boundaries
 
-        addWorldBounds("a");
+        addWorldBounds("r");
         //populateWithSmallSquares(entities, 2, new Random().nextLong());
-        populateWithSmallSquares(entities, 50, -111089002341966575l);
+        //populateWithSmallSquares(entities, 200, -111089002341966575l);
 
         //populateWithSmallCircles(entities, 30, new Random().nextLong());
-        populateWithSmallCircles(entities, 50, 3801484226869149488l);
+        //populateWithSmallCircles(entities, 200, 3801484226869149488l);
         //addRefSquares(700);
 
         Shape s;
@@ -54,14 +54,14 @@ public class Phys2DPane extends AnimatedPane {
         s.setMaterial(Material.RUBBER);
         //entities.add(s);
 
-        s = new Square(new Vec2D(200, 400), 30, 0);
+        s = new Square(new Vec2D(800, 400), 30, 0);
         s.setMaterial(Material.REF60);
-        s.setVelocity(new Vec2D(0, 0));
-        //entities.add(s);
+        s.setVelocity(new Vec2D(100, 0));
+        entities.add(s);
 
-        s = new Square(new Vec2D(800, 200), 50, 0);
-        s.setMaterial(Material.REF70);
-        s.setVelocity(new Vec2D(-40, 0));
+        s = new Square(new Vec2D(550, 200), 50, 0);
+        s.setMaterial(Material.REF60);
+        s.setVelocity(new Vec2D(20, -600));
         //entities.add(s);
 
         s = new Circle(new Vec2D(300, 150), 30); //For ground contact: [300,70],30
@@ -101,7 +101,7 @@ public class Phys2DPane extends AnimatedPane {
             //entity.getVelocity().drawTranslatedVec(g2d, entity.getCOM());
         }
 
-        //sm.getCollisionTree().draw(g2d);
+        //((SpeculativeManager2) collManager).getCollisionTree().draw(g2d);
 
     }
 

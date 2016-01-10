@@ -12,7 +12,6 @@ import phys2d.collisionLogic.collisionCheckers.SimplexDirStruct;
 import phys2d.collisionLogic.spacePartitioning.SpacePartitioningTree;
 import phys2d.collisionLogic.spacePartitioning.SweptQuadTree;
 import phys2d.collisionLogic.tools.CollisionPair;
-import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Shape;
 import phys2d.entities.shapes.polygons.WorldBound;
@@ -30,17 +29,6 @@ import phys2d.entities.shapes.polygons.WorldBound;
 public class SpeculativeManager2 extends CollisionManager {
 
     private final SpacePartitioningTree collisionTree;
-
-    /**
-     * Keeps track of all objects which have been moved for the current
-     * timestep.
-     */
-    private final HashSet<Shape> movedShapes;
-
-    /**
-     * Keeps track of all objects which have had world forces applied to them.
-     */
-    private final HashSet<Shape> forcedShapes;
 
     /**
      * Keeps track of all pairs of shapes on which collision resolution has been
@@ -67,10 +55,6 @@ public class SpeculativeManager2 extends CollisionManager {
         //       new Vec2D(Phys2DMain.XRES + 10, Phys2DMain.YRES + 10) }, BSPTree.HORIZONTAL_SPLIT, 1, dt);
 
         collidedPairs = new HashSet<CollisionPair>();
-
-        movedShapes = new HashSet<Shape>();
-        forcedShapes = new HashSet<Shape>();
-
     }
 
     @Override
@@ -141,7 +125,7 @@ public class SpeculativeManager2 extends CollisionManager {
             forcedShapes.add(s2);
 
             unstickShapes(s1, s2, gjkInfo);
-            computeCollisionForces(s1, s2, gjkInfo);
+            applyCollisionForces(s1, s2, gjkInfo.getDir());
 
             s1.move(dt);
             s2.move(dt);
@@ -175,9 +159,9 @@ public class SpeculativeManager2 extends CollisionManager {
                 collisionTime = 1.0 - collisionTime;
 
                 // Add collision forces
-                gjkInfo.getDir().negate(); // Expected by the force computer.
-                computeCollisionForces(s1, s2, gjkInfo);
-                gjkInfo.getDir().negate();
+                //gjkInfo.getDir().negate(); // Expected by the force computer.
+                applyCollisionForces(s1, s2, gjkInfo.getDir());
+                //gjkInfo.getDir().negate();
 
                 // Add post-collision world forces.
                 addWorldForcesTo(s1, collisionTime);
@@ -201,128 +185,6 @@ public class SpeculativeManager2 extends CollisionManager {
             }
 
         }
-    }
-
-    /**
-     * Applies the corresponding forces to the two shapes because of their
-     * collision.
-     * 
-     * @param s1 the first shape.
-     * @param s2 the second shape.
-     * @param gjkInfo the result of running GJKEPA2 on the two shapes.
-     */
-    private void computeCollisionForces(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
-
-        Vec2D unitDisp = gjkInfo.getDir().getNormalized();
-        Vec2D relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
-
-        relVel.scaleBy(dt);
-
-        // This is the exact speed along collision axis (projection) because
-        // unitDisp is normalized.
-        double relNormSp = relVel.dotProduct(unitDisp);
-
-        // This restitution approximation will give pretty believable results.
-        double restitution = Math.min(s1.getMaterial().getRestitution(), s2.getMaterial().getRestitution());
-
-        // This formula was made almost a year ago. I'm pretty sure it works.
-        Vec2D collForce = Vec2D.getScaled(unitDisp, -(1 + restitution) * relNormSp * (1.0 / dt));
-
-        collForce.scaleBy(1.0 / (s1.getInvMass() + s2.getInvMass()));
-
-        s1.addForce(collForce);
-        s2.addForce(collForce.getNegated());
-
-        // calculate friction forces
-        relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
-        relVel.scaleBy(dt);
-        Vec2D tanVec = Vec2D.sub(relVel, relVel.vecProjection(unitDisp));
-
-        if (!tanVec.equals(Vec2D.ORIGIN))
-            tanVec.normalize();
-
-        double fricMag = -Vec2D.dotProduct(relVel, tanVec); //Because opposite direction
-
-        fricMag /= s1.getInvMass() + s2.getInvMass();
-
-        // Approximate mu using pythagorean theorem
-        double mu = Math.sqrt(Math.pow(s1.getMaterial().getStaticFric(), 2)
-                + Math.pow(s2.getMaterial().getStaticFric(), 2));
-
-        Vec2D frictionForce = Vec2D.ORIGIN;
-
-        if (Math.abs(fricMag) < collForce.getLength() * mu) {
-            if (!MiscTools.tolEquals(-fricMag, 0, 1e-6))
-                frictionForce = tanVec.getScaled(-fricMag);
-        }
-        else {
-            mu = Math.sqrt(Math.pow(s1.getMaterial().getDynFric(), 2) + Math.pow(s2.getMaterial().getDynFric(), 2));
-
-            if (!MiscTools.tolEquals(-fricMag * mu, 0, 1e-6))
-                frictionForce = tanVec.getScaled(-fricMag * mu);
-
-        }
-
-        // The following is a "kill all velocity" routine for when static friction is active and 
-        // an object is moving very slowly. This should stop objects creeping.
-
-        Vec2D velocityKillValue = getKillVelocityValue(s1, tanVec);
-        if (velocityKillValue != Vec2D.ORIGIN) {
-
-            //Negate it, because it represents the tangential velocity, not the friction direction
-            velocityKillValue.negate();
-            velocityKillValue.scaleBy(s1.getMass()); //Yeah yeah, it's a force now. Sue me on the naming scheme.
-
-            s1.addForce(velocityKillValue);
-
-            /*
-             * Check for any floating point error inside the shape's velocity.
-             * The only way to kill tangential velocity in the \general\ case is to apply a force along the tangential vector.
-             * We can't just 0 out the velocity along the x or y component. 
-             * But very often, 0ing out the x/y component of velocity, IS the correct step. The force application itself might fail 
-             * by a miniscule amount (<1e-15), therefore, we must manually 0 out the component. 
-             */
-            s1.incrementMove(dt, 1);
-
-            if (MiscTools.tolEquals(s1.getVelocity().getX(), 0)) {
-                s1.getVelocity().setX(0);
-            }
-            if (MiscTools.tolEquals(s1.getVelocity().getY(), 0)) {
-                s1.getVelocity().setY(0);
-            }
-
-            movedShapes.add(s1);
-        }
-        else { //Friction value high enough, no problemo!
-            s1.addForce(frictionForce.getNegated());
-        }
-
-        //Because we're checking ALONG the shape's velocity vector, not opposite to it.
-        velocityKillValue = getKillVelocityValue(s2, tanVec.getNegated());
-
-        if (velocityKillValue != Vec2D.ORIGIN) {
-            velocityKillValue.negate();
-            velocityKillValue.scaleBy(s2.getMass());
-
-            s2.addForce(velocityKillValue);
-
-            s2.incrementMove(dt, 1);
-
-            if (MiscTools.tolEquals(s2.getVelocity().getX(), 0)) {
-                s2.getVelocity().setX(0);
-            }
-            if (MiscTools.tolEquals(s2.getVelocity().getY(), 0)) {
-                s2.getVelocity().setY(0);
-            }
-
-            movedShapes.add(s2);
-        }
-        else { //Friction value high enough, no problemo!
-            s2.addForce(frictionForce);
-        }
-
-        s1.incrementMove(dt, 0);
-        s2.incrementMove(dt, 0);
     }
 
     /**
@@ -362,33 +224,6 @@ public class SpeculativeManager2 extends CollisionManager {
         }
 
         return -1;
-    }
-
-    /**
-     * Advises whether the shape should be stationary along the given friction
-     * vector.
-     * 
-     * @param s the shape to check.
-     * @param tanVec the tangential vector along which friction is to be
-     *            applied.
-     * @return whether the Shape is moving very slowly along it's friction
-     *         vector. True when there is very little movement and the shape
-     *         should really just be stationary.
-     */
-    private Vec2D getKillVelocityValue(Shape s, Vec2D tanVec) {
-
-        if (s instanceof WorldBound)
-            return Vec2D.ORIGIN;
-
-        final double SPEED_TOL = 0.5; //Magic number that works all right
-
-        Vec2D tanVel = s.getVelocity().vecProjection(tanVec);
-
-        if (tanVel.getSquaredLength() <= SPEED_TOL * SPEED_TOL) {
-            return tanVel;
-        }
-
-        return Vec2D.ORIGIN;
     }
 
     private void computeMinimumDisplacement(SimplexDirStruct gjkInfo) {
