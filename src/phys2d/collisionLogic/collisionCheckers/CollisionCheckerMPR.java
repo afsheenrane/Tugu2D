@@ -83,15 +83,8 @@ public final class CollisionCheckerMPR {
      *            stored.
      */
     private static void computeSimplex(Shape s1, Shape s2, SimplexDirStruct mprInfo) {
-        //@formatter:off
-        /*
-         * A---p>--B
-         * .\...../.
-         * ..\.../..
-         * ...\./...
-         * ....R....
-         */
-        //@formatter:on
+
+        int c = 0;
 
         Vec2D RA, portal, RAnorm, RO;
 
@@ -114,7 +107,7 @@ public final class CollisionCheckerMPR {
         mprInfo.simplex.add(support(s1, s2, mprInfo.dir)); // B: V2
 
         // REFINEMENT PHASE. LOOP HERE?
-        while (true) {
+        while (c++ <= 50) {
 
             // AB
             portal = Vec2D.sub(mprInfo.simplex.get(2), mprInfo.simplex.get(1)); //B - A
@@ -132,31 +125,20 @@ public final class CollisionCheckerMPR {
             Vec2D newPt, AO = mprInfo.simplex.get(1).getNegated();
             Vec2D portalNorm = portal.getNormal(); // Normal axis of the portal. Still need to guarantee that it points outwards.
 
-            if (portal.perpDotProduct(AO) < 0) //This guarantees that portalNorm points outwards.
+            if (portalNorm.dotProduct(RA.getNegated()) > 0) //This guarantees that portalNorm points outwards.
                 portalNorm.negate();
 
             // If the origin is outside the portal
-            if (AO.dotProduct(portalNorm) > 0) {
+            if (AO.dotProduct(portalNorm) >= 0) {
                 mprInfo.dir = portalNorm;
                 newPt = support(s1, s2, mprInfo.dir);
 
                 // See if the new point is past the origin.
-                if (newPt.dotProduct(mprInfo.dir) < 0) { // If not past origin
+                if (newPt.dotProduct(mprInfo.dir) <= 0) { // If not past origin
                     mprInfo.isColliding = false;
                     return;
                 }
                 else {
-                    //@formatter:off
-                    /*
-                     * ....C....
-                     *.../...\..
-                     * A---p>--B
-                     * .\...../.
-                     * ..1...2..
-                     * ...\./...
-                     * ....R....
-                     */
-                    //@formatter:on
 
                     // REFINE THE PORTAL.
                     // Check to see which point to discard from the simplex.
@@ -167,7 +149,7 @@ public final class CollisionCheckerMPR {
                         //Discard B.
                         mprInfo.simplex.set(2, newPt);
                     }
-                    else {
+                    else { //Discard A
                         mprInfo.simplex.set(1, newPt);
                     }
                 }
@@ -179,6 +161,8 @@ public final class CollisionCheckerMPR {
             }
 
         }
+        System.err.println("MPR COMPUTE SIMPLEX FAILURE.");
+        System.exit(1);
     }
 
     /**
