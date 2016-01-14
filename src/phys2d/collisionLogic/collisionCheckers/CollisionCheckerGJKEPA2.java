@@ -300,8 +300,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @param s2 the second shape.
      * @param gjkInfo the final simplex and search direction after GJK has run.
      */
-    protected static void computeMinimumDisplacement(Shape s1, Shape s2,
-            SimplexDirStruct gjkInfo) {
+    protected static void computeMinimumDisplacement(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
 
         final double TOL = 0.1;
 
@@ -333,9 +332,8 @@ public final class CollisionCheckerGJKEPA2 {
 
             // Find closest point on line segment to the origin. Using
             // same protocol as previous simplex where latest point is A.
-
-            Vec2D AB = Vec2D.sub(gjkInfo.simplex.get(0),
-                    gjkInfo.simplex.get(1));
+            int x = 0;
+            Vec2D AB = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(1)); //B - A
             Vec2D AO = gjkInfo.simplex.get(1).getNegated();
             Vec2D closestPt = AO.vecProjection(AB);
 
@@ -366,8 +364,7 @@ public final class CollisionCheckerGJKEPA2 {
 
             // Check if the new support is actually making progress towards the
             // origin.
-            if (Vec2D.sub(newPt, gjkInfo.simplex.get(1))
-                    .dotProduct(gjkInfo.dir) <= TOL) { // If no progress
+            if (Vec2D.sub(newPt, gjkInfo.simplex.get(1)).dotProduct(gjkInfo.dir) <= TOL) { // If no progress
                 gjkInfo.dir = closestPt;
                 return;
             }
