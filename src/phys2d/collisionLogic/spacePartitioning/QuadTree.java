@@ -29,7 +29,7 @@ public class QuadTree extends SpacePartitioningTree {
      * @param level the current level of this node.
      */
     public QuadTree(Vec2D[] bounds, int level) {
-        super(5, 4);
+        super(5, 3);
         this.bounds = bounds;
         this.depth = level;
 
@@ -49,16 +49,12 @@ public class QuadTree extends SpacePartitioningTree {
         children[0] = new QuadTree(new Vec2D[] { bounds[0].getCopy(), center.getCopy() }, depth + 1); //BL
 
         children[1] = new QuadTree(new Vec2D[] { //TL
-                new Vec2D(bounds[0].getX(), center.getY()),
-                new Vec2D(center.getX(), bounds[1].getY())
-        }, depth + 1);
+                new Vec2D(bounds[0].getX(), center.getY()), new Vec2D(center.getX(), bounds[1].getY()) }, depth + 1);
 
         children[2] = new QuadTree(new Vec2D[] { center.getCopy(), bounds[1].getCopy() }, depth + 1); //TR
 
         children[3] = new QuadTree(new Vec2D[] { //BR
-                new Vec2D(center.getX(), bounds[0].getY()),
-                new Vec2D(bounds[1].getX(), center.getY())
-        }, depth + 1);
+                new Vec2D(center.getX(), bounds[0].getY()), new Vec2D(bounds[1].getX(), center.getY()) }, depth + 1);
     }
 
     /**
@@ -71,8 +67,8 @@ public class QuadTree extends SpacePartitioningTree {
      */
     protected boolean childCanContainAABB(QuadTree child, Vec2D[] aabb) {
         //TODO, should eventually move this to the SAT collision checker.
-        return !(child.bounds[0].getX() > aabb[1].getX() || child.bounds[1].getX() < aabb[0].getX() ||
-                child.bounds[0].getY() > aabb[1].getY() || child.bounds[1].getY() < aabb[0].getY());
+        return !(child.bounds[0].getX() > aabb[1].getX() || child.bounds[1].getX() < aabb[0].getX()
+                || child.bounds[0].getY() > aabb[1].getY() || child.bounds[1].getY() < aabb[0].getY());
 
     }
 
@@ -176,8 +172,8 @@ public class QuadTree extends SpacePartitioningTree {
 
         g2d.drawString(depth + " " + items.size(), (int) com.getX() - 10, Phys2DMain.YRES - (int) (com.getY() + 5));
         if (children[0] != null) {
-            g2d.drawLine((int) com.getX(), Phys2DMain.YRES - (int) bounds[0].getY(), (int) com.getX(),
-                    Phys2DMain.YRES - (int) bounds[1].getY());
+            g2d.drawLine((int) com.getX(), Phys2DMain.YRES - (int) bounds[0].getY(), (int) com.getX(), Phys2DMain.YRES
+                    - (int) bounds[1].getY());
             g2d.drawLine((int) bounds[0].getX(), Phys2DMain.YRES - (int) com.getY(), (int) bounds[1].getX(),
                     Phys2DMain.YRES - (int) com.getY());
 
