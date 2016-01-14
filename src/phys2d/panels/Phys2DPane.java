@@ -9,6 +9,7 @@ import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
 import phys2d.collisionLogic.collisionManagers.CollisionManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager2;
+import phys2d.collisionLogic.tools.LinePolyTools;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
 import phys2d.entities.Vec2D;
@@ -40,12 +41,12 @@ public class Phys2DPane extends AnimatedPane {
 
         // Add in the world boundaries
 
-        addWorldBounds("r");
+        addWorldBounds("a");
         //populateWithSmallSquares(entities, 2, new Random().nextLong());
-        //populateWithSmallSquares(entities, 200, -111089002341966575l);
+        populateWithSmallSquares(entities, 200, -111089002341966575l);
 
         //populateWithSmallCircles(entities, 30, new Random().nextLong());
-        //populateWithSmallCircles(entities, 200, 3801484226869149488l);
+        populateWithSmallCircles(entities, 200, 3801484226869149488l);
         //addRefSquares(700);
 
         Shape s;
@@ -54,14 +55,14 @@ public class Phys2DPane extends AnimatedPane {
         s.setMaterial(Material.RUBBER);
         //entities.add(s);
 
-        s = new Square(new Vec2D(800, 400), 30, 0);
+        s = new Square(new Vec2D(980, 400), 30, 0); //970
         s.setMaterial(Material.REF60);
         s.setVelocity(new Vec2D(100, 0));
-        entities.add(s);
+        //entities.add(s);
 
         s = new Square(new Vec2D(550, 200), 50, 0);
         s.setMaterial(Material.REF60);
-        s.setVelocity(new Vec2D(20, -600));
+        s.setVelocity(new Vec2D(20, -20));
         //entities.add(s);
 
         s = new Circle(new Vec2D(300, 150), 30); //For ground contact: [300,70],30
@@ -73,22 +74,24 @@ public class Phys2DPane extends AnimatedPane {
 
         // tester();
 
-        //System.out.println(LinePolyTools.polyDifference(entities.get(0), entities.get(1)));
+        System.out.println(LinePolyTools.polyDifference(entities.get(0), entities.get(1)));
 
         // System.exit(0);
     }
 
     int upCt = 0;
+    long total = 0;
 
     @Override
     public void update() {
         long t = System.nanoTime();
         collManager.runManager(entities);
-        System.out.println((System.nanoTime() - t) / 1e6 + "    " + dt * 1000);
-        //System.out.println(++upCt);
-
-        if (upCt == 20) {
-            System.out.println("break pt");
+        total += System.nanoTime() - t;
+        //System.out.println((System.nanoTime() - t) / 1e6 + "    " + dt * 1000);
+        System.out.println(++upCt);
+        if (upCt == 1000) {
+            System.out.println((total / 1000) / 1e6);
+            //System.out.println("break pt");
         }
     }
 
