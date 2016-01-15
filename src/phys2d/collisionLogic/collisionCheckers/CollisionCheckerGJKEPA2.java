@@ -15,8 +15,8 @@ import phys2d.entities.shapes.polygons.Polygon;
  */
 public final class CollisionCheckerGJKEPA2 {
 
-    private final static int CLOCKWISE_WINDING = 1;
-    private final static int ANTICLOCKWISE_WINDING = -1;
+    private final int CLOCKWISE_WINDING = 1;
+    private final int ANTICLOCKWISE_WINDING = -1;
 
     /**
      * Using GJK, return the result of the algorithm on the two shapes.
@@ -26,7 +26,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @return a structure containing the final state of the simplex, the last
      *         search direction, and whether the shapes are colliding or not.
      */
-    private static SimplexDirStruct computeSimplex(Shape s1, Shape s2) {
+    private SimplexDirStruct computeSimplex(Shape s1, Shape s2) {
 
         //System.out.println(LinePolyTools.polyDifference(s1, s2));
 
@@ -74,7 +74,7 @@ public final class CollisionCheckerGJKEPA2 {
      * 
      * @param gjkInfo the current state of the algorithm.
      */
-    private static void evolveSimplex(SimplexDirStruct gjkInfo) {
+    private void evolveSimplex(SimplexDirStruct gjkInfo) {
 
         switch (gjkInfo.simplex.size()) {
             case 2:
@@ -101,7 +101,7 @@ public final class CollisionCheckerGJKEPA2 {
      * 
      * @param gjkInfo the current state of the algorithm.
      */
-    private static void computeLineSimplex(SimplexDirStruct gjkInfo) {
+    private void computeLineSimplex(SimplexDirStruct gjkInfo) {
 
         // Line: B-------------A
         // B=0,A=1
@@ -138,7 +138,7 @@ public final class CollisionCheckerGJKEPA2 {
      * 
      * @param gjkInfo the current state of the algorithm execution.
      */
-    private static void computeTriangleSimplex(SimplexDirStruct gjkInfo) {
+    private void computeTriangleSimplex(SimplexDirStruct gjkInfo) {
 
         //simplex mapping: A=2, B=1, C=0
 
@@ -244,7 +244,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @param dir the direction to get the support point in.
      * @return the corresponding support mapping of dir for s1 - s2.
      */
-    private static Vec2D support(Shape s1, Shape s2, Vec2D dir) {
+    private Vec2D support(Shape s1, Shape s2, Vec2D dir) {
         return (Vec2D.sub(s1.getMax(dir), s2.getMin(dir)));
     }
 
@@ -255,7 +255,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @param C the vertex that is not included in the above edge.
      * @return the winding of the simplex ABC.
      */
-    private static int calculateInitialWindingModifier(Vec2D AB, Vec2D C) {
+    private int calculateInitialWindingModifier(Vec2D AB, Vec2D C) {
 
         if (AB.perpDotProduct(C) >= 0)
             return ANTICLOCKWISE_WINDING;
@@ -277,7 +277,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @return the resolution vector if the shapes are colliding. The zero
      *         vector otherwise.
      */
-    public static SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
+    public SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
 
         SimplexDirStruct gjkInfo = computeSimplex(s1, s2);
 
@@ -300,7 +300,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @param s2 the second shape.
      * @param gjkInfo the final simplex and search direction after GJK has run.
      */
-    protected static void computeMinimumDisplacement(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
+    protected void computeMinimumDisplacement(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
 
         final double TOL = 0.1;
 
@@ -392,7 +392,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @param simplex the result simplex from running GJK on the shapes.
      * @return the collision normal between the two shapes.
      */
-    protected static void computeCollisionResolutionEPA(Shape s1, Shape s2,
+    protected void computeCollisionResolutionEPA(Shape s1, Shape s2,
             SimplexDirStruct gjkInfo) {
 
         // TODO try and make it so that we dont need this function call.
@@ -459,8 +459,34 @@ public final class CollisionCheckerGJKEPA2 {
      * @param s2 the second shape.
      * @return true if s1 and s2 intersect, false otherwise.
      */
-    public static boolean isColliding(Shape s1, Shape s2) {
+    public boolean isColliding(Shape s1, Shape s2) {
         return computeSimplex(s1, s2).isColliding;
+    }
+
+    /**
+     * Given a fully computed non-penetrating simplex, find the displacement
+     * from the simplex to the origin, and set it as the direction. <br>
+     * The simplex is assumed to be a point or a line. Under the assumption that
+     * a non-penetrating simplex would never have 3 vertices. <br>
+     * <i>Usage tip: </i> This method was more or less designed for use AFTER
+     * <code>getCollisionResolution()</code> has already been run. Because, it
+     * guarantees that the simplex conforms to the expected characteristics.
+     * 
+     * @param gjkInfo the structure containing the resultant information
+     *            (simplex, direction, etc) from the collision test of some
+     *            shapes.
+     */
+    public static void resetMinimumDisplacement(SimplexDirStruct gjkInfo) {
+        if (gjkInfo.getSimplex().size() == 1)
+            gjkInfo.setDir(gjkInfo.getSimplex().get(0));
+
+        else {
+            Vec2D AB = Vec2D.sub(gjkInfo.getSimplex().get(0), gjkInfo.getSimplex().get(1));
+            Vec2D AO = gjkInfo.getSimplex().get(1).getNegated();
+
+            gjkInfo.setDir(AO.vecProjection(AB));
+        }
+
     }
 
 }

@@ -13,6 +13,8 @@ import phys2d.entities.shapes.Shape;
  */
 public final class CollisionCheckerMPR {
 
+    private final CollisionCheckerGJKEPA2 gjkTool = new CollisionCheckerGJKEPA2();
+
     /**
      * Uses the MPR algorithm to detect whether a collision has occurred between
      * shapes s1 and s2.
@@ -21,7 +23,7 @@ public final class CollisionCheckerMPR {
      * @param s2 the second shape.
      * @return true if the shapes are colliding, false otherwise.
      */
-    public static boolean isColliding(Shape s1, Shape s2) {
+    public boolean isColliding(Shape s1, Shape s2) {
         SimplexDirStruct mprInfo = new SimplexDirStruct();
         computeSimplex(s1, s2, mprInfo);
 
@@ -35,7 +37,7 @@ public final class CollisionCheckerMPR {
      * @param s1 the first shape.
      * @param s2 the second shape.
      */
-    public static SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
+    public SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
         SimplexDirStruct mprInfo = new SimplexDirStruct();
         computeSimplex(s1, s2, mprInfo);
 
@@ -48,10 +50,10 @@ public final class CollisionCheckerMPR {
         return mprInfo;
     }
 
-    private static void computeCollisionResolution(Shape s1, Shape s2, SimplexDirStruct mprInfo) {
+    private void computeCollisionResolution(Shape s1, Shape s2, SimplexDirStruct mprInfo) {
         mprInfo.simplex.remove(0);
         mprInfo.simplex.add(support(s1, s2, mprInfo.dir.getNegated()));
-        CollisionCheckerGJKEPA2.computeCollisionResolutionEPA(s1, s2, mprInfo);
+        gjkTool.computeCollisionResolutionEPA(s1, s2, mprInfo);
     }
 
     /**
@@ -62,7 +64,7 @@ public final class CollisionCheckerMPR {
      * @param mprInfo the structure where information about the MPR run is
      *            stored.
      */
-    private static void computeSimplex(Shape s1, Shape s2, SimplexDirStruct mprInfo) {
+    private void computeSimplex(Shape s1, Shape s2, SimplexDirStruct mprInfo) {
 
         //System.out.println("diff: " + LinePolyTools.polyDifference(s1, s2));
 
@@ -159,7 +161,7 @@ public final class CollisionCheckerMPR {
      * @param mprInfo the state of the simplex and the last search direction
      *            after the MPR algorithm searched for the origin.
      */
-    protected static void computeMinimumDisplacement(Shape s1, Shape s2, SimplexDirStruct mprInfo) {
+    protected void computeMinimumDisplacement(Shape s1, Shape s2, SimplexDirStruct mprInfo) {
 
         final double TOL = 0.1;
 
@@ -226,7 +228,7 @@ public final class CollisionCheckerMPR {
      * @param dir the direction to get the support point in.
      * @return the corresponding support mapping of dir for s1 - s2.
      */
-    private static Vec2D support(Shape s1, Shape s2, Vec2D dir) {
+    private Vec2D support(Shape s1, Shape s2, Vec2D dir) {
         return (Vec2D.sub(s1.getMax(dir), s2.getMin(dir)));
     }
 

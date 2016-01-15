@@ -41,6 +41,8 @@ public class SpeculativeManager2 extends CollisionManager {
      */
     private ArrayList<Shape[]> collisionGroups;
 
+    private final CollisionCheckerGJKEPA2 gjkSolver = new CollisionCheckerGJKEPA2();
+
     /**
      * Create a new manager which uses GJKv2 and swept detection.
      * 
@@ -107,7 +109,7 @@ public class SpeculativeManager2 extends CollisionManager {
      * @param s2
      */
     private void resolveCollision(Shape s1, Shape s2) {
-        SimplexDirStruct gjkInfo = CollisionCheckerGJKEPA2.getCollisionResolution(s1, s2);
+        SimplexDirStruct gjkInfo = gjkSolver.getCollisionResolution(s1, s2);
 
         if (gjkInfo.isColliding()) { // Discrete collision
             /*
@@ -211,7 +213,7 @@ public class SpeculativeManager2 extends CollisionManager {
             for (Vec2D v : gjkInfo.getSimplex()) {
                 v.sub(relVel);
             }
-            computeMinimumDisplacement(gjkInfo);
+            CollisionCheckerGJKEPA2.resetMinimumDisplacement(gjkInfo);
             unitDisp = gjkInfo.getDir().getNormalized();
         }
 
@@ -224,19 +226,6 @@ public class SpeculativeManager2 extends CollisionManager {
         }
 
         return -1;
-    }
-
-    private void computeMinimumDisplacement(SimplexDirStruct gjkInfo) {
-        if (gjkInfo.getSimplex().size() == 1)
-            gjkInfo.setDir(gjkInfo.getSimplex().get(0));
-
-        else {
-            Vec2D AB = Vec2D.sub(gjkInfo.getSimplex().get(0), gjkInfo.getSimplex().get(1));
-            Vec2D AO = gjkInfo.getSimplex().get(1).getNegated();
-
-            gjkInfo.setDir(AO.vecProjection(AB));
-        }
-
     }
 
     /**
