@@ -11,7 +11,7 @@ import phys2d.entities.shapes.Shape;
  * @author Afsheen
  *
  */
-public final class CollisionCheckerMPR {
+public final class CollisionCheckerMPR extends CollisionChecker {
 
     private final CollisionCheckerGJKEPA2 gjkTool = new CollisionCheckerGJKEPA2();
 
@@ -23,8 +23,9 @@ public final class CollisionCheckerMPR {
      * @param s2 the second shape.
      * @return true if the shapes are colliding, false otherwise.
      */
+    @Override
     public boolean isColliding(Shape s1, Shape s2) {
-        SimplexDirStruct mprInfo = new SimplexDirStruct();
+        SimplexCollisionInfo mprInfo = new SimplexCollisionInfo();
         computeSimplex(s1, s2, mprInfo);
 
         return mprInfo.isColliding;
@@ -37,8 +38,9 @@ public final class CollisionCheckerMPR {
      * @param s1 the first shape.
      * @param s2 the second shape.
      */
-    public SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
-        SimplexDirStruct mprInfo = new SimplexDirStruct();
+    @Override
+    public SimplexCollisionInfo getCollisionResolution(Shape s1, Shape s2) {
+        SimplexCollisionInfo mprInfo = new SimplexCollisionInfo();
         computeSimplex(s1, s2, mprInfo);
 
         if (mprInfo.isColliding)
@@ -50,7 +52,7 @@ public final class CollisionCheckerMPR {
         return mprInfo;
     }
 
-    private void computeCollisionResolution(Shape s1, Shape s2, SimplexDirStruct mprInfo) {
+    private void computeCollisionResolution(Shape s1, Shape s2, SimplexCollisionInfo mprInfo) {
         mprInfo.simplex.remove(0);
         mprInfo.simplex.add(support(s1, s2, mprInfo.dir.getNegated()));
         gjkTool.computeCollisionResolutionEPA(s1, s2, mprInfo);
@@ -64,7 +66,7 @@ public final class CollisionCheckerMPR {
      * @param mprInfo the structure where information about the MPR run is
      *            stored.
      */
-    private void computeSimplex(Shape s1, Shape s2, SimplexDirStruct mprInfo) {
+    private void computeSimplex(Shape s1, Shape s2, SimplexCollisionInfo mprInfo) {
 
         //System.out.println("diff: " + LinePolyTools.polyDifference(s1, s2));
 
@@ -161,7 +163,7 @@ public final class CollisionCheckerMPR {
      * @param mprInfo the state of the simplex and the last search direction
      *            after the MPR algorithm searched for the origin.
      */
-    protected void computeMinimumDisplacement(Shape s1, Shape s2, SimplexDirStruct mprInfo) {
+    protected void computeMinimumDisplacement(Shape s1, Shape s2, SimplexCollisionInfo mprInfo) {
 
         final double TOL = 0.1;
 
