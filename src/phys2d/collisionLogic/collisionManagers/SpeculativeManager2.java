@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import phys2d.Phys2DMain;
+import phys2d.collisionLogic.collisionCheckers.CollisionChecker;
 import phys2d.collisionLogic.collisionCheckers.CollisionCheckerGJKEPA2;
-import phys2d.collisionLogic.collisionCheckers.SimplexDirStruct;
+import phys2d.collisionLogic.collisionCheckers.CollisionInfo;
+import phys2d.collisionLogic.collisionCheckers.SweptCapable;
 import phys2d.collisionLogic.spacePartitioning.SpacePartitioningTree;
 import phys2d.collisionLogic.spacePartitioning.SweptQuadTree;
 import phys2d.collisionLogic.tools.CollisionPair;
@@ -41,7 +43,23 @@ public class SpeculativeManager2 extends CollisionManager {
      */
     private ArrayList<Shape[]> collisionGroups;
 
-    private final CollisionCheckerGJKEPA2 gjkSolver = new CollisionCheckerGJKEPA2();
+    /**
+     * The structure that holds all the info of each collision.
+     */
+    private CollisionInfo collisionInfo;
+
+    private final CollisionChecker collisionSolver;
+
+    /**
+     * Flag to check if the solver is capable of swept detection.
+     */
+    private final boolean isSweptCapable;
+
+    /**
+     * Practically a copy of the collisionSolver. This just exists to prevent
+     * having to cast the solver into SweptCapable every iteration.
+     */
+    private SweptCapable sweptSolver;
 
     /**
      * Create a new manager which uses GJKv2 and swept detection.
@@ -49,6 +67,24 @@ public class SpeculativeManager2 extends CollisionManager {
      * @param dt the timestep of this simulation.
      */
     public SpeculativeManager2(double dt) {
+        this(dt, new CollisionCheckerGJKEPA2(), false);
+    }
+
+    /**
+     * Create a new swept capable solver using the collisionSolver provided.
+     * <br>
+     * Note: If the entered collisionSolver is not <code>SweptCapable</code>
+     * this manager will default to discrete collision detection.
+     * 
+     * @param dt the timestep of this simulation.
+     * @param collisionSolver the algorithm set which will be used to compute
+     *            collisions.
+     * @param forceDiscreteSolver if true, this manager will only run the
+     *            simulation using discrete timestep collision resolution.
+     *            <br>
+     *            Has no effect if the CollisionSolver is not swept capable.
+     */
+    public SpeculativeManager2(double dt, CollisionChecker collisionSolver, boolean forceDiscreteSolver) {
         super(dt);
         collisionTree = new SweptQuadTree(new Vec2D[] { new Vec2D(-10, -10),
                 new Vec2D(Phys2DMain.XRES + 10, Phys2DMain.YRES + 10) }, 1, dt);
@@ -57,6 +93,14 @@ public class SpeculativeManager2 extends CollisionManager {
         //       new Vec2D(Phys2DMain.XRES + 10, Phys2DMain.YRES + 10) }, BSPTree.HORIZONTAL_SPLIT, 1, dt);
 
         collidedPairs = new HashSet<CollisionPair>();
+
+        this.collisionSolver = collisionSolver;
+
+        this.isSweptCapable = forceDiscreteSolver ? false : this.collisionSolver instanceof SweptCapable;
+
+        if (isSweptCapable) {
+            sweptSolver = (SweptCapable) this.collisionSolver;
+        }
     }
 
     @Override
@@ -109,9 +153,9 @@ public class SpeculativeManager2 extends CollisionManager {
      * @param s2
      */
     private void resolveCollision(Shape s1, Shape s2) {
-        SimplexDirStruct gjkInfo = gjkSolver.getCollisionResolution(s1, s2);
+        collisionInfo = collisionSolver.getCollisionResolution(s1, s2);
 
-        if (gjkInfo.isColliding()) { // Discrete collision
+        if (collisionInfo.isColliding()) { // Discrete collision
             /*
              * Apply world forces
              * unstick
@@ -126,8 +170,8 @@ public class SpeculativeManager2 extends CollisionManager {
             forcedShapes.add(s1);
             forcedShapes.add(s2);
 
-            unstickShapes(s1, s2, gjkInfo);
-            applyCollisionForces(s1, s2, gjkInfo.getDir());
+            unstickShapes(s1, s2, collisionInfo.getDir());
+            applyCollisionForces(s1, s2, collisionInfo.getDir());
 
             s1.move(dt);
             s2.move(dt);
@@ -135,7 +179,7 @@ public class SpeculativeManager2 extends CollisionManager {
             movedShapes.add(s1);
             movedShapes.add(s2);
         }
-        else {
+        else if (isSweptCapable) {
             /*
              * apply pre collision world forces
              * move till in contact
@@ -143,7 +187,7 @@ public class SpeculativeManager2 extends CollisionManager {
              * add post collision world forces
              * move for remainder of frame
              */
-            double collisionTime = impendingCollisionChecker(s1, s2, gjkInfo);
+            double collisionTime = sweptSolver.getImpendingCollisionTime(s1, s2, collisionInfo, dt);
             if (collisionTime >= 0) { // Impending coll.
                 //System.out.println("full swept");
 
@@ -162,7 +206,7 @@ public class SpeculativeManager2 extends CollisionManager {
 
                 // Add collision forces
                 //gjkInfo.getDir().negate(); // Expected by the force computer.
-                applyCollisionForces(s1, s2, gjkInfo.getDir());
+                applyCollisionForces(s1, s2, collisionInfo.getDir());
                 //gjkInfo.getDir().negate();
 
                 // Add post-collision world forces.
@@ -190,45 +234,6 @@ public class SpeculativeManager2 extends CollisionManager {
     }
 
     /**
-     * Checks to see if there will be a collision between these two shapes in
-     * the next frame. If there is, return the exact time during the next frame
-     * that the collision should happen.
-     * 
-     * @param s1 the first shape.
-     * @param s2 the second shape.
-     * @param gjkInfo the result of the GJKEPA run on the two shapes.
-     * @return a double between 0.0-1.0 representing when a collision will take
-     *         place next frame. If there is no collision next frame, return -1.
-     */
-    private double impendingCollisionChecker(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
-
-        Vec2D unitDisp = gjkInfo.getDir().getNormalized();
-        Vec2D relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
-
-        relVel.scaleBy(dt);
-
-        // If the shapes are touching, move them back 1 frame to see their
-        // previous positions to deduce a collision normal.
-        if (unitDisp.equals(Vec2D.ORIGIN)) {
-            for (Vec2D v : gjkInfo.getSimplex()) {
-                v.sub(relVel);
-            }
-            CollisionCheckerGJKEPA2.resetMinimumDisplacement(gjkInfo);
-            unitDisp = gjkInfo.getDir().getNormalized();
-        }
-
-        // The speed along the collision normal
-        double relNormSpeed = relVel.dotProduct(unitDisp);
-        double seperatingDist = gjkInfo.getDir().getLength();
-
-        if (relNormSpeed >= seperatingDist) {
-            return seperatingDist / relNormSpeed;
-        }
-
-        return -1;
-    }
-
-    /**
      * If a collision is detected, translate the shapes out of each other. <br>
      * The translation is distributed between each shape depending on mass. This
      * should be very small anyways because deep collisions will be prevented by
@@ -236,9 +241,10 @@ public class SpeculativeManager2 extends CollisionManager {
      * 
      * @param s1 the first shape.
      * @param s2 the second shape.
-     * @param gjkInfo the result of the GJKEPA run on the two shapes.
+     * @param collisionAxis the axis (and direction) along which s2 needs to be
+     *            translated by,to be completely removed from s1.
      */
-    private void unstickShapes(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
+    private void unstickShapes(Shape s1, Shape s2, Vec2D collisionAxis) {
 
         double totalMass = s1.getMass() + s2.getMass();
         double s1ratio, s2ratio;
@@ -259,8 +265,8 @@ public class SpeculativeManager2 extends CollisionManager {
 
         Vec2D s1tran, s2tran;
 
-        s1tran = gjkInfo.getDir().getNegated().getScaled(s1ratio);
-        s2tran = gjkInfo.getDir().getScaled(s2ratio);
+        s1tran = collisionAxis.getNegated().getScaled(s1ratio);
+        s2tran = collisionAxis.getScaled(s2ratio);
 
         s1.translate(s1tran);
         s2.translate(s2tran);
