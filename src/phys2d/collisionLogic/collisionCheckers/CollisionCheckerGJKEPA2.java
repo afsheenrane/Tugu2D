@@ -13,7 +13,7 @@ import phys2d.entities.shapes.polygons.Polygon;
  * @author afsheen
  *
  */
-public final class CollisionCheckerGJKEPA2 {
+public final class CollisionCheckerGJKEPA2 extends CollisionChecker implements SweptCapable {
 
     private final int CLOCKWISE_WINDING = 1;
     private final int ANTICLOCKWISE_WINDING = -1;
@@ -26,12 +26,12 @@ public final class CollisionCheckerGJKEPA2 {
      * @return a structure containing the final state of the simplex, the last
      *         search direction, and whether the shapes are colliding or not.
      */
-    private SimplexDirStruct computeSimplex(Shape s1, Shape s2) {
+    private SimplexCollisionInfo computeSimplex(Shape s1, Shape s2) {
 
         //System.out.println(LinePolyTools.polyDifference(s1, s2));
 
         Vec2D newPt;
-        SimplexDirStruct gjkInfo = new SimplexDirStruct();
+        SimplexCollisionInfo gjkInfo = new SimplexCollisionInfo();
 
         int count = 0;
 
@@ -74,7 +74,7 @@ public final class CollisionCheckerGJKEPA2 {
      * 
      * @param gjkInfo the current state of the algorithm.
      */
-    private void evolveSimplex(SimplexDirStruct gjkInfo) {
+    private void evolveSimplex(SimplexCollisionInfo gjkInfo) {
 
         switch (gjkInfo.simplex.size()) {
             case 2:
@@ -101,7 +101,7 @@ public final class CollisionCheckerGJKEPA2 {
      * 
      * @param gjkInfo the current state of the algorithm.
      */
-    private void computeLineSimplex(SimplexDirStruct gjkInfo) {
+    private void computeLineSimplex(SimplexCollisionInfo gjkInfo) {
 
         // Line: B-------------A
         // B=0,A=1
@@ -138,7 +138,7 @@ public final class CollisionCheckerGJKEPA2 {
      * 
      * @param gjkInfo the current state of the algorithm execution.
      */
-    private void computeTriangleSimplex(SimplexDirStruct gjkInfo) {
+    private void computeTriangleSimplex(SimplexCollisionInfo gjkInfo) {
 
         //simplex mapping: A=2, B=1, C=0
 
@@ -277,9 +277,10 @@ public final class CollisionCheckerGJKEPA2 {
      * @return the resolution vector if the shapes are colliding. The zero
      *         vector otherwise.
      */
-    public SimplexDirStruct getCollisionResolution(Shape s1, Shape s2) {
+    @Override
+    public SimplexCollisionInfo getCollisionResolution(Shape s1, Shape s2) {
 
-        SimplexDirStruct gjkInfo = computeSimplex(s1, s2);
+        SimplexCollisionInfo gjkInfo = computeSimplex(s1, s2);
 
         if (gjkInfo.isColliding)
             computeCollisionResolutionEPA(s1, s2, gjkInfo);
@@ -300,7 +301,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @param s2 the second shape.
      * @param gjkInfo the final simplex and search direction after GJK has run.
      */
-    protected void computeMinimumDisplacement(Shape s1, Shape s2, SimplexDirStruct gjkInfo) {
+    protected void computeMinimumDisplacement(Shape s1, Shape s2, SimplexCollisionInfo gjkInfo) {
 
         final double TOL = 0.1;
 
@@ -393,7 +394,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @return the collision normal between the two shapes.
      */
     protected void computeCollisionResolutionEPA(Shape s1, Shape s2,
-            SimplexDirStruct gjkInfo) {
+            SimplexCollisionInfo gjkInfo) {
 
         // TODO try and make it so that we dont need this function call.
         gjkInfo.simplex = Polygon.arrangePoints(gjkInfo.simplex);
@@ -459,6 +460,7 @@ public final class CollisionCheckerGJKEPA2 {
      * @param s2 the second shape.
      * @return true if s1 and s2 intersect, false otherwise.
      */
+    @Override
     public boolean isColliding(Shape s1, Shape s2) {
         return computeSimplex(s1, s2).isColliding;
     }
@@ -476,7 +478,7 @@ public final class CollisionCheckerGJKEPA2 {
      *            (simplex, direction, etc) from the collision test of some
      *            shapes.
      */
-    public static void resetMinimumDisplacement(SimplexDirStruct gjkInfo) {
+    public static void resetMinimumDisplacement(SimplexCollisionInfo gjkInfo) {
         if (gjkInfo.getSimplex().size() == 1)
             gjkInfo.setDir(gjkInfo.getSimplex().get(0));
 
@@ -487,6 +489,51 @@ public final class CollisionCheckerGJKEPA2 {
             gjkInfo.setDir(AO.vecProjection(AB));
         }
 
+    }
+
+    /**
+     * Checks to see if there will be a collision between these two shapes in
+     * the next frame. If there is, return the exact time during the next frame
+     * that the collision should happen.
+     * 
+     * @param s1 the first shape.
+     * @param s2 the second shape.
+     * @param gjkInfo the result of the GJKEPA run on the two shapes.
+     * @param dt the physics delta time of the simulation.
+     * 
+     * @return a double between 0.0-1.0 representing when a collision will take
+     *         place next frame. If there is no collision next frame, return -1.
+     */
+    @Override
+    public double getImpendingCollisionTime(Shape s1, Shape s2, CollisionInfo gjkInfo, double dt) {
+        return getImpendingCollisionTimeHelper(s1, s2, (SimplexCollisionInfo) gjkInfo, dt);
+    }
+
+    private static double getImpendingCollisionTimeHelper(Shape s1, Shape s2, SimplexCollisionInfo gjkInfo, double dt) {
+        Vec2D unitDisp = gjkInfo.getDir().getNormalized();
+        Vec2D relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
+
+        relVel.scaleBy(dt);
+
+        // If the shapes are touching, move them back 1 frame to see their
+        // previous positions to deduce a collision normal.
+        if (unitDisp.equals(Vec2D.ORIGIN)) {
+            for (Vec2D v : gjkInfo.getSimplex()) {
+                v.sub(relVel);
+            }
+            CollisionCheckerGJKEPA2.resetMinimumDisplacement(gjkInfo);
+            unitDisp = gjkInfo.getDir().getNormalized();
+        }
+
+        // The speed along the collision normal
+        double relNormSpeed = relVel.dotProduct(unitDisp);
+        double seperatingDist = gjkInfo.getDir().getLength();
+
+        if (relNormSpeed >= seperatingDist) {
+            return seperatingDist / relNormSpeed;
+        }
+
+        return -1;
     }
 
 }
