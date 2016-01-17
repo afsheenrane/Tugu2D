@@ -333,7 +333,6 @@ public final class CollisionCheckerGJKEPA2 extends CollisionChecker implements S
 
             // Find closest point on line segment to the origin. Using
             // same protocol as previous simplex where latest point is A.
-            int x = 0;
             Vec2D AB = Vec2D.sub(gjkInfo.simplex.get(0), gjkInfo.simplex.get(1)); //B - A
             Vec2D AO = gjkInfo.simplex.get(1).getNegated();
             Vec2D closestPt = AO.vecProjection(AB);
@@ -509,7 +508,7 @@ public final class CollisionCheckerGJKEPA2 extends CollisionChecker implements S
         return getImpendingCollisionTimeHelper(s1, s2, (SimplexCollisionInfo) gjkInfo, dt);
     }
 
-    private static double getImpendingCollisionTimeHelper(Shape s1, Shape s2, SimplexCollisionInfo gjkInfo, double dt) {
+    protected static double getImpendingCollisionTimeHelper(Shape s1, Shape s2, SimplexCollisionInfo gjkInfo, double dt) {
         Vec2D unitDisp = gjkInfo.getDir().getNormalized();
         Vec2D relVel = Vec2D.sub(s1.getVelocity(), s2.getVelocity());
 

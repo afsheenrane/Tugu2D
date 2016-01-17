@@ -62,7 +62,8 @@ public class SpeculativeManager2 extends CollisionManager {
     private SweptCapable sweptSolver;
 
     /**
-     * Create a new manager which uses GJKv2 and swept detection.
+     * Create a new manager which uses {@link CollisionCheckerGJKEPA2} and swept
+     * detection.
      * 
      * @param dt the timestep of this simulation.
      */
@@ -73,7 +74,7 @@ public class SpeculativeManager2 extends CollisionManager {
     /**
      * Create a new swept capable solver using the collisionSolver provided.
      * <br>
-     * Note: If the entered collisionSolver is not <code>SweptCapable</code>
+     * Note: If the entered collisionSolver is not {@link SweptCapable}
      * this manager will default to discrete collision detection.
      * 
      * @param dt the timestep of this simulation.
@@ -82,7 +83,8 @@ public class SpeculativeManager2 extends CollisionManager {
      * @param forceDiscreteSolver if true, this manager will only run the
      *            simulation using discrete timestep collision resolution.
      *            <br>
-     *            Has no effect if the CollisionSolver is not swept capable.
+     *            Has no effect if the CollisionSolver is not
+     *            {@link SweptCapable}.
      */
     public SpeculativeManager2(double dt, CollisionChecker collisionSolver, boolean forceDiscreteSolver) {
         super(dt);
