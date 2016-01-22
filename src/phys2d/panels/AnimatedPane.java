@@ -77,6 +77,9 @@ public class AnimatedPane extends JPanel {
 
         init();
 
+        long fpsTimer = System.nanoTime();
+        int fpsCt = 0;
+
         while (isRunning) {
             timeSinceLastUpdate = (System.nanoTime() / 1e9) - currentTime;
             currentTime = System.nanoTime() / 1e9;
@@ -94,8 +97,14 @@ public class AnimatedPane extends JPanel {
             }
 
             alpha = accumulator / dt; //percentage time remaining after updates. Used for smooth rendering
-
             repaint();
+            fpsCt++;
+
+            if ((System.nanoTime() - fpsTimer) >= 1e9) {
+                //System.out.println(fpsCt);
+                fpsCt = 0;
+                fpsTimer = System.nanoTime();
+            }
 
             timeTakenForLoop = (System.nanoTime() / 1e9) - currentTime;
             callSleep((1000.0 / maxFps) - (timeTakenForLoop * 1e3)); //Caps FPS to maxFps
