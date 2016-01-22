@@ -56,7 +56,7 @@ public class Circle extends Shape {
     @Override
     public void move(double dt) {
 
-        prevPos[0] = this.centerOfMass;
+        prevPos[0] = this.centerOfMass.getCopy();
 
         // Symplectic euler integrator
         Vec2D accel = Vec2D.getScaled(netForce, invMass);
@@ -170,8 +170,7 @@ public class Circle extends Shape {
 
         g2d.fillOval(
                 (int) Math.round(((points[0].getX() - 1) * alpha) + ((prevPos[0].getX() - 1) * (1.0 - alpha))),
-                Phys2DMain.YRES - (int) Math.round(((points[0].getY() - 1) * alpha) + ((prevPos[0].getY() - 1) * (1.0
-                        - alpha))),
+                Phys2DMain.YRES - (int) Math.round(((points[0].getY() - 1) * alpha) + ((prevPos[0].getY() - 1) * (1.0 - alpha))),
                 3, 3);
 
         g2d.setColor(t);

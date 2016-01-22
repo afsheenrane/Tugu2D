@@ -15,8 +15,8 @@ public class Phys2DMain {
     public static final int XRES = 1000;
     public static final int YRES = 1000;
     private static final int updateRate = 50;
-    private static final int maxFps = 200;
-    private static final int maxFramesSkippable = 1;
+    private static final int maxFps = 300;
+    private static final int maxFramesSkippable = 5;
 
     public static void main(String[] args) {
 

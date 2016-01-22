@@ -319,10 +319,10 @@ public class Polygon extends Shape {
      */
     protected void resetPrevPos() {
         for (int i = 0; i < this.points.length; i++) {
-            this.prevPos[i] = this.points[i];
+            this.prevPos[i] = this.points[i].getCopy();
         }
 
-        this.prevPos[this.prevPos.length - 1] = this.centerOfMass;
+        this.prevPos[this.prevPos.length - 1] = this.centerOfMass.getCopy();
     }
 
     /**
