@@ -71,19 +71,17 @@ public final class MiscTools {
      *         vectors within the giving floor and ceiling parameters.
      */
     public static Vec2D[] genRandVecs(int count, Vec2D floor, Vec2D ceiling, long seed) {
-        System.out.println("seed: " + seed);
+        //System.out.println("seed: " + seed);
         Random randGen = new Random(seed);
         Vec2D[] results = new Vec2D[count];
 
         double rx, ry;
 
         for (int i = 0; i < count; i++) {
-            rx = randGen.nextInt((int) (ceiling.getX() - floor.getX()))
-                    + floor.getX();
+            rx = randGen.nextInt((int) (ceiling.getX() - floor.getX())) + floor.getX();
             rx += randGen.nextDouble();
 
-            ry = randGen.nextInt((int) (ceiling.getY() - floor.getY()))
-                    + floor.getY();
+            ry = randGen.nextInt((int) (ceiling.getY() - floor.getY())) + floor.getY();
             ry += randGen.nextDouble();
 
             results[i] = new Vec2D(rx, ry);
