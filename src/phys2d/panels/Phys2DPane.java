@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import phys2d.Phys2DMain;
 import phys2d.collisionLogic.collisionManagers.CollisionManager;
 import phys2d.collisionLogic.collisionManagers.SpeculativeManager2;
-import phys2d.collisionLogic.tools.LinePolyTools;
 import phys2d.collisionLogic.tools.MiscTools;
 import phys2d.entities.Material;
 import phys2d.entities.Vec2D;
 import phys2d.entities.shapes.Circle;
 import phys2d.entities.shapes.Shape;
+import phys2d.entities.shapes.polygons.Polygon;
 import phys2d.entities.shapes.polygons.Rectangle;
 import phys2d.entities.shapes.polygons.Square;
 import phys2d.entities.shapes.polygons.WorldBound;
@@ -42,11 +42,13 @@ public class Phys2DPane extends AnimatedPane {
 
         addWorldBounds("a");
         //populateWithSmallSquares(entities, 2, new Random().nextLong());
-        populateWithSmallSquares(entities, 200, -111089002341966575l);
+        //populateWithSmallSquares(entities, 200, -111089002341966575l);
 
         //populateWithSmallCircles(entities, 30, new Random().nextLong());
-        populateWithSmallCircles(entities, 200, 3801484226869149488l);
+        populateWithSmallCircles(entities, 50, 3801484226869149488l);
         //addRefSquares(700);
+
+        populateWithRandomPolys(entities, 30, 50, 7);
 
         Shape s;
 
@@ -73,7 +75,7 @@ public class Phys2DPane extends AnimatedPane {
 
         // tester();
 
-        System.out.println(LinePolyTools.polyDifference(entities.get(0), entities.get(1)));
+        //System.out.println(LinePolyTools.polyDifference(entities.get(0), entities.get(1)));
 
         // System.exit(0);
     }
@@ -87,7 +89,7 @@ public class Phys2DPane extends AnimatedPane {
         collManager.runManager(entities);
         total += System.nanoTime() - t;
         //System.out.println((System.nanoTime() - t) / 1e6 + "    " + dt * 1000);
-        System.out.println(++upCt);
+        //System.out.println(++upCt);
         if (upCt == 1000) {
             System.out.println((total / 1000) / 1e6);
             //System.out.println("break pt");
@@ -126,13 +128,13 @@ public class Phys2DPane extends AnimatedPane {
 
         // Right
         if (s.indexOf('a') != -1 || s.indexOf('r') != -1) {
-            entities.add(new WorldBound(new Vec2D(Phys2DMain.XRES - 15, -20),
-                    new Vec2D(Phys2DMain.XRES * 1.5, Phys2DMain.YRES + 20)));
+            entities.add(new WorldBound(new Vec2D(Phys2DMain.XRES - 15, -20), new Vec2D(Phys2DMain.XRES * 1.5,
+                    Phys2DMain.YRES + 20)));
         }
         // Top
         if (s.indexOf('a') != -1 || s.indexOf('t') != -1) {
-            entities.add(new WorldBound(new Vec2D(-10, Phys2DMain.YRES - 10),
-                    new Vec2D(Phys2DMain.XRES + 10, Phys2DMain.YRES * 1.5)));
+            entities.add(new WorldBound(new Vec2D(-10, Phys2DMain.YRES - 10), new Vec2D(Phys2DMain.XRES + 10,
+                    Phys2DMain.YRES * 1.5)));
         }
         for (Shape w : entities) {
             System.out.println(w);
@@ -172,6 +174,45 @@ public class Phys2DPane extends AnimatedPane {
             s.setVelocity(vel[i]);
             entities.add(s);
         }
+    }
+
+    /**
+     * Generates num random polygons of the given complexity and of
+     * approximately the given radius.
+     * 
+     * @param entities the list of all entities in the world.
+     * @param num the number of polygons to generate.
+     * @param radius the approximate radius of the polygons
+     * @param complexity the number of vertices in the polygons. <b>Must be
+     *            greater than 2.</b>
+     * @param seed the random generation seed.
+     */
+    public void populateWithRandomPolys(ArrayList<Shape> entities, int num, int radius, int complexity) {
+        if (complexity <= 2) {
+            throw new RuntimeException("Complexity must be greater than 2!");
+        }
+
+        Vec2D[] positions = MiscTools.genRandVecs(num, new Vec2D(radius + 20, radius + 20), new Vec2D(900, 900));
+
+        for (int j = 0; j < num; j++) {
+            Shape s;
+            int curComplexity = (int) MiscTools.genRandVecs(1, new Vec2D(4, 0), new Vec2D(complexity + 1, 1))[0].getX();
+
+            Vec2D[] piVecs = MiscTools.genRandVecs(curComplexity, Vec2D.ORIGIN, new Vec2D(2.0 * Math.PI, 1));
+
+            Vec2D[] polyPts = new Vec2D[curComplexity];
+
+            for (int i = 0; i < curComplexity; i++) {
+                polyPts[i] = new Vec2D(radius * Math.cos(piVecs[i].getX()), radius * Math.sin(piVecs[i].getX()));
+                polyPts[i].add(positions[j]);
+            }
+
+            s = new Polygon(polyPts);
+            System.out.println(s);
+            entities.add(s);
+            System.out.println(entities.get(entities.size() - 1));
+        }
+
     }
 
     private void addRefSquares(double height) {
