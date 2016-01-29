@@ -11,11 +11,11 @@ import phys2d.panels.Phys2DPane;
 
 public class Phys2DMain {
 
-    private static JFrame mainPhys2dFrame = new JFrame("Physics 2D");
+    public static JFrame mainPhys2dFrame = new JFrame("Physics 2D");
     public static final int XRES = 1000;
     public static final int YRES = 1000;
     private static final int updateRate = 50;
-    private static final int maxFps = 300;
+    private static final int maxFps = 200;
     private static final int maxFramesSkippable = 5;
 
     public static void main(String[] args) {
