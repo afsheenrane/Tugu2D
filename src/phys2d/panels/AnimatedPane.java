@@ -6,6 +6,8 @@ import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
+import phys2d.Phys2DMain;
+
 @SuppressWarnings("serial")
 public class AnimatedPane extends JPanel {
 
@@ -101,7 +103,7 @@ public class AnimatedPane extends JPanel {
             fpsCt++;
 
             if ((System.nanoTime() - fpsTimer) >= 1e9) {
-                //System.out.println(fpsCt);
+                Phys2DMain.mainPhys2dFrame.setTitle("Physics 2D " + fpsCt);
                 fpsCt = 0;
                 fpsTimer = System.nanoTime();
             }
