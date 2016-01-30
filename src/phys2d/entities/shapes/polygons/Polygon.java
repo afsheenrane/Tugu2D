@@ -306,11 +306,12 @@ public class Polygon extends Shape {
 
         area *= 0.5;
 
-        area /= 10000.0; // convert from px^2 (cm^2) to m^2
-
-        area = Math.abs(area);
+        area /= 1e5; // convert from px^2 (cm^2) to m^2
+        xSum /= 1e5;
+        ySum /= 1e5;
 
         centerOfMass = new Vec2D(xSum / (6.0 * area), ySum / (6.0 * area));
+        area = Math.abs(area);
     }
 
     /**
@@ -572,7 +573,7 @@ public class Polygon extends Shape {
 
         yInterp = Phys2DMain.YRES - yInterp;
 
-        //g2d.drawString(centerOfMass + "", xInterp - 35, yInterp - 13);
+        g2d.drawString(centerOfMass + "", xInterp - 35, yInterp - 13);
         g2d.fillOval(xInterp, yInterp, 3, 3);
 
         // if mode 1, draw AABB
